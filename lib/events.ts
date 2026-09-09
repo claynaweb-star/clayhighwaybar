@@ -130,7 +130,7 @@ export const events: ClayEvent[] = [
     date: "2026-09-13",
     timeNote: "Bar abre 18h",
     genre: "Autoral · Curitiba",
-    banner: "/curitiba-autoral-lab-old-four-celinne-retravo-13-09.jpg",
+    banner: "/curitiba-autoral-lab-old-four-celinne-retravo-13-09.png",
     category: "Curitiba Autoral Lab",
     plataforma: "Bandas",
     lineup: [
@@ -165,7 +165,7 @@ export const events: ClayEvent[] = [
     time: "21:30",
     genre: "Rock Nacional · Tributo",
     price: "R$ 20 (antecipado)",
-    banner: "/raul-seixas-tributo-paranoia-route-cwb80-11-09.jpg",
+    banner: "/raul-seixas-tributo-paranoia-route-cwb80-11-09.png",
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/paranoia",
     lineup: [
@@ -415,7 +415,7 @@ export const events: ClayEvent[] = [
     time: "20:30",
     genre: "Flashback · Ao vivo",
     price: "R$ 25 (antecipado)",
-    banner: "/volta-que-eu-gosto-anos-80-90-boogie-delorean-double-deck-12-09.jpg",
+    banner: "/volta-que-eu-gosto-anos-80-90-boogie-delorean-double-deck-12-09.png",
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/flashback",
     lineup: [
