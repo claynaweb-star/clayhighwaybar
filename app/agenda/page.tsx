@@ -30,14 +30,28 @@ export default function AgendaPage() {
 
   const [month, setMonth] = useState<string>("all");
   const [exactDate, setExactDate] = useState<string>("");
+  // Por padrão a agenda mostra só os próximos shows; o histórico fica opt-in.
+  const [showPast, setShowPast] = useState<boolean>(false);
+
+  // Data de hoje (ISO, fuso local) — calculada no cliente a cada visita.
+  const today = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }, []);
 
   const filtered = useMemo(() => {
     return allEvents.filter((e) => {
       const matchesMonth = month === "all" || monthKey(e.date) === month;
       const matchesDate = !exactDate || e.date === exactDate;
-      return matchesMonth && matchesDate;
+      // Padrão: só eventos de hoje em diante. Escolher uma data exata é intenção
+      // explícita e ignora esse filtro (permite ver um dia específico já passado).
+      const matchesTime = showPast || exactDate !== "" || e.date >= today;
+      return matchesMonth && matchesDate && matchesTime;
     });
-  }, [allEvents, month, exactDate]);
+  }, [allEvents, month, exactDate, showPast, today]);
 
   const hasFilters = month !== "all" || exactDate !== "";
 
@@ -84,7 +98,18 @@ export default function AgendaPage() {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowPast((v) => !v)}
+            aria-pressed={showPast}
+            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+              showPast
+                ? "border-accent bg-accent text-ink"
+                : "border-border text-fog hover:border-accent hover:text-accent"
+            }`}
+          >
+            {showPast ? "Ocultar passados" : "Ver shows passados"}
+          </button>
           <label htmlFor="date" className="text-sm text-muted">
             Data:
           </label>
