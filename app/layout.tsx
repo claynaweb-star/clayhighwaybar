@@ -53,7 +53,7 @@ function Navbar() {
             alt="Clay Highway Bar"
             width={64}
             height={64}
-            className="h-16 w-16 transition-transform hover:scale-105"
+            className="aspect-square h-16 w-16 shrink-0 rounded-full object-cover transition-transform hover:scale-105"
           />
         </Link>
         <nav className="ml-4 flex items-center gap-4 overflow-x-auto whitespace-nowrap text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -116,7 +116,7 @@ function Footer() {
             alt="Clay Highway Bar"
             width={72}
             height={72}
-            className="h-18 w-18"
+            className="aspect-square h-18 w-18 shrink-0 rounded-full object-cover"
           />
           <p className="mt-3">{SITE.address.street}</p>
           <p>
