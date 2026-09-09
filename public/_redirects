@@ -1,0 +1,11 @@
+# Redirects 301 — migração Wix → Netlify (clayhighwaybar.com.br)
+# Formato Netlify: <origem>  <destino>  <status>
+
+/cardápio               https://clayhighwaybar.ola.click/products  301
+/cardapio               https://clayhighwaybar.ola.click/products  301
+/festas                 /                                          301
+/proximassemanas        /                                          301
+/airguitar              /                                          301
+/coming-soon-02         /                                          301
+/down-for-maintenance   /galeria                                   301
+/event-details/*        /                                          301
