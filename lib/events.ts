@@ -3,6 +3,12 @@ import { SITE } from "./site";
 export type Artist = {
   name: string;
   role?: string;
+  /**
+   * Link de ingresso próprio da banda (abre em nova aba). Usado quando a venda é
+   * feita por banda separadamente (ex.: Curitiba Autoral Lab) — cada banda tem seu
+   * checkout e a pessoa escolhe qual comprar.
+   */
+  ticketUrl?: string;
 };
 
 /**
@@ -22,6 +28,10 @@ export type Plataforma =
 export type ClayEvent = {
   id: string;
   title: string;
+  /** Título SEO customizado (sobrescreve o gerado automaticamente). */
+  seoTitle?: string;
+  /** Meta description SEO customizada (sobrescreve a gerada automaticamente). */
+  seoDescription?: string;
   /** ISO date (YYYY-MM-DD) */
   date: string;
   /** Horário de início "HH:MM" (opcional — alguns eventos ainda não têm horário divulgado). */
@@ -114,7 +124,9 @@ export const events: ClayEvent[] = [
   },
   {
     id: "curitiba-autoral-lab-1",
-    title: "Curitiba Autoral Lab — 1ª edição",
+    title: "Curitiba Autoral Lab — Old Four, Celinne e Retravo",
+    seoDescription:
+      "Curitiba Autoral Lab reúne Old Four, Celinne e Retravo em uma noite de rock autoral no Clay Highway Bar. Ingresso único válido para todos os shows — a renda fica direto com as bandas. Domingo 13/09, Curitiba.",
     date: "2026-09-13",
     timeNote: "Bar abre 18h",
     genre: "Autoral · Curitiba",
@@ -122,30 +134,47 @@ export const events: ClayEvent[] = [
     category: "Curitiba Autoral Lab",
     plataforma: "Bandas",
     lineup: [
-      { name: "Oud/Old Four", role: "19h" },
-      { name: "Celinne", role: "20h" },
-      { name: "Retravo", role: "21h" },
+      {
+        name: "Old Four",
+        role: "19h",
+        ticketUrl: "https://meaple.com.br/curitibaautorallab/oudfour",
+      },
+      {
+        name: "Celinne",
+        role: "20h",
+        ticketUrl: "https://meaple.com.br/curitibaautorallab/celinne",
+      },
+      {
+        name: "Retravo",
+        role: "21h",
+        ticketUrl: "https://meaple.com.br/retravo/curitiba-autoral-lab",
+      },
     ],
     venue: CLAY_HIGHWAY,
     description:
-      "O Clay abre o palco pra cena autoral de Curitiba: Oud/Old Four (19h), Celinne (20h) e Retravo (21h). Ingressos vendidos diretamente pelas bandas — toda a arrecadação fica com elas.",
+      "O Clay abre o palco pra cena autoral de Curitiba: Old Four (19h), Celinne (20h) e Retravo (21h). Ingressos vendidos diretamente pelas bandas — toda a arrecadação fica com elas.",
   },
   {
-    id: "cw-rock-paranoia-raul-seixas",
-    title: "CW Rock + Paranoia (Tributo Raul Seixas)",
+    id: "route-cwb80-paranoia-raul-seixas",
+    title: "Route CWB 80 + Paranoia — Tributo Raul Seixas",
+    seoTitle:
+      "Tributo Raul Seixas com Paranoia Banda + Route CWB 80 | Clay Highway Bar",
+    seoDescription:
+      "Noite de rock nacional no Clay Highway Bar: Paranoia Banda faz tributo a Raul Seixas (Maluco Beleza, Gita, Ouro de Tolo) e Route CWB 80 abre com clássicos de Barão Vermelho, Titãs e Legião. Sexta 11/09, Curitiba.",
     date: "2026-09-11",
     time: "21:30",
     genre: "Rock Nacional · Tributo",
-    banner: "/banner-cw-rock-11set.webp",
+    price: "R$ 20 (antecipado)",
+    banner: "/raul-seixas-tributo-paranoia-route-cwb80-11-09.jpg",
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/paranoia",
     lineup: [
-      { name: "CW Rock", role: "Rock nacional" },
-      { name: "Paranoia", role: "Tributo Raul Seixas" },
+      { name: "Route CWB 80", role: "21h30 · Rock nacional anos 80" },
+      { name: "Paranoia", role: "23h00 · Tributo Raul Seixas" },
     ],
     venue: CLAY_HIGHWAY,
     description:
-      "Estreia da CW Rock no palco do Clay com clássicos do rock nacional, seguida da Paranoia — tributo a Raul Seixas — trazendo os grandes hinos do Maluco Beleza.",
+      "Route CWB 80 (21h30) abre a noite com o melhor do rock nacional anos 80. Em seguida, Paranoia Banda (23h) sobe ao palco com tributo completo a Raul Seixas.",
   },
   {
     id: "sarau-matine-flashbacks",
@@ -376,20 +405,27 @@ export const events: ClayEvent[] = [
       "Feriado no Clay com o melhor do rock nacional dos anos 2000: The Fábio Jr's passeia por Legião Urbana, Paralamas, Charlie Brown Jr., Raimundos, O Rappa, Detonautas, Ultraje a Rigor, Los Hermanos e Mamonas Assassinas, com participação da CPM 22 Cover Brasil.",
   },
   {
-    id: "boogie-night-delorean",
-    title: 'Boogie Night & Delorean — "Volta que eu Gosto"',
+    id: "volta-que-eu-gosto-5-boogie-delorean-double-deck",
+    title: "Volta Que Eu Gosto — 5ª Edição (Flashback Anos 80 e 90)",
+    seoTitle:
+      "Volta Que Eu Gosto 5ª Edição — Flashback Anos 80 e 90 | Clay Highway Bar",
+    seoDescription:
+      "Festa de flashback com três bandas ao vivo no Clay Highway Bar: Boogie Night, DeLorean e Double Deck (post punk). Sucessos dos anos 80 e 90 pra cantar e dançar a noite toda. Sábado 12/09, Curitiba.",
     date: "2026-09-12",
+    time: "20:30",
     genre: "Flashback · Ao vivo",
-    banner: "/banner-boogie-delorean-12set.png",
+    price: "R$ 25 (antecipado)",
+    banner: "/volta-que-eu-gosto-anos-80-90-boogie-delorean-double-deck-12-09.jpg",
     plataforma: "Meaple/Sympla",
-    linkIngresso: PLATAFORMA_URL["Meaple/Sympla"],
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/flashback",
     lineup: [
-      { name: "Boogie Night", role: "Flashbacks" },
-      { name: "Delorean", role: "Flashbacks" },
+      { name: "Boogie Night", role: "20h30 · Flashback" },
+      { name: "DeLorean", role: "22h30 · Flashback" },
+      { name: "Double Deck", role: "01h00 · Post punk" },
     ],
     venue: CLAY_HIGHWAY,
     description:
-      "Delorean e Boogie Night juntos no palco para uma noite histórica de flashbacks — o melhor do pop e do rock que marcou época, na festa \"Volta que eu Gosto\".",
+      "Boogie Night (20h30) e DeLorean (22h30) trazem os clássicos flashback anos 80/90. Double Deck (01h) fecha com post punk (The Cure, Depeche Mode, The Smiths).",
   },
   {
     id: "acdc-uk-tribute",

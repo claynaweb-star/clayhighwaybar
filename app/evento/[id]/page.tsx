@@ -36,9 +36,11 @@ export async function generateMetadata({
   if (!event) return { title: "Evento não encontrado — Clay Highway" };
 
   const date = formatEventDate(event.date);
-  // Formato do briefing: "[Nome] — [Data] — Clay Highway Bar Curitiba"
-  const title = `${event.title} — ${date.short} — Clay Highway Bar Curitiba`;
-  const description = metaDescription(event);
+  // Formato do briefing: "[Nome] — [Data] — Clay Highway Bar Curitiba".
+  // Eventos podem sobrescrever com seoTitle/seoDescription próprios.
+  const title =
+    event.seoTitle ?? `${event.title} — ${date.short} — Clay Highway Bar Curitiba`;
+  const description = event.seoDescription ?? metaDescription(event);
 
   return {
     title,
@@ -67,6 +69,9 @@ export default async function EventPage({
   const free = isFree(event);
   const direct = isDirectSale(event);
   const canBuy = hasTicketLink(event) && !event.soldOut;
+  // Venda por banda: cada artista tem seu próprio link de ingresso (ex.: Curitiba
+  // Autoral Lab). Quando presente, substitui o botão único por um botão por banda.
+  const perBandTickets = event.lineup.filter((artist) => artist.ticketUrl);
 
   return (
     <article>
@@ -218,7 +223,35 @@ export default async function EventPage({
               </div>
             </div>
 
-            {canBuy ? (
+            {perBandTickets.length > 0 ? (
+              <div className="mt-6 space-y-3">
+                <p className="text-sm font-semibold text-white">
+                  🎟️ Escolha sua banda:
+                </p>
+                <div className="space-y-2">
+                  {perBandTickets.map((artist) => (
+                    <a
+                      key={artist.name}
+                      href={artist.ticketUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="glow-accent flex w-full items-center justify-between gap-3 rounded-lg bg-accent px-5 py-3 font-semibold text-ink transition-colors hover:bg-accent-strong"
+                    >
+                      <span>{artist.name}</span>
+                      {artist.role && (
+                        <span className="text-sm font-normal opacity-80">
+                          {artist.role}
+                        </span>
+                      )}
+                    </a>
+                  ))}
+                </div>
+                <p className="text-xs text-muted">
+                  1 ingresso é válido para todos os shows da noite. Os ingressos
+                  são vendidos diretamente pelas bandas e a renda fica com elas.
+                </p>
+              </div>
+            ) : canBuy ? (
               <div className="mt-6 space-y-2">
                 <a
                   href={event.linkIngresso}
@@ -266,17 +299,19 @@ export default async function EventPage({
               </div>
             )}
 
-            <p className="mt-3 text-center text-xs text-muted">
-              {event.soldOut
-                ? "Ingressos esgotados · Lista de espera na bilheteria"
-                : free
-                  ? event.linkIngresso
-                    ? "Entrada gratuita · reserve pela Meaple (abre em nova aba)"
-                    : "Sem necessidade de ingresso · chegue cedo"
-                  : direct
-                    ? "Toda a arrecadação fica com as bandas"
-                    : `Venda oficial via ${event.plataforma} · abre em nova aba`}
-            </p>
+            {perBandTickets.length === 0 && (
+              <p className="mt-3 text-center text-xs text-muted">
+                {event.soldOut
+                  ? "Ingressos esgotados · Lista de espera na bilheteria"
+                  : free
+                    ? event.linkIngresso
+                      ? "Entrada gratuita · reserve pela Meaple (abre em nova aba)"
+                      : "Sem necessidade de ingresso · chegue cedo"
+                    : direct
+                      ? "Toda a arrecadação fica com as bandas"
+                      : `Venda oficial via ${event.plataforma} · abre em nova aba`}
+              </p>
+            )}
 
             {event.ticketNote && (
               <p className="mt-3 rounded-lg border border-border bg-surface px-3 py-2 text-xs text-muted">
