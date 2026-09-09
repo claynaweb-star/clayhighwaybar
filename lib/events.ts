@@ -130,7 +130,7 @@ export const events: ClayEvent[] = [
     date: "2026-09-13",
     timeNote: "Bar abre 18h",
     genre: "Autoral · Curitiba",
-    banner: "/evento-02-curitiba-autoral-lab-13set.png",
+    banner: "/curitiba-autoral-lab-old-four-celinne-retravo-13-09.jpg",
     category: "Curitiba Autoral Lab",
     plataforma: "Bandas",
     lineup: [
