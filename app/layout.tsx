@@ -116,7 +116,7 @@ function Footer() {
             alt="Clay Highway Bar"
             width={72}
             height={72}
-            className="aspect-square h-18 w-18 shrink-0 rounded-full object-cover"
+            className="h-18 w-18"
           />
           <p className="mt-3">{SITE.address.street}</p>
           <p>
