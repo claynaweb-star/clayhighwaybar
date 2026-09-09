@@ -101,7 +101,7 @@ export default function HomePage() {
             </span>
 
             <h1 className="font-display mt-6 text-4xl leading-[0.95] text-white drop-shadow-lg sm:text-5xl lg:text-6xl xl:text-7xl">
-              O bar mais rock and roll
+              {"O bar mais rock'n'roll"}
               <br />
               <span className="text-accent">de Curitiba.</span>
             </h1>
