@@ -460,9 +460,14 @@ export function getSortedEvents(): ClayEvent[] {
   return [...events].sort((a, b) => a.date.localeCompare(b.date));
 }
 
+/**
+ * Próximos shows: apenas eventos de hoje em diante (data >= hoje), ordenados por
+ * data mais próxima primeiro. Nunca inclui eventos que já aconteceram.
+ */
 export function getUpcomingEvents(limit?: number): ClayEvent[] {
-  const sorted = getSortedEvents();
-  return typeof limit === "number" ? sorted.slice(0, limit) : sorted;
+  const today = todayIso();
+  const upcoming = getSortedEvents().filter((e) => e.date >= today);
+  return typeof limit === "number" ? upcoming.slice(0, limit) : upcoming;
 }
 
 export function getEventById(id: string): ClayEvent | undefined {

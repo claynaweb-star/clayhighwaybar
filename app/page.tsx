@@ -21,6 +21,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
+/**
+ * Revalida a página a cada 24h para que o filtro de "Próximos Shows" (data >= hoje)
+ * se atualize sozinho quando a data vira, sem depender de um novo deploy.
+ */
+export const revalidate = 86400;
+
 const STRUCTURE = [
   {
     title: "Música ao vivo",
