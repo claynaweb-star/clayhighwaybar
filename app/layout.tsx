@@ -46,14 +46,14 @@ function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-ink/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-        <Link href="/" className="flex items-center" aria-label="Clay Highway Bar — página inicial">
+        <Link href="/" className="flex shrink-0 items-center" aria-label="Clay Highway Bar — página inicial">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo-clay-highway.png"
             alt="Clay Highway Bar"
             width={64}
             height={64}
-            className="aspect-square h-16 w-16 shrink-0 rounded-full object-cover transition-transform hover:scale-105"
+            className="aspect-square h-16 w-16 max-w-none shrink-0 rounded-full object-cover transition-transform hover:scale-105"
           />
         </Link>
         <nav className="ml-4 flex items-center gap-4 overflow-x-auto whitespace-nowrap text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
