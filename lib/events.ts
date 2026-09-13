@@ -345,7 +345,7 @@ export const events: ClayEvent[] = [
     date: "2026-11-13",
     time: "22:00",
     genre: "Tributo · Internacional",
-    banner: "/banner-roxette-uk.png",
+    banner: "/roxette-uk-tribute-show-13-11.png",
     plataforma: "Blueticket",
     linkIngresso: "https://www.blueticket.com.br/evento/41433",
     featured: true,
