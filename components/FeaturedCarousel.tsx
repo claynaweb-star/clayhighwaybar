@@ -65,7 +65,7 @@ export function FeaturedCarousel({ events }: { events: ClayEvent[] }) {
             type="button"
             onClick={() => go(-1)}
             aria-label="Show anterior"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface/80 text-2xl text-fog backdrop-blur transition-colors hover:border-accent hover:text-accent sm:h-12 sm:w-12"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/30 bg-black/55 text-2xl text-white shadow-lg backdrop-blur transition-colors hover:border-accent hover:bg-black/70 hover:text-accent sm:h-14 sm:w-14"
           >
             ‹
           </button>
@@ -149,7 +149,7 @@ export function FeaturedCarousel({ events }: { events: ClayEvent[] }) {
             type="button"
             onClick={() => go(1)}
             aria-label="Próximo show"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface/80 text-2xl text-fog backdrop-blur transition-colors hover:border-accent hover:text-accent sm:h-12 sm:w-12"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/30 bg-black/55 text-2xl text-white shadow-lg backdrop-blur transition-colors hover:border-accent hover:bg-black/70 hover:text-accent sm:h-14 sm:w-14"
           >
             ›
           </button>

@@ -33,7 +33,7 @@ export function EventCarousel({ events }: { events: ClayEvent[] }) {
             type="button"
             onClick={() => scroll(-1)}
             aria-label="Shows anteriores"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-fog transition-colors hover:border-accent hover:text-accent"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface-2 text-lg text-fog shadow-sm transition-colors hover:border-accent hover:text-accent"
           >
             ←
           </button>
@@ -41,7 +41,7 @@ export function EventCarousel({ events }: { events: ClayEvent[] }) {
             type="button"
             onClick={() => scroll(1)}
             aria-label="Próximos shows"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-fog transition-colors hover:border-accent hover:text-accent"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface-2 text-lg text-fog shadow-sm transition-colors hover:border-accent hover:text-accent"
           >
             →
           </button>

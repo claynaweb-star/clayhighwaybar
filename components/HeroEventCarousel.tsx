@@ -49,7 +49,7 @@ export function HeroEventCarousel({ events }: { events: ClayEvent[] }) {
               type="button"
               onClick={() => go(-1)}
               aria-label="Show anterior"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-ink/60 text-xl text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-black/55 text-2xl text-white shadow-lg backdrop-blur transition-colors hover:border-accent hover:bg-black/70 hover:text-accent"
             >
               ‹
             </button>
@@ -57,7 +57,7 @@ export function HeroEventCarousel({ events }: { events: ClayEvent[] }) {
               type="button"
               onClick={() => go(1)}
               aria-label="Próximo show"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-ink/60 text-xl text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-black/55 text-2xl text-white shadow-lg backdrop-blur transition-colors hover:border-accent hover:bg-black/70 hover:text-accent"
             >
               ›
             </button>
