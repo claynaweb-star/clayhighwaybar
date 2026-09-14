@@ -22,10 +22,11 @@ export const metadata: Metadata = {
 };
 
 /**
- * Revalida a página a cada 24h para que o filtro de "Próximos Shows" (data >= hoje)
- * se atualize sozinho quando a data vira, sem depender de um novo deploy.
+ * Revalida de hora em hora para o corte central de 3h (isUpcoming) se aplicar
+ * sozinho perto do horário certo, sem depender de novo deploy. (Diário deixaria
+ * o corte de 3h defasado por até 24h.)
  */
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 const STRUCTURE = [
   {

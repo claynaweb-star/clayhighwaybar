@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Revalida de hora em hora para o corte central de 3h se atualizar sozinho.
+export const revalidate = 3600;
+
 export default function ShowsEmCuritibaPage() {
   const upcoming = getUpcomingEvents();
 

@@ -469,8 +469,7 @@ export function getSortedEvents(): ClayEvent[] {
  * data mais próxima primeiro. Nunca inclui eventos que já aconteceram.
  */
 export function getUpcomingEvents(limit?: number): ClayEvent[] {
-  const today = todayIso();
-  const upcoming = getSortedEvents().filter((e) => e.date >= today);
+  const upcoming = getSortedEvents().filter(isUpcoming);
   return typeof limit === "number" ? upcoming.slice(0, limit) : upcoming;
 }
 
@@ -478,20 +477,34 @@ export function getEventById(id: string): ClayEvent | undefined {
   return events.find((event) => event.id === id);
 }
 
-/** Data de hoje em ISO (YYYY-MM-DD), fuso local. */
-function todayIso(): string {
+/**
+ * Data de referência (ISO YYYY-MM-DD, fuso local) para decidir se um evento já
+ * passou — com CORTE ÀS 3h DA MANHÃ. Shows de bar varam a madrugada, então um
+ * evento continua "ativo" até as 3h do dia seguinte: se agora for antes das 3h,
+ * a referência recua para o dia anterior (o show de ontem à noite ainda conta
+ * como atual). Ponto ÚNICO de verdade — todas as listagens do site usam isto.
+ */
+function referenceDateIso(): string {
   const now = new Date();
+  if (now.getHours() < 3) now.setDate(now.getDate() - 1);
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, "0");
   const d = String(now.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
 
+/**
+ * Um evento é "próximo/ativo" se sua data ainda não passou do corte de 3h.
+ * Use este predicado em QUALQUER lugar que liste eventos (exceto histórico).
+ */
+export function isUpcoming(event: ClayEvent): boolean {
+  return event.date >= referenceDateIso();
+}
+
 /** Próximo show a partir de hoje (ou o mais próximo, se todos já passaram). */
 export function getNextEvent(): ClayEvent | undefined {
-  const today = todayIso();
   const sorted = getSortedEvents();
-  return sorted.find((e) => e.date >= today) ?? sorted[0];
+  return sorted.find(isUpcoming) ?? sorted[0];
 }
 
 /** Total de shows confirmados na agenda. */
@@ -505,7 +518,8 @@ export function getConfirmedCount(): number {
  * data. Ordem cronológica entre os destaques; cai nos próximos se nenhum marcado.
  */
 export function getFeaturedEvents(): ClayEvent[] {
-  const featured = getSortedEvents().filter((e) => e.featured);
+  // Só destaques que ainda não passaram (mesmo corte de 3h das demais listagens).
+  const featured = getUpcomingEvents().filter((e) => e.featured);
   return featured.length > 0 ? featured : getUpcomingEvents(5);
 }
 
@@ -514,8 +528,7 @@ export function getFeaturedEvents(): ClayEvent[] {
  * a partir de hoje (calculado dinamicamente, nunca fixo).
  */
 export function getWeekHighlights(): ClayEvent[] {
-  const today = todayIso();
-  const upcoming = getSortedEvents().filter((e) => e.date >= today);
+  const upcoming = getSortedEvents().filter(isUpcoming);
   const pick = (dayOfWeek: number) =>
     upcoming.find(
       (e) => new Date(`${e.date}T00:00:00`).getDay() === dayOfWeek

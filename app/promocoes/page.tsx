@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EventCard } from "@/components/EventCard";
-import { getSortedEvents, isFree } from "@/lib/events";
+import { getUpcomingEvents, isFree } from "@/lib/events";
 import { SITE } from "@/lib/site";
 import { SocialLinks } from "@/components/SocialLinks";
 
@@ -18,8 +18,13 @@ export const metadata: Metadata = {
   },
 };
 
+// Revalida de hora em hora para o corte de 3h (via getUpcomingEvents) se
+// atualizar sozinho, sem depender de novo deploy.
+export const revalidate = 3600;
+
 export default function PromocoesPage() {
-  const freeEvents = getSortedEvents().filter(isFree);
+  // Só promoções de shows que ainda não passaram (corte central de 3h).
+  const freeEvents = getUpcomingEvents().filter(isFree);
 
   return (
     <section className="mx-auto max-w-6xl px-5 py-14">

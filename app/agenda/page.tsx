@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { EventCard } from "@/components/EventCard";
-import { getSortedEvents } from "@/lib/events";
+import { getSortedEvents, isUpcoming } from "@/lib/events";
 
 function monthLabel(iso: string) {
   const d = new Date(`${iso}T00:00:00`);
@@ -33,25 +33,17 @@ export default function AgendaPage() {
   // Por padrão a agenda mostra só os próximos shows; o histórico fica opt-in.
   const [showPast, setShowPast] = useState<boolean>(false);
 
-  // Data de hoje (ISO, fuso local) — calculada no cliente a cada visita.
-  const today = useMemo(() => {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, "0");
-    const d = String(now.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
-  }, []);
-
   const filtered = useMemo(() => {
     return allEvents.filter((e) => {
       const matchesMonth = month === "all" || monthKey(e.date) === month;
       const matchesDate = !exactDate || e.date === exactDate;
-      // Padrão: só eventos de hoje em diante. Escolher uma data exata é intenção
-      // explícita e ignora esse filtro (permite ver um dia específico já passado).
-      const matchesTime = showPast || exactDate !== "" || e.date >= today;
+      // Padrão: só eventos que ainda não passaram, usando o MESMO corte de 3h
+      // central (isUpcoming). Escolher uma data exata é intenção explícita e
+      // ignora esse filtro (permite ver um dia específico já passado).
+      const matchesTime = showPast || exactDate !== "" || isUpcoming(e);
       return matchesMonth && matchesDate && matchesTime;
     });
-  }, [allEvents, month, exactDate, showPast, today]);
+  }, [allEvents, month, exactDate, showPast]);
 
   const hasFilters = month !== "all" || exactDate !== "";
 
