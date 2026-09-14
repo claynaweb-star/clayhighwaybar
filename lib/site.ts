@@ -256,3 +256,14 @@ export function fullAddress(): string {
 }
 
 export const whatsappLink = `https://wa.me/${SITE.whatsapp}`;
+
+/**
+ * Link do WhatsApp para reserva de camarote (abre em nova aba). Se `eventName`
+ * for informado (botão dentro do card/página de um evento), personaliza a
+ * mensagem pré-preenchida com o nome do show; senão usa a genérica.
+ */
+export function camaroteWhatsappUrl(eventName?: string): string {
+  const base = "Olá! Gostaria de reservar um camarote no Clay Highway Bar";
+  const message = eventName ? `${base} para o show "${eventName}"` : base;
+  return `${whatsappLink}?text=${encodeURIComponent(message)}`;
+}

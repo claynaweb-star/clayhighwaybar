@@ -5,6 +5,7 @@ import {
   isFree,
   type ClayEvent,
 } from "@/lib/events";
+import { camaroteWhatsappUrl } from "@/lib/site";
 
 function MusicNoteIcon({ className }: { className?: string }) {
   return (
@@ -28,8 +29,6 @@ function MusicNoteIcon({ className }: { className?: string }) {
 function WeekCard({ event }: { event: ClayEvent }) {
   const d = formatEventDate(event.date);
   const canBuy = hasTicketLink(event) && !event.soldOut;
-  // Camarote: mesmo link do ingresso por enquanto; sem link, cai na página do evento.
-  const camaroteHref = event.linkIngresso ?? `/evento/${event.id}`;
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface">
@@ -111,9 +110,9 @@ function WeekCard({ event }: { event: ClayEvent }) {
             </Link>
           )}
           <a
-            href={camaroteHref}
-            target={event.linkIngresso ? "_blank" : undefined}
-            rel={event.linkIngresso ? "noopener noreferrer" : undefined}
+            href={camaroteWhatsappUrl(event.title)}
+            target="_blank"
+            rel="noopener noreferrer"
             className="rounded-lg border border-accent/50 px-4 py-2.5 text-center text-sm font-semibold text-accent transition-colors hover:bg-accent hover:text-ink"
           >
             Reservar camarote

@@ -12,7 +12,7 @@ import {
 } from "@/lib/events";
 import { JsonLd } from "@/components/JsonLd";
 import { eventSchema } from "@/lib/schema";
-import { SITE } from "@/lib/site";
+import { SITE, camaroteWhatsappUrl } from "@/lib/site";
 
 export function generateStaticParams() {
   return events.map((event) => ({ id: event.id }));
@@ -261,9 +261,9 @@ export default async function EventPage({
                 >
                   Comprar ingresso
                 </a>
-                {/* Camarote: mesmo link por enquanto, até haver link dedicado. */}
+                {/* Camarote: reserva via WhatsApp, com o nome do show na mensagem. */}
                 <a
-                  href={event.linkIngresso}
+                  href={camaroteWhatsappUrl(event.title)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full rounded-lg border border-accent/50 px-6 py-3 text-center font-semibold text-accent transition-colors hover:bg-accent hover:text-ink"
