@@ -468,6 +468,27 @@ export const events: ClayEvent[] = [
     description:
       "A Ventania traz a energia da sua Banda Hippie para uma noite de rock em Curitiba, no palco do Clay Highway.",
   },
+  {
+    id: "grand-theft-party-cwb-city",
+    title: "Grand Theft Party — CWB City",
+    seoTitle: "Grand Theft Party — CWB City | Clay Highway Bar",
+    seoDescription:
+      "R2 Produções e Clay Highway Bar apresentam Grand Theft Party CWB City: ambientação anos 80, DJ, banda ao vivo, drinks temáticos e missões especiais. Sexta 02/10, Curitiba.",
+    date: "2026-10-02",
+    time: "21:30",
+    timeNote: "Casa abre 20h · festa a partir das 21h30",
+    genre: "Festa Temática · Anos 80",
+    banner: "/grand-theft-party-cwb-city-02-10.webp",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/grandparty",
+    ticketNote: "Realização: R2 Produções + Clay Highway Bar.",
+    lineup: [
+      { name: "DJ + Banda ao vivo", role: "Festa temática GTA · anos 80" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Uma festa temática inspirada em GTA, com ambientação anos 80, DJ, banda ao vivo, drinks temáticos, missões especiais com recompensas e personagens circulando pelo evento. Realização R2 Produções + Clay Highway Bar.",
+  },
 ];
 
 export function getSortedEvents(): ClayEvent[] {
