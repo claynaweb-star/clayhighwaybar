@@ -177,19 +177,23 @@ export const events: ClayEvent[] = [
       "Route CWB 80 (21h30) abre a noite com o melhor do rock nacional anos 80. Em seguida, Paranoia Banda (23h) sobe ao palco com tributo completo a Raul Seixas.",
   },
   {
-    id: "sarau-matine-flashbacks",
-    title: "Sarau Matinê — Flashbacks 70/80/90 (DJ Jeison Sales)",
+    id: "matine-domingo-jeison-sales",
+    title: "Matinê de Domingo — Anos 70, 80 e 90 com DJ Jeison Sales",
+    seoTitle:
+      "Matinê de Domingo — Anos 70, 80 e 90 com DJ Jeison Sales | Clay Highway Bar",
+    seoDescription:
+      "Matinê de domingo no Clay Highway Bar com DJ Jeison Sales tocando os melhores sucessos dos anos 70, 80 e 90. Entrada livre mediante doação de alimento, leite ou ração para pets. Domingo 20/09, a partir das 17h, em Curitiba.",
     date: "2026-09-20",
-    time: "18:00",
-    timeNote: "18h às 23h",
+    time: "17:00",
     genre: "DJ · Flashback",
-    banner: "/evento-04-sarau-matine-flashbacks-20set.webp",
+    banner: "/matine-domingo-anos-70-80-90-jeison-sales-20-09.png",
     plataforma: "Gratuito",
-    linkIngresso: "https://meaple.com.br/clayhighwaybar/flashback",
-    lineup: [{ name: "DJ Jeison Sales", role: "Flashbacks 70/80/90/2000" }],
+    ticketNote:
+      "Entrada livre mediante doação de 1 alimento não-perecível, 1 litro de leite ou 1 pacote de ração para pets.",
+    lineup: [{ name: "DJ Jeison Sales", role: "Flashbacks anos 70, 80 e 90" }],
     venue: CLAY_HIGHWAY,
     description:
-      "DJ Jeison Sales comanda 5 horas de flashbacks — disco, pop, dance e os maiores hits dos anos 70, 80, 90 e 2000. Matinê de domingo com clima de sábado. Entrada gratuita.",
+      "DJ Jeison Sales comanda a matinê de domingo com os maiores sucessos dos anos 70, 80 e 90. Entrada livre mediante doação de 1 alimento não-perecível, 1 litro de leite ou 1 pacote de ração para pets. A partir das 17h.",
   },
   {
     id: "radio-show-nando-fernandes",
