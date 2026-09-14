@@ -489,6 +489,26 @@ export const events: ClayEvent[] = [
     description:
       "Uma festa temática inspirada em GTA, com ambientação anos 80, DJ, banda ao vivo, drinks temáticos, missões especiais com recompensas e personagens circulando pelo evento. Realização R2 Produções + Clay Highway Bar.",
   },
+  {
+    id: "pearl-jam-linkin-park-cover",
+    title: "Pearl Jam + Linkin Park Cover",
+    seoTitle: "Pearl Jam + Linkin Park Cover ao Vivo | Clay Highway Bar",
+    seoDescription:
+      "Noite dupla de covers no Clay Highway Bar: Pearl Jam Cover Ribeirão e Linkin Park Cover Brasil tocando Alive, Black, Numb, In The End e muito mais. Sexta 23/10, Curitiba.",
+    date: "2026-10-23",
+    time: "21:30",
+    genre: "Cover · Rock 90/2000",
+    banner: "/pearl-jam-linkin-park-cover-23-10.jpg",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/pearljam",
+    lineup: [
+      { name: "Pearl Jam Ribeirão Cover", role: "21h30" },
+      { name: "Linkin Park Brasil Cover", role: "00h00" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Pearl Jam Ribeirão Cover (21h30) e Linkin Park Brasil Cover (00h) revivem os maiores hinos das duas bandas que marcaram uma geração.",
+  },
 ];
 
 export function getSortedEvents(): ClayEvent[] {
