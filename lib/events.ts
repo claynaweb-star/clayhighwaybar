@@ -254,19 +254,29 @@ export const events: ClayEvent[] = [
   },
   {
     id: "freework-os-extintos",
-    title: "Freework (Tributo Nazareth) + Os Extintos",
+    title:
+      "Uma Noite de Led Zeppelin, Guns N' Roses, Black Sabbath, Dio e Nazareth",
+    seoTitle:
+      "Uma Noite de Led Zeppelin, Guns N' Roses, Black Sabbath, Dio e Nazareth | Clay Highway Bar",
+    seoDescription:
+      "Tributo triplo no Clay Highway Bar: Freework (Nazareth), Os Extintos (Led Zeppelin, Guns N' Roses, Greta Van Fleet) e Stormgazer (Dio, Black Sabbath). Sábado 26/09, Curitiba.",
     date: "2026-09-26",
+    time: "20:30",
     genre: "Rock Clássico · Tributo",
-    banner: "/banner-freework-extintos-26set.webp",
+    banner: "/tributo-zeppelin-gnr-sabbath-dio-nazareth-26-09.png",
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/extintos",
     lineup: [
-      { name: "Os Extintos", role: "Led Zeppelin, Guns N' Roses, Greta Van Fleet" },
-      { name: "Freework", role: "Abertura · Tributo Nazareth" },
+      { name: "Freework", role: "20h30 · Tributo Nazareth" },
+      {
+        name: "Os Extintos",
+        role: "22h30 · Led Zeppelin, Guns N' Roses, Greta Van Fleet",
+      },
+      { name: "Stormgazer", role: "01h00 · Dio, Black Sabbath" },
     ],
     venue: CLAY_HIGHWAY,
     description:
-      "Os Extintos — vencedores do Prêmio Mundial Rock e destaque no Show de Calouros do SBT — sobem ao palco com interpretações poderosas de Led Zeppelin, Guns N' Roses e Greta Van Fleet. Abertura com Freework, tributo ao Nazareth.",
+      "Freework abre às 20h30 com tributo a Nazareth. Os Extintos (22h30) — vencedores do Prêmio Mundial Rock e já no Programa de Calouros do SBT — trazem Led Zeppelin, Guns N' Roses e Greta Van Fleet. Stormgazer fecha à 01h com Dio e Black Sabbath.",
   },
   {
     id: "curitiba-autoral-lab-2",
