@@ -539,6 +539,20 @@ export function getWeekHighlights(): ClayEvent[] {
   );
 }
 
+/**
+ * Destaques para o carrossel "Em destaque" do hero: os destaques normais
+ * (getFeaturedEvents) SEM repetir os que já aparecem em "Destaques da semana"
+ * (getWeekHighlights) — evita duplicação entre as duas seções da home. Parte do
+ * mesmo corte de 3h; a exclusão é o único acréscimo. Se a exclusão esvaziar,
+ * cai para os próximos eventos após a semana (também sem os da semana).
+ */
+export function getHeroFeaturedEvents(): ClayEvent[] {
+  const weekIds = new Set(getWeekHighlights().map((e) => e.id));
+  const featured = getFeaturedEvents().filter((e) => !weekIds.has(e.id));
+  if (featured.length > 0) return featured;
+  return getUpcomingEvents().filter((e) => !weekIds.has(e.id));
+}
+
 /** Eventos gratuitos não têm venda de ingresso. */
 export function isFree(event: ClayEvent): boolean {
   return event.plataforma === "Gratuito";

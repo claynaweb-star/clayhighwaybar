@@ -5,7 +5,7 @@ import { HeroEventCarousel } from "@/components/HeroEventCarousel";
 import { WeekHighlights } from "@/components/WeekHighlights";
 import {
   getConfirmedCount,
-  getFeaturedEvents,
+  getHeroFeaturedEvents,
   getUpcomingEvents,
   getWeekHighlights,
 } from "@/lib/events";
@@ -62,8 +62,9 @@ const STRUCTURE = [
 export default function HomePage() {
   const upcoming = getUpcomingEvents(3);
   const confirmed = getConfirmedCount();
-  const featuredEvents = getFeaturedEvents();
   const weekHighlights = getWeekHighlights();
+  // "Em destaque" (hero) exclui os eventos já exibidos em "Destaques da semana".
+  const featuredEvents = getHeroFeaturedEvents();
 
   return (
     <>
