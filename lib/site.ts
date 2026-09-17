@@ -50,15 +50,15 @@ export const SITE = {
   openingHours: [
     { days: ["Friday"], opens: "20:00", closes: "03:00" },
     { days: ["Saturday"], opens: "20:00", closes: "03:30" },
-    { days: ["Sunday"], opens: "20:00", closes: "00:00" },
+    { days: ["Sunday"], opens: "19:00", closes: "23:00" },
   ],
   openingHoursDisplay: [
     { label: "Sexta-feira", value: "20h às 03h" },
     { label: "Sábado", value: "20h às 03h30" },
-    { label: "Domingo", value: "20h às 00h" },
+    { label: "Domingo", value: "19h às 23h" },
     { label: "Segunda a quinta", value: "Fechado" },
   ],
-  openingHoursHuman: "Sex e sáb, 20h · Dom, 20h às 00h · Seg a qui fechado",
+  openingHoursHuman: "Sex e sáb, 20h · Dom, 19h às 23h · Seg a qui fechado",
   /** Prova social exibida no site e no Schema.org (dados do Google). */
   reviews: {
     ratingValue: 4.7,
