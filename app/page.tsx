@@ -11,7 +11,7 @@ import {
 } from "@/lib/events";
 import { JsonLd } from "@/components/JsonLd";
 import { localBusinessSchema } from "@/lib/schema";
-import { SITE } from "@/lib/site";
+import { SITE, whatsappLink } from "@/lib/site";
 import { SocialLinks } from "@/components/SocialLinks";
 
 export const metadata: Metadata = {
@@ -272,6 +272,54 @@ export default function HomePage() {
               </figcaption>
             </figure>
           ))}
+        </div>
+      </section>
+
+      {/* VENHA TOCAR NO CLAY */}
+      <section className="relative overflow-hidden border-t border-border">
+        {/* Imagem de fundo */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/venha-tocar-no-clay-bandas.jpg"
+          alt="Banda tocando ao vivo no palco do Clay Highway Bar"
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* Overlay pra legibilidade */}
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to top, rgba(13,13,14,0.95) 0%, rgba(13,13,14,0.8) 50%, rgba(13,13,14,0.7) 100%)",
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-5 py-20 sm:py-24">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent-soft/40 px-3 py-1 text-xs font-semibold tracking-wide text-accent backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+              PARA BANDAS
+            </span>
+            <h2 className="font-display mt-6 text-3xl text-white drop-shadow-lg sm:text-4xl lg:text-5xl">
+              VENHA TOCAR NO CLAY
+            </h2>
+            <p className="mt-4 max-w-xl text-lg text-fog">
+              Envie o material da sua banda para a nossa produção e faça parte da
+              programação do Clay Highway Bar.
+            </p>
+            <div className="mt-8">
+              <a
+                href={`${whatsappLink}?text=${encodeURIComponent(
+                  "Olá! Sou de uma banda e gostaria de enviar nosso material para tocar no Clay Highway Bar.",
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="glow-accent inline-block rounded-xl bg-accent px-8 py-4 text-lg font-semibold text-ink transition-colors hover:bg-accent-strong"
+              >
+                Falar com a Produção
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
