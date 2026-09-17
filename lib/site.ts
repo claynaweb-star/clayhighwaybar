@@ -257,6 +257,18 @@ export function fullAddress(): string {
   return `${a.street} — ${a.city} - ${a.state}, ${country}`;
 }
 
+/**
+ * Caminho da versão otimizada (leve, < 300 KB) de uma arte de evento para uso
+ * como og:image — o WhatsApp não renderiza o preview quando a imagem é pesada.
+ * As versões são geradas por `scripts/generate-og-images.mjs` em /public/og/.
+ * Sem banner, cai na imagem padrão do site.
+ */
+export function ogImageForBanner(banner?: string): string {
+  if (!banner) return SITE.ogImage;
+  const base = banner.replace(/^\//, "").replace(/\.[^.]+$/, "");
+  return `/og/${base}.jpg`;
+}
+
 export const whatsappLink = `https://wa.me/${SITE.whatsapp}`;
 
 /**

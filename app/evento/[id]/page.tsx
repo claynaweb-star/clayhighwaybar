@@ -12,7 +12,7 @@ import {
 } from "@/lib/events";
 import { JsonLd } from "@/components/JsonLd";
 import { eventSchema } from "@/lib/schema";
-import { SITE, camaroteWhatsappUrl } from "@/lib/site";
+import { SITE, camaroteWhatsappUrl, ogImageForBanner } from "@/lib/site";
 
 export function generateStaticParams() {
   return events.map((event) => ({ id: event.id }));
@@ -41,8 +41,9 @@ export async function generateMetadata({
   const title =
     event.seoTitle ?? `${event.title} — ${date.short} — Clay Highway Bar Curitiba`;
   const description = event.seoDescription ?? metaDescription(event);
-  // Usa a arte do evento quando houver; senão, a imagem padrão do site.
-  const image = event.banner ?? SITE.ogImage;
+  // Usa a versão leve da arte do evento (og/) — WhatsApp não renderiza a arte
+  // original (2–3 MB). Sem banner, cai na imagem padrão do site.
+  const image = ogImageForBanner(event.banner);
 
   return {
     title,
