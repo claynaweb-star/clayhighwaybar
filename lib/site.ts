@@ -7,7 +7,9 @@ export const SITE = {
   name: "Clay Highway Bar",
   shortName: "Clay Highway",
   /** Domínio de produção (ajuste quando publicar). */
-  url: "https://www.clayhighway.com.br",
+  url: "https://clayhighwaybar.com.br",
+  /** Imagem padrão de compartilhamento (Open Graph / Twitter), 1200x630. */
+  ogImage: "/og-image.jpg",
   tagline: "Bar de rock e música ao vivo em Curitiba",
   description:
     "Clay Highway Bar — bar de rock em Curitiba com shows ao vivo toda semana. Rock, blues e garage na Linha Verde, com cerveja gelada e palco pra banda nenhuma botar defeito.",

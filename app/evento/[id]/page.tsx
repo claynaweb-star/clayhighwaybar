@@ -41,6 +41,8 @@ export async function generateMetadata({
   const title =
     event.seoTitle ?? `${event.title} — ${date.short} — Clay Highway Bar Curitiba`;
   const description = event.seoDescription ?? metaDescription(event);
+  // Usa a arte do evento quando houver; senão, a imagem padrão do site.
+  const image = event.banner ?? SITE.ogImage;
 
   return {
     title,
@@ -51,6 +53,13 @@ export async function generateMetadata({
       description,
       url: `${SITE.url}/evento/${event.id}`,
       type: "website",
+      images: [{ url: image, alt: event.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
     },
   };
 }

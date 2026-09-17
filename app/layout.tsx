@@ -28,13 +28,22 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     url: SITE.url,
     siteName: SITE.name,
-    title: "Clay Highway Bar — Bar de rock e shows ao vivo em Curitiba",
+    title: "Clay Highway Bar — O Bar Mais Rock'n'Roll de Curitiba",
     description: SITE.description,
+    images: [
+      {
+        url: SITE.ogImage,
+        width: 1200,
+        height: 630,
+        alt: SITE.name,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Clay Highway Bar — Bar de rock em Curitiba",
+    title: "Clay Highway Bar — O Bar Mais Rock'n'Roll de Curitiba",
     description: SITE.description,
+    images: [SITE.ogImage],
   },
   robots: {
     index: true,

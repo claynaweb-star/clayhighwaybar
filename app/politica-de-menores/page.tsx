@@ -2,11 +2,27 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE, fullAddress, whatsappLink } from "@/lib/site";
 
+const OG_TITLE = "Política de Menores — Clay Highway Bar";
+const OG_DESCRIPTION =
+  "Política de entrada de menores no Clay Highway Bar em Curitiba: valores por faixa etária em shows da casa e em shows especiais, pagamento na portaria e documentos obrigatórios.";
+
 export const metadata: Metadata = {
   title: "Política de Menores · Entrada e valores | Clay Highway Bar",
-  description:
-    "Política de entrada de menores no Clay Highway Bar em Curitiba: valores por faixa etária em shows da casa e em shows especiais, pagamento na portaria e documentos obrigatórios.",
+  description: OG_DESCRIPTION,
   alternates: { canonical: "/politica-de-menores" },
+  openGraph: {
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    url: `${SITE.url}/politica-de-menores`,
+    type: "website",
+    images: [{ url: SITE.ogImage, width: 1200, height: 630, alt: SITE.name }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    images: [SITE.ogImage],
+  },
 };
 
 function Section({
