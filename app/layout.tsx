@@ -280,6 +280,9 @@ function Footer() {
           <Link href="/informacoes" className="hover:text-accent">
             Informações e regras
           </Link>
+          <Link href="/politica-de-menores" className="hover:text-accent">
+            Política de Menores
+          </Link>
         </nav>
 
         <div className="sm:text-right">
