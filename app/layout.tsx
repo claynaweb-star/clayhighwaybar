@@ -1,6 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Anton, Inter } from "next/font/google";
 import "./globals.css";
+
+/**
+ * Fontes auto-hospedadas via next/font: além de eliminar a requisição externa
+ * ao Google Fonts, o next/font gera automaticamente uma fonte de fallback com
+ * size-adjust/ascent/descent casados, o que zera o layout shift (CLS) quando a
+ * fonte real termina de carregar — crítico para a Anton, bem mais condensada
+ * que a fonte de sistema.
+ */
+const anton = Anton({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-anton",
+});
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 import { SITE, whatsappLink } from "@/lib/site";
 import { SocialLinks } from "@/components/SocialLinks";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -323,19 +343,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="pt-BR" className={`${anton.variable} ${inter.variable}`}>
       <body className="min-h-screen bg-ink text-fog antialiased">
         <Navbar />
         <main>{children}</main>
