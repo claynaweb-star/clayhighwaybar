@@ -84,6 +84,26 @@ export const SITE = {
     poster: "/clay-ao-vivo-1.jpg",
   },
   /**
+   * ===================================================================
+   * CONVENÇÃO DE ALT-TEXT (vale para TODAS as fotos abaixo: photos,
+   * experience, menuGallery, galleryPhotos)
+   * -------------------------------------------------------------------
+   * Ao adicionar uma foto nova, escreva o `alt` descrevendo a CENA REAL +
+   * a palavra-chave, no formato:
+   *
+   *     "[o que aparece na foto] no Clay Highway Bar, Curitiba"
+   *
+   * Ex.: "Banda tocando rock ao vivo no palco do Clay Highway Bar, Curitiba"
+   *      "Hambúrguer artesanal com bacon e cheddar no Clay Highway Bar, Curitiba"
+   *
+   * Dicas: seja específico (o que dá pra ver na imagem), não repita
+   * "imagem de"/"foto de", e mantenha o nome do bar + a cidade no fim.
+   * O NOME DO ARQUIVO também deve ser descritivo em kebab-case, ex.:
+   * "tira-picanha-batata-frita-clay-highway-bar.jpg".
+   * (Nas fotos de EVENTO, o alt é gerado automaticamente a partir do título
+   *  do show — veja lib/events.ts, campo `banner`.)
+   * ===================================================================
+   *
    * Imagens usadas em metadados/Schema.org (OG image, LocalBusiness).
    * Fotos reais da casa (arquivos em /public).
    */

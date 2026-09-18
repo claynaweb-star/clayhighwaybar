@@ -14,6 +14,8 @@ import { JsonLd } from "@/components/JsonLd";
 import { localBusinessSchema } from "@/lib/schema";
 import { SITE, whatsappLink } from "@/lib/site";
 import { SocialLinks } from "@/components/SocialLinks";
+import { Testimonials } from "@/components/Testimonials";
+import { testimonials } from "@/lib/testimonials";
 
 export const metadata: Metadata = {
   title: "Clay Highway Bar | Bar de Rock com Shows ao Vivo em Curitiba",
@@ -288,6 +290,9 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* DEPOIMENTOS — dados em lib/testimonials.ts (troque os placeholders). */}
+      <Testimonials testimonials={testimonials} />
 
       {/* VENHA TOCAR NO CLAY */}
       <section className="relative overflow-hidden border-t border-border">

@@ -33,24 +33,33 @@ export default function BarDeRockCuritibaPage() {
 
         <div className="mt-8 space-y-6 text-lg leading-relaxed text-fog">
           <p>
-            O <strong>Clay Highway Bar</strong> nasceu da vontade de ter, em
-            Curitiba, uma casa de verdade pra quem vive de rock. Não é balada
-            com playlist genérica: é um <strong>bar de rock</strong> com palco,
-            som encorpado e uma programação de <strong>música ao vivo</strong>{" "}
-            que roda de sexta a domingo, na Linha Verde, em Curitiba.
+            A gente montou o <strong>Clay Highway</strong> pra ser o tipo de
+            lugar que fazia falta em Curitiba: uma casa de rock de verdade, com
+            palco, som que enche o peito e gente que curte a mesma música que a
+            gente. Nada de playlist genérica. Aqui o rock toca ao vivo, de sexta
+            a domingo, na beira da Linha Verde.
+          </p>
+
+          {/*
+            PERSONALIZAR: adicionar aqui a história real de fundação do Clay.
+            Ex.: em que ano o bar abriu, quem começou, de onde veio o nome
+            "Clay Highway", a ligação com o motoclube / a estrada, os primeiros
+            shows. Escreva com suas palavras, no mesmo tom pessoal dos parágrafos
+            acima. NÃO inventar datas/nomes — preencher só com o que for real.
+          */}
+
+          <p>
+            No palco rola rock cru, blues arrastado, garage barulhento e aquela
+            pegada psicodélica que faz a noite render. Banda da cena curitibana
+            divide a noite com nome de fora, o ingresso tem preço honesto e a
+            cerveja é sempre gelada. É casa cheia, gente cantando junto e aquele
+            clima de quem chegou e não quer ir embora.
           </p>
           <p>
-            Aqui passa rock cru, blues arrastado, garage barulhento e aquela
-            pegada psicodélica que faz a noite render. Bandas da cena curitibana
-            dividem o palco com nomes de fora, sempre com preço de ingresso
-            honesto e cerveja gelada pra acompanhar. É o tipo de lugar onde você
-            chega pra um show e sai fã da casa.
-          </p>
-          <p>
-            Se você procura <strong>bar com música ao vivo em Curitiba</strong>,
-            um lugar pra ver <strong>shows ao vivo</strong> sem frescura ou
-            simplesmente tomar uma boa cerveja ouvindo rock de verdade, o Clay
-            Highway é o seu endereço.
+            Se você procura um <strong>bar com música ao vivo em Curitiba</strong>{" "}
+            pra ver um show sem frescura, ou só tomar uma boa cerveja ouvindo
+            rock de verdade, chega mais. O Clay Highway fica te esperando na
+            Linha Verde.
           </p>
         </div>
 

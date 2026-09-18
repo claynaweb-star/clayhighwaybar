@@ -50,7 +50,13 @@ export type ClayEvent = {
   linkIngresso?: string;
   /** Observação extra sobre o ingresso (ex.: pré-venda, produção externa). */
   ticketNote?: string;
-  /** Arte/banner do evento (arquivo em /public). Ausente quando ainda não há arte. */
+  /**
+   * Arte/banner do evento (arquivo em /public). Ausente quando ainda não há arte.
+   * O alt-text é gerado automaticamente a partir do `title` do show
+   * (ex.: "Arte do evento {title} no Clay Highway Bar") nos componentes que
+   * exibem o banner, então basta caprichar no nome do arquivo (kebab-case).
+   * A versão leve para preview/social sai de scripts/generate-og-images.mjs.
+   */
   banner?: string;
   /** Categoria recorrente para agrupar na agenda (ex.: "Curitiba Autoral Lab"). */
   category?: string;
