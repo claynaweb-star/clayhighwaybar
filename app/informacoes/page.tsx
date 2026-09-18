@@ -36,7 +36,7 @@ export default function InformacoesPage() {
         </h1>
         <p className="mt-3 max-w-2xl text-muted">
           Regras que valem para todos os shows do Clay Highway Bar. Elas ficam
-          centralizadas aqui para não poluir cada evento — sempre que tiver
+          centralizadas aqui para não poluir cada evento. Sempre que tiver
           dúvida sobre ingresso, idade ou documento, é só voltar a esta página.
         </p>
       </header>
@@ -76,7 +76,7 @@ export default function InformacoesPage() {
           A venda de ingressos é feita nas plataformas oficiais indicadas em cada
           evento (Meaple, Sympla, Blueticket ou Articket). O botão{" "}
           <strong>“Comprar ingresso”</strong> de cada show abre a plataforma
-          correta em uma nova aba — não há checkout de pagamento dentro deste
+          correta em uma nova aba. Não há checkout de pagamento dentro deste
           site.
         </p>
         <p>

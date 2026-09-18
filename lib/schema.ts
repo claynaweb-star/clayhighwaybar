@@ -80,7 +80,7 @@ export function eventSchema(
 
   const data: Record<string, unknown> = {
     "@type": "MusicEvent",
-    name: `${event.title} — ${SITE.shortName}`,
+    name: `${event.title}, ${SITE.shortName}`,
     description: event.description,
     ...(event.banner ? { image: `${SITE.url}${event.banner}` } : {}),
     startDate,

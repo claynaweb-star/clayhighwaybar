@@ -33,11 +33,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const event = getEventById(id);
-  if (!event) return { title: "Evento não encontrado — Clay Highway" };
+  if (!event) return { title: "Evento não encontrado, Clay Highway" };
 
   // Padrão SEO local: "[Nome do show] — Show de Rock em Curitiba | Clay Highway Bar".
   // `absolute` evita que o template do layout ("%s · Clay Highway Bar") duplique o sufixo.
-  const title = `${event.title} — Show de Rock em Curitiba | Clay Highway Bar`;
+  const title = `${event.title}, Show de Rock em Curitiba | Clay Highway Bar`;
   const description = event.seoDescription ?? metaDescription(event);
   // Usa a versão leve da arte do evento (og/) — WhatsApp não renderiza a arte
   // original (2–3 MB). Sem banner, cai na imagem padrão do site.

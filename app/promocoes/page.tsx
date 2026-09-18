@@ -54,7 +54,7 @@ export default function PromocoesPage() {
           </div>
         ) : (
           <p className="mt-3 text-muted">
-            Nenhum show gratuito programado no momento — acompanhe as redes pra
+            Nenhum show gratuito programado no momento. Acompanhe as redes pra
             não perder o próximo.
           </p>
         )}
@@ -91,7 +91,7 @@ export default function PromocoesPage() {
         <div className="rounded-2xl border border-border bg-surface p-6">
           <h3 className="font-display text-xl text-white">Pré-vendas</h3>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Ingressos antecipados costumam sair mais barato — e alguns shows têm
+            Ingressos antecipados costumam sair mais barato, e alguns shows têm
             brindes só na pré-venda. Fique de olho na agenda.
           </p>
           <Link

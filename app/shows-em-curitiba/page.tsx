@@ -48,7 +48,7 @@ export default function ShowsEmCuritibaPage() {
           <p>
             Abaixo estão os <strong>próximos shows ao vivo em Curitiba</strong>{" "}
             na casa. Clique em qualquer um pra ver o line-up completo, o horário,
-            o valor e comprar o ingresso com antecedência — as noites mais
+            o valor e comprar o ingresso com antecedência. As noites mais
             concorridas costumam esgotar.
           </p>
         </div>

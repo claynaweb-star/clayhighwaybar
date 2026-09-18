@@ -12,7 +12,7 @@ export const SITE = {
   ogImage: "/og-image.jpg",
   tagline: "Bar de rock e música ao vivo em Curitiba",
   description:
-    "Clay Highway Bar — bar de rock em Curitiba com shows ao vivo toda semana. Rock, blues e garage na Linha Verde, com cerveja gelada e palco pra banda nenhuma botar defeito.",
+    "Clay Highway Bar, bar de rock em Curitiba com shows ao vivo toda semana. Rock, blues e garage na Linha Verde, com cerveja gelada e palco pra banda nenhuma botar defeito.",
   /** Telefone / WhatsApp (mesmo número). */
   telephone: "(41) 99677-5930",
   telephoneE164: "+55 41 99677-5930",
@@ -254,7 +254,7 @@ export const SITE = {
 export function fullAddress(): string {
   const a = SITE.address;
   const country = a.country === "BR" ? "Brasil" : a.country;
-  return `${a.street} — ${a.city} - ${a.state}, ${country}`;
+  return `${a.street}, ${a.city} - ${a.state}, ${country}`;
 }
 
 /**

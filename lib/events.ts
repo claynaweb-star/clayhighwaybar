@@ -103,11 +103,11 @@ export const events: ClayEvent[] = [
     ],
     venue: CLAY_HIGHWAY,
     description:
-      "Uma noite de nostalgia, romance e brega rock pra cantar do primeiro ao último refrão — Roupa Nova Cover e Varal do Wando (Wando, Reginaldo Rossi, Sidney Magal, Fábio Jr.) no mesmo palco.",
+      "Uma noite de nostalgia, romance e brega rock pra cantar do primeiro ao último refrão. Roupa Nova Cover e Varal do Wando (Wando, Reginaldo Rossi, Sidney Magal, Fábio Jr.) no mesmo palco.",
   },
   {
     id: "a-era-nu-metal",
-    title: "A Era Nu Metal — Linkin Park, Limp Bizkit & Evanescence Cover",
+    title: "A Era Nu Metal: Linkin Park, Limp Bizkit & Evanescence Cover",
     date: "2026-09-05",
     genre: "Nu Metal · Tributo",
     banner: "/banner-nu-metal-05set.png",
@@ -124,9 +124,9 @@ export const events: ClayEvent[] = [
   },
   {
     id: "curitiba-autoral-lab-1",
-    title: "Curitiba Autoral Lab — Old Four, Celinne e Retravo",
+    title: "Curitiba Autoral Lab: Old Four, Celinne e Retravo",
     seoDescription:
-      "Curitiba Autoral Lab reúne Old Four, Celinne e Retravo em uma noite de rock autoral no Clay Highway Bar. Ingresso único válido para todos os shows — a renda fica direto com as bandas. Domingo 13/09, Curitiba.",
+      "Curitiba Autoral Lab reúne Old Four, Celinne e Retravo em uma noite de rock autoral no Clay Highway Bar. Ingresso único válido para todos os shows. A renda fica direto com as bandas. Domingo 13/09, Curitiba.",
     date: "2026-09-13",
     timeNote: "Bar abre 18h",
     genre: "Autoral · Curitiba",
@@ -152,11 +152,11 @@ export const events: ClayEvent[] = [
     ],
     venue: CLAY_HIGHWAY,
     description:
-      "O Clay abre o palco pra cena autoral de Curitiba: Old Four (19h), Celinne (20h) e Retravo (21h). Ingressos vendidos diretamente pelas bandas — toda a arrecadação fica com elas.",
+      "O Clay abre o palco pra cena autoral de Curitiba: Old Four (19h), Celinne (20h) e Retravo (21h). Ingressos vendidos diretamente pelas bandas. Toda a arrecadação fica com elas.",
   },
   {
     id: "route-cwb80-paranoia-raul-seixas",
-    title: "Route CWB 80 + Paranoia — Tributo Raul Seixas",
+    title: "Route CWB 80 + Paranoia: Tributo Raul Seixas",
     seoTitle:
       "Tributo Raul Seixas com Paranoia Banda + Route CWB 80 | Clay Highway Bar",
     seoDescription:
@@ -178,9 +178,9 @@ export const events: ClayEvent[] = [
   },
   {
     id: "matine-domingo-jeison-sales",
-    title: "Matinê de Domingo — Anos 70, 80 e 90 com DJ Jeison Sales",
+    title: "Matinê de Domingo: Anos 70, 80 e 90 com DJ Jeison Sales",
     seoTitle:
-      "Matinê de Domingo — Anos 70, 80 e 90 com DJ Jeison Sales | Clay Highway Bar",
+      "Matinê de Domingo: Anos 70, 80 e 90 com DJ Jeison Sales | Clay Highway Bar",
     seoDescription:
       "Matinê de domingo no Clay Highway Bar com DJ Jeison Sales tocando os melhores sucessos dos anos 70, 80 e 90. Entrada livre mediante doação de alimento, leite ou ração para pets. Domingo 20/09, a partir das 17h, em Curitiba.",
     date: "2026-09-20",
@@ -211,11 +211,11 @@ export const events: ClayEvent[] = [
     ],
     venue: CLAY_HIGHWAY,
     description:
-      "Nando Fernandes — vocalista da Sinistra e ex-Hangar, uma das vozes mais impressionantes do heavy rock nacional — comanda a Rádio Show direto de São Paulo. Abertura com a banda Shiftshaders.",
+      "Nando Fernandes, vocalista da Sinistra e ex-Hangar, uma das vozes mais impressionantes do heavy rock nacional, comanda a Rádio Show direto de São Paulo. Abertura com a banda Shiftshaders.",
   },
   {
     id: "miro-penna-tributo-legiao-urbana",
-    title: "Miro Penna & Banda — Tributo Legião Urbana",
+    title: "Miro Penna & Banda: Tributo Legião Urbana",
     date: "2026-09-19",
     time: "20:30",
     genre: "Tributo · Legião Urbana",
@@ -233,7 +233,7 @@ export const events: ClayEvent[] = [
   },
   {
     id: "camisa-de-venus-40-anos",
-    title: "Camisa de Vênus — Turnê 40 Anos",
+    title: "Camisa de Vênus: Turnê 40 Anos",
     date: "2026-09-25",
     time: "20:00",
     timeNote: "Abertura 20h · show principal 22h30",
@@ -243,7 +243,7 @@ export const events: ClayEvent[] = [
     plataforma: "Articket",
     linkIngresso: "https://articket.com.br/e/6193/camisa-de-venus-em-curitiba",
     ticketNote:
-      "Evento externo (produção Mister Rock) — venda pela Articket, fora do fluxo padrão do Clay.",
+      "Evento externo (produção Mister Rock), venda pela Articket, fora do fluxo padrão do Clay.",
     lineup: [
       { name: "Camisa de Vênus", role: "22h30" },
       { name: "Geração Coca Cola", role: "Abertura · 20h30" },
@@ -276,11 +276,11 @@ export const events: ClayEvent[] = [
     ],
     venue: CLAY_HIGHWAY,
     description:
-      "Freework abre às 20h30 com tributo a Nazareth. Os Extintos (22h30) — vencedores do Prêmio Mundial Rock e já no Programa de Calouros do SBT — trazem Led Zeppelin, Guns N' Roses e Greta Van Fleet. Stormgazer fecha à 01h com Dio e Black Sabbath.",
+      "Freework abre às 20h30 com tributo a Nazareth. Os Extintos (22h30), vencedores do Prêmio Mundial Rock e já no Programa de Calouros do SBT, trazem Led Zeppelin, Guns N' Roses e Greta Van Fleet. Stormgazer fecha à 01h com Dio e Black Sabbath.",
   },
   {
     id: "curitiba-autoral-lab-2",
-    title: "Curitiba Autoral Lab — 2ª edição",
+    title: "Curitiba Autoral Lab: 2ª edição",
     date: "2026-09-27",
     timeNote: "Bar abre 18h",
     genre: "Autoral · Curitiba",
@@ -298,7 +298,7 @@ export const events: ClayEvent[] = [
   },
   {
     id: "cassidy-paris-bittersweet",
-    title: 'Cassidy Paris — Turnê "Bittersweet" (Austrália)',
+    title: 'Cassidy Paris: Turnê "Bittersweet" (Austrália)',
     date: "2026-10-13",
     time: "20:00",
     genre: "Rock Internacional",
@@ -330,11 +330,11 @@ export const events: ClayEvent[] = [
     ],
     venue: CLAY_HIGHWAY,
     description:
-      "Edição especial e antecipada de Halloween com decoração temática, cabine capa de revista, plataforma 360° e três shows: Pitty Cover Brasil (20h30), RW Pop Rock (22h30) e Jamp — Rock Nacional 90/2000 (01h).",
+      "Edição especial e antecipada de Halloween com decoração temática, cabine capa de revista, plataforma 360° e três shows: Pitty Cover Brasil (20h30), RW Pop Rock (22h30) e Jamp, Rock Nacional 90/2000 (01h).",
   },
   {
     id: "the-eurodance-tour",
-    title: "The Eurodance Tour — Taleesa, Nicki French, Gottsha",
+    title: "The Eurodance Tour: Taleesa, Nicki French, Gottsha",
     date: "2026-10-31",
     genre: "Eurodance · Internacional",
     banner: "/evento-07-eurodance-tour-31out.jpg",
@@ -349,11 +349,11 @@ export const events: ClayEvent[] = [
     ],
     venue: CLAY_HIGHWAY,
     description:
-      'Atração internacional: Taleesa (Itália), Nicki French (Reino Unido — voz de "Total Eclipse of the Heart") e Gottsha, com DJ Jeison Sales comandando os clássicos dos anos 70, 80 e 90.',
+      'Atração internacional: Taleesa (Itália), Nicki French (Reino Unido, voz de "Total Eclipse of the Heart") e Gottsha, com DJ Jeison Sales comandando os clássicos dos anos 70, 80 e 90.',
   },
   {
     id: "roxette-uk-tribute-show",
-    title: "Roxette UK — The Tribute Show",
+    title: "Roxette UK: The Tribute Show",
     // Data confirmada pelo bar: sexta-feira 13/11/2026, 22h.
     // (A arte antiga trazia "12/11"; a data oficial é 13/11.)
     date: "2026-11-13",
@@ -370,7 +370,7 @@ export const events: ClayEvent[] = [
   },
   {
     id: "freaks-nu-metal",
-    title: "Freaks — Tributo Korn, Slipknot & System of a Down",
+    title: "Freaks: Tributo Korn, Slipknot & System of a Down",
     date: "2026-10-10",
     genre: "Nu Metal · Tributo",
     banner: "/evento-01-freaks-10out.png",
@@ -387,7 +387,7 @@ export const events: ClayEvent[] = [
   },
   {
     id: "flash-n-back-gallo-jack",
-    title: "Flash'n Back + Gallo Jack — Matinê de Flashbacks",
+    title: "Flash'n Back + Gallo Jack: Matinê de Flashbacks",
     date: "2026-09-06",
     time: "18:00",
     timeNote: "Bar abre 18h",
@@ -404,7 +404,7 @@ export const events: ClayEvent[] = [
   },
   {
     id: "feriado-no-clay-fabio-jrs-cpm22",
-    title: "Feriado no Clay — The Fábio Jr's + CPM 22 Cover Brasil",
+    title: "Feriado no Clay: The Fábio Jr's + CPM 22 Cover Brasil",
     date: "2026-09-07",
     genre: "Rock 2000 · Tributo",
     banner: "/banner-fabio-jrs-07set.png",
@@ -420,9 +420,9 @@ export const events: ClayEvent[] = [
   },
   {
     id: "volta-que-eu-gosto-5-boogie-delorean-double-deck",
-    title: "Volta Que Eu Gosto — 5ª Edição (Flashback Anos 80 e 90)",
+    title: "Volta Que Eu Gosto: 5ª Edição (Flashback Anos 80 e 90)",
     seoTitle:
-      "Volta Que Eu Gosto 5ª Edição — Flashback Anos 80 e 90 | Clay Highway Bar",
+      "Volta Que Eu Gosto 5ª Edição: Flashback Anos 80 e 90 | Clay Highway Bar",
     seoDescription:
       "Festa de flashback com três bandas ao vivo no Clay Highway Bar: Boogie Night, DeLorean e Double Deck (post punk). Sucessos dos anos 80 e 90 pra cantar e dançar a noite toda. Sábado 12/09, Curitiba.",
     date: "2026-09-12",
@@ -443,7 +443,7 @@ export const events: ClayEvent[] = [
   },
   {
     id: "acdc-uk-tribute",
-    title: "AC/DC UK — O Maior Tributo ao AC/DC do Mundo",
+    title: "AC/DC UK: O Maior Tributo ao AC/DC do Mundo",
     date: "2026-10-01",
     genre: "Tributo · Internacional",
     banner: "/banner-acdc-uk-01out.png",
@@ -453,11 +453,11 @@ export const events: ClayEvent[] = [
     lineup: [{ name: "AC/DC UK", role: "Direto da Inglaterra" }],
     venue: CLAY_HIGHWAY,
     description:
-      "Direto da Inglaterra, o AC/DC UK — apontado como o maior tributo ao AC/DC do mundo — chega ao Clay Highway para uma noite de puro rock'n'roll com os maiores clássicos da banda.",
+      "Direto da Inglaterra, o AC/DC UK, apontado como o maior tributo ao AC/DC do mundo, chega ao Clay Highway para uma noite de puro rock'n'roll com os maiores clássicos da banda.",
   },
   {
     id: "ventania-banda-hippie",
-    title: "Ventania — Banda Hippie",
+    title: "Ventania: Banda Hippie",
     date: "2026-11-06",
     genre: "Rock · Banda Hippie",
     banner: "/banner-ventania-06nov.png",
@@ -470,8 +470,8 @@ export const events: ClayEvent[] = [
   },
   {
     id: "grand-theft-party-cwb-city",
-    title: "Grand Theft Party — CWB City",
-    seoTitle: "Grand Theft Party — CWB City | Clay Highway Bar",
+    title: "Grand Theft Party: CWB City",
+    seoTitle: "Grand Theft Party: CWB City | Clay Highway Bar",
     seoDescription:
       "R2 Produções e Clay Highway Bar apresentam Grand Theft Party CWB City: ambientação anos 80, DJ, banda ao vivo, drinks temáticos e missões especiais. Sexta 02/10, Curitiba.",
     date: "2026-10-02",

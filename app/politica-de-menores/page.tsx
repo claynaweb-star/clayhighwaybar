@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE, fullAddress, whatsappLink } from "@/lib/site";
 
-const OG_TITLE = "Política de Menores — Clay Highway Bar";
+const OG_TITLE = "Política de Menores, Clay Highway Bar";
 const OG_DESCRIPTION =
   "Política de entrada de menores no Clay Highway Bar em Curitiba: valores por faixa etária em shows da casa e em shows especiais, pagamento na portaria e documentos obrigatórios.";
 
@@ -57,7 +57,7 @@ export default function PoliticaDeMenoresPage() {
           POLÍTICA DE MENORES
         </p>
         <h1 className="font-display mt-2 text-4xl text-white sm:text-5xl">
-          POLÍTICA DE MENORES — CLAY HIGHWAY BAR
+          POLÍTICA DE MENORES, CLAY HIGHWAY BAR
         </h1>
         <p className="mt-3 max-w-2xl text-muted">
           Estas são as regras de entrada e os valores aplicáveis a menores de

@@ -8,7 +8,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: "Clay Highway Bar — Bar de rock e shows ao vivo em Curitiba",
+    default: "Clay Highway Bar, Bar de rock e shows ao vivo em Curitiba",
     template: "%s · Clay Highway Bar",
   },
   description: SITE.description,
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     url: SITE.url,
     siteName: SITE.name,
-    title: "Clay Highway Bar — O Bar Mais Rock'n'Roll de Curitiba",
+    title: "Clay Highway Bar, O Bar Mais Rock'n'Roll de Curitiba",
     description: SITE.description,
     images: [
       {
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Clay Highway Bar — O Bar Mais Rock'n'Roll de Curitiba",
+    title: "Clay Highway Bar, O Bar Mais Rock'n'Roll de Curitiba",
     description: SITE.description,
     images: [SITE.ogImage],
   },
@@ -55,7 +55,7 @@ function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-ink/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-        <Link href="/" className="flex shrink-0 items-center" aria-label="Clay Highway Bar — página inicial">
+        <Link href="/" className="flex shrink-0 items-center" aria-label="Clay Highway Bar, página inicial">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo-clay-highway.png"
@@ -144,7 +144,7 @@ function TrustBadges() {
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-2"
-            aria-label={`Google Verificado — ${rating} estrelas com ${count} avaliações`}
+            aria-label={`Google Verificado, ${rating} estrelas com ${count} avaliações`}
           >
             <svg viewBox="0 0 48 48" className="h-5 w-5 shrink-0" aria-hidden>
               <path

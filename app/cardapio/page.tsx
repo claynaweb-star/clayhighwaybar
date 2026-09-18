@@ -27,7 +27,7 @@ export default function CardapioPage() {
         </h1>
         <p className="mt-2 max-w-2xl text-muted">
           Hambúrgueres artesanais, petiscos pra dividir, drinks autorais e chopp
-          gelado — a trilha perfeita pra noite de rock. Imagens ilustrativas;
+          gelado, a trilha perfeita pra noite de rock. Imagens ilustrativas;
           itens e valores atualizados ficam no cardápio completo.
         </p>
         <a

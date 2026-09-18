@@ -31,7 +31,7 @@ export const revalidate = 3600;
 const STRUCTURE = [
   {
     title: "Música ao vivo",
-    text: "Palco, som encorpado e shows de sexta a domingo — rock, tributos e atrações nacionais e internacionais.",
+    text: "Palco, som encorpado e shows de sexta a domingo: rock, tributos e atrações nacionais e internacionais.",
     icon: (
       <path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
     ),
@@ -102,16 +102,14 @@ export default function HomePage() {
               BAR DE ROCK · CURITIBA
             </span>
 
-            <h1 className="font-display mt-6 text-4xl leading-[0.98] text-white drop-shadow-lg sm:text-5xl lg:text-6xl">
-              Clay Highway Bar —
+            <h1 className="font-display mt-6 text-4xl leading-[0.98] text-white drop-shadow-lg sm:text-5xl lg:text-6xl xl:text-7xl">
+              {"O Bar Mais Rock'n'Roll"}
               <br />
-              <span className="text-accent">
-                Bar de Rock e Shows ao Vivo em Curitiba
-              </span>
+              <span className="text-accent">de Curitiba</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg text-fog">
-              Música ao vivo toda semana em Curitiba — rock, tributos e atrações
+              Música ao vivo toda semana em Curitiba: rock, tributos e atrações
               nacionais e internacionais, na Linha Verde.
             </p>
 
@@ -163,7 +161,7 @@ export default function HomePage() {
           </h2>
           <p className="mt-1 text-muted">
             Mais que um bar de rock em Curitiba, o Clay é uma casa de shows ao
-            vivo — com tudo que a casa oferece pra sua noite render.
+            vivo, com tudo que a casa oferece pra sua noite render.
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STRUCTURE.map((item) => (
@@ -239,7 +237,7 @@ export default function HomePage() {
             </h2>
             <p className="mt-1 text-muted">
               Palco, público, a casa na Linha Verde e o melhor da cozinha e do
-              bar — tudo numa noite só.
+              bar. Tudo numa noite só.
             </p>
           </div>
           <div className="flex gap-3">
@@ -335,7 +333,7 @@ export default function HomePage() {
             </h2>
             <p className="mt-3 text-muted">
               O Clay Highway fica na <strong className="text-fog">Linha Verde</strong>{" "}
-              (BR-116), no Capão Raso, em Curitiba — fácil de achar e com o
+              (BR-116), no Capão Raso, em Curitiba, fácil de achar e com o
               letreiro iluminado à beira da via.
             </p>
             <p className="mt-4 text-fog">{SITE.address.street}</p>
