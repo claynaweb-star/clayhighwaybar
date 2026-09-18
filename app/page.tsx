@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { EventCard } from "@/components/EventCard";
 import { HeroEventCarousel } from "@/components/HeroEventCarousel";
@@ -72,15 +73,27 @@ export default function HomePage() {
 
       {/* HERO */}
       <section className="relative flex min-h-[60vh] items-center overflow-hidden border-b border-border">
-        {/* Vídeo de fundo (mudo, em loop) */}
+        {/* Imagem de fundo (elemento LCP): pôster leve em WebP, com prioridade.
+            next/image serve AVIF/WebP no tamanho certo por dispositivo. */}
+        <Image
+          src="/hero-poster.webp"
+          alt=""
+          aria-hidden
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        {/* Vídeo de fundo (mudo, em loop) — só no desktop; o mobile não baixa o
+            MP4 pesado (preload none + hidden), o que derruba o LCP no celular. */}
         <video
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 hidden h-full w-full object-cover md:block"
           autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
-          poster={SITE.heroVideo.poster}
+          preload="none"
+          poster="/hero-poster.webp"
           aria-hidden
         >
           <source src={SITE.heroVideo.desktop} type="video/mp4" />

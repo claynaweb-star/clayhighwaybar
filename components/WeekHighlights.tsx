@@ -5,7 +5,7 @@ import {
   isFree,
   type ClayEvent,
 } from "@/lib/events";
-import { camaroteWhatsappUrl } from "@/lib/site";
+import { camaroteWhatsappUrl, ogImageForBanner } from "@/lib/site";
 
 function MusicNoteIcon({ className }: { className?: string }) {
   return (
@@ -46,9 +46,11 @@ function WeekCard({ event }: { event: ClayEvent }) {
         {event.banner ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src={event.banner}
+            src={ogImageForBanner(event.banner)}
             alt={`Arte do show ${event.title} no Clay Highway Bar`}
             loading="lazy"
+            width={1200}
+            height={675}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (

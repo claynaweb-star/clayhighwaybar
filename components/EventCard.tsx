@@ -5,6 +5,7 @@ import {
   isFree,
   type ClayEvent,
 } from "@/lib/events";
+import { ogImageForBanner } from "@/lib/site";
 
 export function DateBadge({ date }: { date: string }) {
   const d = formatEventDate(date);
@@ -47,9 +48,11 @@ export function EventCard({ event }: { event: ClayEvent }) {
       {event.banner && (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
-          src={event.banner}
+          src={ogImageForBanner(event.banner)}
           alt={`Arte do evento ${event.title} no Clay Highway Bar`}
           loading="lazy"
+          width={128}
+          height={80}
           className="hidden h-20 w-32 shrink-0 rounded-lg border border-border object-cover sm:block"
         />
       )}

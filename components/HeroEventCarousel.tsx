@@ -8,6 +8,7 @@ import {
   isFree,
   type ClayEvent,
 } from "@/lib/events";
+import { ogImageForBanner } from "@/lib/site";
 
 export function HeroEventCarousel({ events }: { events: ClayEvent[] }) {
   const [index, setIndex] = useState(0);
@@ -32,8 +33,10 @@ export function HeroEventCarousel({ events }: { events: ClayEvent[] }) {
           {event.banner ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
-              src={event.banner}
+              src={ogImageForBanner(event.banner)}
               alt={`Evento em destaque: ${event.title} no Clay Highway Bar`}
+              width={1200}
+              height={675}
               className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (

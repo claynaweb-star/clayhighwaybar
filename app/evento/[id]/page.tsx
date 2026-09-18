@@ -127,9 +127,11 @@ export default async function EventPage({
           {event.banner && (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
-              src={event.banner}
+              src={ogImageForBanner(event.banner)}
               alt={`Arte do evento ${event.title} no Clay Highway Bar, Curitiba`}
-              className="mt-6 w-full rounded-2xl border border-border object-cover"
+              width={1200}
+              height={675}
+              className="mt-6 aspect-video w-full rounded-2xl border border-border object-cover"
             />
           )}
 
