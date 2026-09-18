@@ -15,9 +15,9 @@ import { SITE, whatsappLink } from "@/lib/site";
 import { SocialLinks } from "@/components/SocialLinks";
 
 export const metadata: Metadata = {
-  title: "Bar de rock em Curitiba · Shows ao vivo | Clay Highway Bar",
+  title: "Clay Highway Bar | Bar de Rock com Shows ao Vivo em Curitiba",
   description:
-    "Clay Highway Bar é o bar de rock em Curitiba com shows ao vivo toda semana. Confira a agenda de shows em Curitiba, line-ups e ingressos. Rock, blues e garage no centro da cidade.",
+    "O point do rock em Curitiba. Shows ao vivo toda semana, tributos, bandas autorais e cerveja gelada. Confira a agenda e garanta seu ingresso.",
   alternates: { canonical: "/" },
 };
 
@@ -102,10 +102,12 @@ export default function HomePage() {
               BAR DE ROCK · CURITIBA
             </span>
 
-            <h1 className="font-display mt-6 text-4xl leading-[0.95] text-white drop-shadow-lg sm:text-5xl lg:text-6xl xl:text-7xl">
-              {"O bar mais rock'n'roll"}
+            <h1 className="font-display mt-6 text-4xl leading-[0.98] text-white drop-shadow-lg sm:text-5xl lg:text-6xl">
+              Clay Highway Bar —
               <br />
-              <span className="text-accent">de Curitiba.</span>
+              <span className="text-accent">
+                Bar de Rock e Shows ao Vivo em Curitiba
+              </span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg text-fog">
@@ -160,7 +162,8 @@ export default function HomePage() {
             A estrutura do Clay
           </h2>
           <p className="mt-1 text-muted">
-            Tudo que a casa oferece pra sua noite render.
+            Mais que um bar de rock em Curitiba, o Clay é uma casa de shows ao
+            vivo — com tudo que a casa oferece pra sua noite render.
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STRUCTURE.map((item) => (

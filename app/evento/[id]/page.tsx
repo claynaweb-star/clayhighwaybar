@@ -35,18 +35,16 @@ export async function generateMetadata({
   const event = getEventById(id);
   if (!event) return { title: "Evento não encontrado — Clay Highway" };
 
-  const date = formatEventDate(event.date);
-  // Formato do briefing: "[Nome] — [Data] — Clay Highway Bar Curitiba".
-  // Eventos podem sobrescrever com seoTitle/seoDescription próprios.
-  const title =
-    event.seoTitle ?? `${event.title} — ${date.short} — Clay Highway Bar Curitiba`;
+  // Padrão SEO local: "[Nome do show] — Show de Rock em Curitiba | Clay Highway Bar".
+  // `absolute` evita que o template do layout ("%s · Clay Highway Bar") duplique o sufixo.
+  const title = `${event.title} — Show de Rock em Curitiba | Clay Highway Bar`;
   const description = event.seoDescription ?? metaDescription(event);
   // Usa a versão leve da arte do evento (og/) — WhatsApp não renderiza a arte
   // original (2–3 MB). Sem banner, cai na imagem padrão do site.
   const image = ogImageForBanner(event.banner);
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical: `/evento/${event.id}` },
     openGraph: {
