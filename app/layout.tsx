@@ -312,6 +312,9 @@ function Footer() {
           <Link href="/politica-de-menores" className="hover:text-accent">
             Política de Menores
           </Link>
+          <Link href="/venha-tocar" className="hover:text-accent">
+            Venha Tocar no Clay
+          </Link>
         </nav>
 
         <div className="sm:text-right">
