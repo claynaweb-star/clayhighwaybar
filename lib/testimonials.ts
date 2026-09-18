@@ -15,9 +15,8 @@
  * ONDE COLETAR: prints das avaliações do Google, comentários no Instagram/
  * Facebook, mensagens no WhatsApp. Use o texto real da pessoa.
  *
- * >>> PLACEHOLDER <<<
- * Os 3 depoimentos abaixo são FICTÍCIOS, só pra montar o layout.
- * SUBSTITUA todos pelos depoimentos reais que você coletar.
+ * Os depoimentos abaixo são REAIS. Para adicionar mais, é só acrescentar um
+ * objeto ao array seguindo o mesmo formato.
  */
 
 export type Testimonial = {
@@ -33,24 +32,20 @@ export type Testimonial = {
 
 export const testimonials: Testimonial[] = [
   {
-    // PLACEHOLDER — substituir por depoimento real
-    name: "Depoimento real aqui",
-    quote: "Aguardando depoimento do cliente.",
+    name: "Adam",
+    quote: "O bar de rock mais querido de Curitiba!",
     rating: 5,
-    context: "PLACEHOLDER — substituir",
   },
   {
-    // PLACEHOLDER — substituir por depoimento real
-    name: "Depoimento real aqui",
-    quote: "Aguardando depoimento do cliente.",
+    name: "Silvia Monique",
+    quote:
+      "Meu aniversário foi um espetáculo! Lugar perfeito para quem curte rock!",
     rating: 5,
-    context: "PLACEHOLDER — substituir",
   },
   {
-    // PLACEHOLDER — substituir por depoimento real
-    name: "Depoimento real aqui",
-    quote: "Aguardando depoimento do cliente.",
+    // Mantido fiel ao original do cliente ("Muit bom!"), sem correção ortográfica.
+    name: "Silvano Argner",
+    quote: "Curitiba a cidade mais rock com o bar mais rock. Muit bom!",
     rating: 5,
-    context: "PLACEHOLDER — substituir",
   },
 ];

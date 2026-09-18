@@ -291,7 +291,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* DEPOIMENTOS — dados em lib/testimonials.ts (troque os placeholders). */}
+      {/* DEPOIMENTOS — dados em lib/testimonials.ts. */}
       <Testimonials testimonials={testimonials} />
 
       {/* COMO CHEGAR */}
