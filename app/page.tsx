@@ -40,8 +40,8 @@ const STRUCTURE = [
     ),
   },
   {
-    title: "Petiscos & hambúrgueres",
-    text: "Hambúrgueres artesanais, tira de picanha, pão de alho e petiscos pra dividir a noite inteira.",
+    title: "Cardápio Perfeito",
+    text: "Praça de alimentação exclusiva, com petiscos e hambúrgueres pra acompanhar o show. Não deixe de experimentar o Rock Dog!",
     icon: (
       <path d="M3 11h18M4 15h16a1 1 0 0 0 1-1 6 6 0 0 0-6-6H9a6 6 0 0 0-6 6 1 1 0 0 0 1 1Zm2 3h12" />
     ),
