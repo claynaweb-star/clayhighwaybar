@@ -20,7 +20,7 @@ import { testimonials } from "@/lib/testimonials";
 export const metadata: Metadata = {
   title: "Clay Highway Bar | Bar de Rock com Shows ao Vivo em Curitiba",
   description:
-    "O point do rock em Curitiba. Shows ao vivo toda semana, tributos, bandas autorais e cerveja gelada. Confira a agenda e garanta seu ingresso.",
+    "O bar de rock mais avaliado do Google em Curitiba. Shows ao vivo toda semana, tributos, bandas autorais e cerveja gelada. Confira a agenda e garanta seu ingresso.",
   alternates: { canonical: "/" },
 };
 
