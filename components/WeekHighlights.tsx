@@ -137,7 +137,7 @@ export function WeekHighlights({ events }: { events: ClayEvent[] }) {
         </h2>
       </div>
       <p className="mt-1 text-muted">
-        Os próximos shows de sexta, sábado e domingo no palco do Clay.
+        Os próximos shows no palco do Clay, do mais próximo em diante.
       </p>
 
       <div className="mt-8 grid items-stretch gap-5 sm:grid-cols-3">

@@ -970,19 +970,13 @@ export function getFeaturedEvents(): ClayEvent[] {
 }
 
 /**
- * Destaques da semana: o próximo show de sexta, o de sábado e o de domingo,
- * a partir de hoje (calculado dinamicamente, nunca fixo).
+ * Destaques da semana: os 3 próximos shows a partir de hoje, sempre em ordem
+ * cronológica (data mais próxima primeiro), independente do dia da semana.
+ * (Antes selecionava só sexta/sábado/domingo, o que escondia eventos de outros
+ * dias, como uma quinta, mesmo sendo a data mais próxima.)
  */
 export function getWeekHighlights(): ClayEvent[] {
-  const upcoming = getSortedEvents().filter(isUpcoming);
-  const pick = (dayOfWeek: number) =>
-    upcoming.find(
-      (e) => new Date(`${e.date}T00:00:00`).getDay() === dayOfWeek
-    );
-  // 5 = sexta, 6 = sábado, 0 = domingo
-  return [pick(5), pick(6), pick(0)].filter(
-    (e): e is ClayEvent => Boolean(e)
-  );
+  return getUpcomingEvents(3);
 }
 
 /**
