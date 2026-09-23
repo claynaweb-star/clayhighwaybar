@@ -791,6 +791,41 @@ export const events: ClayEvent[] = [
       },
     ],
   },
+  {
+    id: "reggae-no-clay",
+    title: "Reggae no Clay",
+    date: "2026-10-30",
+    time: "21:30",
+    timeNote: "Shows a partir das 21h30",
+    genre: "Reggae · Ao vivo",
+    banner: "/reggae-no-clay-highway-bar-30-10.webp",
+    bannerAlt:
+      "Banner de divulgação da noite de reggae no Clay Highway Bar, especial Natiruts com a Banda Castanheira",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/reggae",
+    lineup: [
+      { name: "Especial 41 Natiruts", role: "21h30" },
+      { name: "Banda Castanheira", role: "00h00" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Uma sexta de reggae ao vivo no Clay: o Especial 41 Natiruts abre a noite às 21h30 e a Banda Castanheira segue a partir da 00h. Clay Highway Bar, referência em rock e música ao vivo em Curitiba.",
+    callToAction: "Não é só show. É Clay!",
+    policies: [
+      {
+        title: "Classificação etária",
+        text: "18 anos. Permitida a entrada de menores de 18 anos acompanhados por um dos pais, com documentos de ambos, ou com autorização por escrito de um dos pais assinada no gov.br.",
+      },
+      {
+        title: "Cancelamento de pedidos pagos",
+        text: "Cancelamentos aceitos até 7 dias após a compra, desde que a solicitação seja enviada até 48 horas antes do início do evento.",
+      },
+    ],
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
 ];
 
 export function getSortedEvents(): ClayEvent[] {
