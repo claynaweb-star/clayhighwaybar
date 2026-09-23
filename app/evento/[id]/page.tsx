@@ -160,6 +160,11 @@ export default async function EventPage({
             <p className="mt-3 leading-relaxed text-fog">
               {event.description}
             </p>
+            {event.callToAction && (
+              <p className="mt-4 text-lg font-semibold text-accent">
+                {event.callToAction}
+              </p>
+            )}
           </div>
 
           {/* LINE-UP */}
@@ -341,6 +346,20 @@ export default async function EventPage({
           </div>
         </aside>
       </section>
+
+      {/* RODAPÉ DE INGRESSOS (política da plataforma / SAC) */}
+      {event.ticketFooter && event.ticketFooter.length > 0 && (
+        <section className="mx-auto max-w-4xl px-5 pb-12">
+          <div className="space-y-3 rounded-xl border border-border bg-surface/40 p-5 text-xs leading-relaxed text-muted">
+            <h2 className="font-display text-sm text-white">
+              Informações sobre ingressos
+            </h2>
+            {event.ticketFooter.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
+          </div>
+        </section>
+      )}
     </article>
   );
 }

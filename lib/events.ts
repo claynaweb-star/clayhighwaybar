@@ -64,6 +64,13 @@ export type ClayEvent = {
    * ex.: "Motociclistas na noite de moto e rock no Clay Highway Bar em Curitiba".
    */
   bannerAlt?: string;
+  /** Frase de chamada (CTA) opcional, exibida em destaque abaixo da descrição. */
+  callToAction?: string;
+  /**
+   * Texto(s) de rodapé da página do evento sobre ingressos (política da
+   * plataforma, taxas, SAC). Cada item do array vira um parágrafo. Opcional.
+   */
+  ticketFooter?: string[];
   /** Categoria recorrente para agrupar na agenda (ex.: "Curitiba Autoral Lab"). */
   category?: string;
   /** Destaque visual na agenda/home. */
@@ -541,6 +548,32 @@ export const events: ClayEvent[] = [
     venue: CLAY_HIGHWAY,
     description:
       "Noite Moto e Rock no Clay com entrada gratuita: DJ Santiago abre às 20h e a Banda Silvermoon sobe ao palco às 21h. Destaque da noite: os motociclistas podem entrar com a moto dentro da casa, com vagas limitadas no interior. Clay Highway Bar, referência em rock e música ao vivo em Curitiba.",
+  },
+  {
+    id: "anos-80-na-pista-clay",
+    title: "Anos 80 na Pista do Clay",
+    date: "2026-10-03",
+    time: "20:30",
+    timeNote: "Shows a partir das 20h30",
+    genre: "Flashback · Anos 80",
+    banner: "/anos-80-na-pista-clay-highway-bar-03-10.webp",
+    bannerAlt:
+      "Banners de divulgação da noite anos 80 no Clay Highway Bar, com tributos a Bon Jovi, Gold Times e Candyman Club",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/candyman",
+    lineup: [
+      { name: "Gold Times", role: "20h30" },
+      { name: "Candyman Club", role: "22h30" },
+      { name: "Bon Jovi (cover)", role: "01h00" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Tem músicas que não envelhecem. Elas viram hinos. Prepare-se para uma noite feita dos clássicos que dominaram rádios, pistas e gerações. É refrão atrás de refrão, nostalgia, energia e aquela sensação de voltar à melhor época da música. Dia 03/10, a Era Gold vai estar viva no Clay! Clay Highway Bar, referência em rock e música ao vivo em Curitiba, comemorando 10 anos de casa.",
+    callToAction: "Garante seu ingresso antecipado e vem viver essa noite!",
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
   },
 ];
 
