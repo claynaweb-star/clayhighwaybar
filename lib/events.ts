@@ -88,10 +88,13 @@ export type ClayEvent = {
    */
   video?: { url: string; title: string };
   /**
-   * Destaques de estrutura/atrações do evento, exibidos em grade com ícone
-   * (mesmo padrão visual de "A Estrutura do Clay" na home). Opcional.
+   * Destaques do evento, exibidos em grade com ícone (mesmo padrão visual de
+   * "A Estrutura do Clay" na home). Serve tanto para estrutura/atrações quanto
+   * para uma playlist em destaque, por exemplo. Opcional.
    */
   highlights?: string[];
+  /** Título do bloco de `highlights`. Padrão: "Estrutura e atrações". Opcional. */
+  highlightsTitle?: string;
   /**
    * Links de venda adicionais além do principal (`linkIngresso`), ex.: quando
    * o evento vende em mais de uma plataforma. Renderizados como botões
@@ -820,6 +823,37 @@ export const events: ClayEvent[] = [
         title: "Cancelamento de pedidos pagos",
         text: "Cancelamentos aceitos até 7 dias após a compra, desde que a solicitação seja enviada até 48 horas antes do início do evento.",
       },
+    ],
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
+    id: "summer-eletrohits-andre-werneck",
+    title: "A História da Summer Eletrohits ao Vivo no Clay",
+    date: "2026-12-05",
+    genre: "Dance anos 2000 · DJ set",
+    banner: "/summer-eletrohits-clay-highway-bar-05-12.webp",
+    bannerAlt:
+      "Banner de divulgação da festa Summer Eletrohits com DJ André Werneck no Clay Highway Bar",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/summerhits",
+    lineup: [
+      { name: "DJ André Werneck", role: "Criador da Summer Eletrohits" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Atenção: você está prestes a presenciar a história da Summer Eletrohits ao vivo no Clay! Se você viveu os anos 2000, você sabe exatamente o que é a sensação de colocar um CD no som e aumentar o volume até o talo. Aquela batida que definiu as suas férias, as suas viagens com amigos e as noites mais inesquecíveis da sua juventude tem um nome por trás. E agora, ele está vindo para a sua cidade. Não é só uma festa, é o criador da Summer Eletrohits fazendo a festa! Pela primeira vez, o lendário DJ André Werneck, o homem que idealizou e assinou a maior coletânea de dance music da história do Brasil, assume as picapes para uma noite que vai parar o tempo. Prepare o seu coração para uma viagem no tempo absurda. Você vai explodir na pista ao som dos maiores hinos que ele mesmo escolheu para dominar o país. Clay Highway Bar, referência em rock e música ao vivo em Curitiba.",
+    callToAction:
+      "É a energia do Summer Eletrohits purinha, comandada pelo cara que deu vida a tudo isso. O cronômetro está correndo. Garanta o seu lugar na pista mais nostálgica e épica do ano agora mesmo, antes que vire sold out!",
+    highlightsTitle: "Os hinos da noite",
+    highlights: [
+      "\"Can't Get Over\" (Kasino), o hino absoluto das pistas brasileiras vai ecoar no talo",
+      "\"Satisfaction\" (Benny Benassi), aquela linha de baixo icônica que vai fazer o chão tremer",
+      "\"World, Hold On\" (Bob Sinclar), para todo mundo cantar junto de braços abertos",
+      "\"Destination Calabria\" (Alex Gaudino), o saxofone mais famoso das baladas vai assumir o controle",
+      "E dezenas de outros clássicos que fizeram você dançar a vida inteira",
     ],
     ticketFooter: [
       "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",

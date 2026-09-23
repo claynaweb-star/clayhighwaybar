@@ -211,7 +211,7 @@ export default async function EventPage({
           {event.highlights && event.highlights.length > 0 && (
             <div>
               <h2 className="font-display text-2xl text-white">
-                Estrutura e atrações
+                {event.highlightsTitle ?? "Estrutura e atrações"}
               </h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {event.highlights.map((item) => (
