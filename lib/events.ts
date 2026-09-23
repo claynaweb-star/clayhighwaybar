@@ -616,6 +616,40 @@ export const events: ClayEvent[] = [
       "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
     ],
   },
+  {
+    id: "rock-kids-dia-das-criancas",
+    title: "Rock Kids, Especial Dia das Crianças",
+    date: "2026-10-11",
+    time: "16:00",
+    timeNote: "Abertura 16h, fechamento 23h",
+    genre: "Especial Família · Ao vivo",
+    banner: "/rock-kids-dia-das-criancas-clay-highway-bar-11-10.webp",
+    bannerAlt:
+      "Banner do evento Rock Kids, especial Dia das Crianças no Clay Highway Bar, com show cover de Mamonas Assassinas",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/rockids",
+    ticketNote:
+      "Crianças não pagam entrada. O ingresso é apenas para os adultos acompanhantes.",
+    lineup: [
+      { name: "Palhaço Batata", role: "17h" },
+      { name: "Mamonas Assassinas Cover", role: "18h" },
+      { name: "Gallo Jack", role: "20h30" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "O Clay preparou uma festa linda para você trazer seu filho curtir o Dia das Crianças aqui. Vai ter brinquedos, bandas ao vivo, games e muita diversão. A casa abre às 16h e fecha às 23h. No palco: Palhaço Batata (17h), Mamonas Assassinas Cover (18h) tocando Pelados em Santos, Robocop Gay, Vira-Vira e todas as que você cantava e agora seu filho vai cantar junto, e Gallo Jack (20h30) com pop e disco music. E tem atrações extras gratuitas: pula-pula e escorregador, algodão doce e a GAMEScola, com games e oficina de arte para a criança aprender a criar um jogo. Crianças não pagam entrada. Traz a família, traz os primos, traz a turma da escola. Uma tarde de rock para quem tem 6 e para quem tem 46, 56, 66... Clay Highway Bar, referência em rock e música ao vivo em Curitiba.",
+    callToAction: "Não é só show. É Clay!",
+    policies: [
+      {
+        title: "Classificação etária",
+        text: "Livre para todas as idades. Evento família, especial de Dia das Crianças. Crianças não pagam entrada e o ingresso é apenas para os adultos acompanhantes.",
+      },
+    ],
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
 ];
 
 export function getSortedEvents(): ClayEvent[] {
