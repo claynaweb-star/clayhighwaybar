@@ -34,7 +34,10 @@ export function HeroEventCarousel({ events }: { events: ClayEvent[] }) {
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={ogImageForBanner(event.banner)}
-              alt={`Evento em destaque: ${event.title} no Clay Highway Bar`}
+              alt={
+                event.bannerAlt ??
+                `Evento em destaque: ${event.title} no Clay Highway Bar`
+              }
               width={1200}
               height={675}
               className="absolute inset-0 h-full w-full object-cover"

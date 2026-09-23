@@ -58,6 +58,12 @@ export type ClayEvent = {
    * A versão leve para preview/social sai de scripts/generate-og-images.mjs.
    */
   banner?: string;
+  /**
+   * Alt-text opcional do banner. Se omitido, é gerado automaticamente a partir
+   * do título. Use quando quiser descrever a CENA da arte (melhor p/ SEO/a11y),
+   * ex.: "Motociclistas na noite de moto e rock no Clay Highway Bar em Curitiba".
+   */
+  bannerAlt?: string;
   /** Categoria recorrente para agrupar na agenda (ex.: "Curitiba Autoral Lab"). */
   category?: string;
   /** Destaque visual na agenda/home. */
@@ -514,6 +520,27 @@ export const events: ClayEvent[] = [
     venue: CLAY_HIGHWAY,
     description:
       "Pearl Jam Ribeirão Cover (21h30) e Linkin Park Brasil Cover (00h) revivem os maiores hinos das duas bandas que marcaram uma geração.",
+  },
+  {
+    id: "noite-moto-rock-clay",
+    title: "Noite Moto e Rock no Clay",
+    date: "2026-09-24",
+    time: "20:00",
+    timeNote: "Casa abre 20h",
+    genre: "Rock · Ao vivo",
+    banner: "/noite-moto-rock-clay-highway-bar-24-09.webp",
+    bannerAlt:
+      "Motociclistas na noite de moto e rock no Clay Highway Bar em Curitiba",
+    plataforma: "Gratuito",
+    // Link de referência externo (Meaple) usado como "Entrada gratuita, reserve pela Meaple".
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/role",
+    lineup: [
+      { name: "DJ Santiago", role: "20h" },
+      { name: "Banda Silvermoon", role: "21h" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Noite Moto e Rock no Clay com entrada gratuita: DJ Santiago abre às 20h e a Banda Silvermoon sobe ao palco às 21h. Destaque da noite: os motociclistas podem entrar com a moto dentro da casa, com vagas limitadas no interior. Clay Highway Bar, referência em rock e música ao vivo em Curitiba.",
   },
 ];
 

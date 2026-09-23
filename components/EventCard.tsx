@@ -49,7 +49,7 @@ export function EventCard({ event }: { event: ClayEvent }) {
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
           src={ogImageForBanner(event.banner)}
-          alt={`Arte do evento ${event.title} no Clay Highway Bar`}
+          alt={event.bannerAlt ?? `Arte do evento ${event.title} no Clay Highway Bar`}
           loading="lazy"
           width={128}
           height={80}
