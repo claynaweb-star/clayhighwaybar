@@ -208,6 +208,25 @@ export default async function EventPage({
               </a>
             </div>
           </div>
+
+          {/* POLÍTICAS DO EVENTO (classificação, cancelamento etc.) */}
+          {event.policies && event.policies.length > 0 && (
+            <div>
+              <h2 className="font-display text-2xl text-white">
+                Políticas do evento
+              </h2>
+              <dl className="mt-4 space-y-4 rounded-xl border border-border bg-surface p-5">
+                {event.policies.map((p) => (
+                  <div key={p.title}>
+                    <dt className="font-semibold text-white">{p.title}</dt>
+                    <dd className="mt-1 text-sm leading-relaxed text-muted">
+                      {p.text}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
         </div>
 
         {/* CARD DE INGRESSO (sticky) */}

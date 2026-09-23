@@ -71,6 +71,11 @@ export type ClayEvent = {
    * plataforma, taxas, SAC). Cada item do array vira um parágrafo. Opcional.
    */
   ticketFooter?: string[];
+  /**
+   * Políticas do evento (classificação etária, cancelamento etc.). Cada item
+   * é um par título/texto, renderizado no bloco "Políticas do evento". Opcional.
+   */
+  policies?: { title: string; text: string }[];
   /** Categoria recorrente para agrupar na agenda (ex.: "Curitiba Autoral Lab"). */
   category?: string;
   /** Destaque visual na agenda/home. */
@@ -570,6 +575,42 @@ export const events: ClayEvent[] = [
     description:
       "Tem músicas que não envelhecem. Elas viram hinos. Prepare-se para uma noite feita dos clássicos que dominaram rádios, pistas e gerações. É refrão atrás de refrão, nostalgia, energia e aquela sensação de voltar à melhor época da música. Dia 03/10, a Era Gold vai estar viva no Clay! Clay Highway Bar, referência em rock e música ao vivo em Curitiba, comemorando 10 anos de casa.",
     callToAction: "Garante seu ingresso antecipado e vem viver essa noite!",
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
+    id: "bailinho-de-garagem-czar-club-soda",
+    title: "Bailinho de Garagem",
+    date: "2026-10-09",
+    time: "21:30",
+    timeNote: "Shows a partir das 21h30",
+    genre: "Flashback · Pop Rock",
+    banner: "/bailinho-de-garagem-clay-highway-bar-09-10.webp",
+    bannerAlt:
+      "Banner de divulgação do Bailinho de Garagem no Clay Highway Bar, com as bandas Czar e Club Soda",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/nostalgia",
+    lineup: [
+      { name: "Czar", role: "21h30" },
+      { name: "Club Soda", role: "00h00" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "O Bailinho de Garagem está de volta, com muita nostalgia para você lembrar como era bom! Uma festa para voltar aos tempos dos bailinhos, quando a música começava e ninguém queria ficar parado. Czar e Club Soda trazem pop rock e flashbacks, grandes hits e aqueles refrões que fizeram parte das nossas festas, amizades e histórias. Dia 09/10 é para cantar, dançar e sentir aquela nostalgia boa outra vez! Clay Highway Bar, referência em rock e música ao vivo em Curitiba.",
+    callToAction:
+      "Garante seu ingresso antecipado e vem para o Bailinho de Garagem!",
+    policies: [
+      {
+        title: "Classificação etária",
+        text: "18 anos. Permitida a entrada de menores de 18 anos acompanhados por um dos pais, com documentos de ambos, ou com autorização por escrito de um dos pais assinada no gov.br.",
+      },
+      {
+        title: "Cancelamento de pedidos pagos",
+        text: "Cancelamentos aceitos até 7 dias após a compra, desde que a solicitação seja enviada até 48 horas antes do início do evento.",
+      },
+    ],
     ticketFooter: [
       "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
       "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
