@@ -87,6 +87,17 @@ export type ClayEvent = {
    * bloco e do iframe (acessibilidade). Opcional.
    */
   video?: { url: string; title: string };
+  /**
+   * Destaques de estrutura/atrações do evento, exibidos em grade com ícone
+   * (mesmo padrão visual de "A Estrutura do Clay" na home). Opcional.
+   */
+  highlights?: string[];
+  /**
+   * Links de venda adicionais além do principal (`linkIngresso`), ex.: quando
+   * o evento vende em mais de uma plataforma. Renderizados como botões
+   * secundários no card de ingresso. Opcional.
+   */
+  secondaryTickets?: { label: string; url: string }[];
   /** Categoria recorrente para agrupar na agenda (ex.: "Curitiba Autoral Lab"). */
   category?: string;
   /** Destaque visual na agenda/home. */
@@ -734,6 +745,50 @@ export const events: ClayEvent[] = [
     ticketFooter: [
       "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
       "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
+    id: "motorblack-rock-festival",
+    title: "Motorblack Rock Festival",
+    date: "2026-10-18",
+    time: "15:00",
+    timeNote: "Portões abrem 15h",
+    genre: "Rock · Festival",
+    banner: "/motorblack-rock-festival-clay-highway-bar-18-10.png",
+    bannerAlt:
+      "Banner de divulgação do Motorblack Rock Festival no Clay Highway Bar, com bandas de rock e motoclubes",
+    plataforma: "Sympla",
+    linkIngresso:
+      "https://www.sympla.com.br/evento/motorblack-rock-festval/3511569",
+    secondaryTickets: [
+      {
+        label: "Comprar pela Meaple",
+        url: "https://meaple.com.br/clayhighwaybar/motorblack",
+      },
+    ],
+    ticketNote:
+      "Ingressos limitados. Garanta o seu antecipadamente pelo Sympla para evitar filas. Acesso liberado mediante apresentação do ingresso digital, diretamente no app do Sympla, ou impresso.",
+    lineup: [
+      { name: "Motorocker" },
+      { name: "Motorblack" },
+      { name: "Flashmetal" },
+      { name: "Jailbreak (AC/DC)" },
+      { name: "Criminal Action" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Prepare-se para um dia de muita adrenalina, guitarras distorcidas, cerveja gelada e estilo de vida custom no Clay Highway Bar! O Motorblack Rock Festival reúne Motorocker, Motorblack, Flashmetal, Jailbreak (AC/DC) e Criminal Action, com portões abrindo às 15h. Clay Highway Bar, referência em rock e música ao vivo em Curitiba.",
+    highlights: [
+      "Espaço e recepção dedicados a motoclubes",
+      "Praça de alimentação com opções variadas e muita cerveja gelada",
+      "Espaço lifestyle e exposição",
+      "Ambiente seguro e familiar",
+    ],
+    policies: [
+      {
+        title: "Classificação etária",
+        text: "Livre. Menores devem estar acompanhados pelos pais ou responsáveis legais.",
+      },
     ],
   },
 ];

@@ -207,6 +207,37 @@ export default async function EventPage({
             </div>
           )}
 
+          {/* ESTRUTURA E ATRAÇÕES (grade com ícone, estilo "A Estrutura do Clay") */}
+          {event.highlights && event.highlights.length > 0 && (
+            <div>
+              <h2 className="font-display text-2xl text-white">
+                Estrutura e atrações
+              </h2>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {event.highlights.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-start gap-3 rounded-2xl border border-border bg-surface p-4"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.8}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                      className="mt-0.5 h-6 w-6 shrink-0 text-accent"
+                    >
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                    <span className="text-fog">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* LINE-UP */}
           <div>
             <h2 className="font-display text-2xl text-white">Line-up</h2>
@@ -338,6 +369,17 @@ export default async function EventPage({
                 >
                   Comprar ingresso
                 </a>
+                {event.secondaryTickets?.map((t) => (
+                  <a
+                    key={t.url}
+                    href={t.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full rounded-lg border border-border px-6 py-3 text-center font-semibold text-fog transition-colors hover:border-accent hover:text-accent"
+                  >
+                    {t.label}
+                  </a>
+                ))}
                 {/* Camarote: reserva via WhatsApp, com o nome do show na mensagem. */}
                 <a
                   href={camaroteWhatsappUrl(event.title)}
