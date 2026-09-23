@@ -650,6 +650,36 @@ export const events: ClayEvent[] = [
       "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
     ],
   },
+  {
+    id: "the-dicksons-engenheiros-hawaii",
+    title: "The Dicksons + Engenheiros do Hawaii CWB",
+    date: "2026-10-16",
+    time: "21:30",
+    timeNote: "Shows a partir das 21h30",
+    genre: "Rock nacional · Ao vivo",
+    banner: "/the-dicksons-engenheiros-hawaii-clay-highway-bar-16-10.webp",
+    bannerAlt:
+      "Banner de divulgação do show de The Dicksons e Engenheiros do Hawaii CWB no Clay Highway Bar",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/thedicksons",
+    lineup: [
+      { name: "Engenheiros do Hawaii CWB", role: "21h30" },
+      { name: "The Dicksons", role: "00h00" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Sexta de rock ao vivo no Clay: Engenheiros do Hawaii CWB abre a noite às 21h30 com o melhor do rock nacional, e a banda The Dicksons fecha à 00h com rock, punk rock, grunge e nu metal. Clay Highway Bar, referência em rock e música ao vivo em Curitiba.",
+    policies: [
+      {
+        title: "Classificação etária",
+        text: "18 anos. Permitida a entrada de menores de 18 anos acompanhados por um dos pais, com documentos de ambos, ou com autorização por escrito de um dos pais assinada no gov.br.",
+      },
+    ],
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
 ];
 
 export function getSortedEvents(): ClayEvent[] {
