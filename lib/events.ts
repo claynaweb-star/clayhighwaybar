@@ -88,6 +88,11 @@ export type ClayEvent = {
    */
   video?: { url: string; title: string };
   /**
+   * Vários vídeos incorporados (YouTube embed), renderizados um abaixo do
+   * outro no bloco "Vídeos". Cada item é a URL de embed. Opcional.
+   */
+  videos?: string[];
+  /**
    * Destaques do evento, exibidos em grade com ícone (mesmo padrão visual de
    * "A Estrutura do Clay" na home). Serve tanto para estrutura/atrações quanto
    * para uma playlist em destaque, por exemplo. Opcional.
@@ -854,6 +859,45 @@ export const events: ClayEvent[] = [
       "\"World, Hold On\" (Bob Sinclar), para todo mundo cantar junto de braços abertos",
       "\"Destination Calabria\" (Alex Gaudino), o saxofone mais famoso das baladas vai assumir o controle",
       "E dezenas de outros clássicos que fizeram você dançar a vida inteira",
+    ],
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
+    id: "aniversario-11-anos-clay",
+    title: "Aniversário de 11 Anos do Clay",
+    date: "2026-12-12",
+    genre: "Aniversário · Rock nacional",
+    category: "Aniversário",
+    featured: true,
+    banner: "/aniversario-11-anos-clay-highway-bar-12-12.webp",
+    bannerAlt:
+      "Banner do aniversário de 11 anos do Clay Highway Bar, com tributos a Raimundos, O Rappa, Charlie Brown Jr. e Legião Urbana",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/aniversario",
+    lineup: [
+      { name: "Raimundos", role: "Tributo" },
+      { name: "O Rappa", role: "Tributo" },
+      { name: "Charlie Brown Jr.", role: "Tributo" },
+      { name: "Legião Urbana", role: "Tributo" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Você não leu errado: Raimundos, O Rappa, Charlie Brown Jr. e Legião Urbana Curitiba no aniversário de 11 anos do Clay! Shows que já protagonizaram noites inesquecíveis no Clay agora se encontram em uma única festa para celebrar 11 anos de história. Quatro universos que marcaram gerações. Uma casa inteira cantando junto. Uma noite para celebrar as músicas que fazem parte da nossa vida e também da história do Clay. São 11 anos de shows e noites inesquecíveis. 11 anos de encontros. 11 anos de amizades. 11 anos de histórias que começaram aqui. 11 anos de vocês fazendo o Clay ser o que é. Clay Highway Bar, referência em rock e música ao vivo em Curitiba.",
+    callToAction:
+      "Essa é daquelas noites para não deixar o ingresso para a última hora. Garanta seu ingresso antecipado e venha fazer parte dessa comemoração! 11 anos, quatro tributos, uma única noite para entrar para a história. Não é só show. É Clay!",
+    videos: [
+      "https://www.youtube.com/embed/UyBtZo7_ZSY",
+      "https://www.youtube.com/embed/wqHW3iM8N_c",
+      "https://www.youtube.com/embed/RK4AY2bbokk",
+    ],
+    policies: [
+      {
+        title: "Classificação etária",
+        text: "18 anos. Permitida a entrada de menores de 18 anos acompanhados por um dos pais, com documentos de ambos, ou com autorização por escrito de um dos pais assinada no gov.br.",
+      },
     ],
     ticketFooter: [
       "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",

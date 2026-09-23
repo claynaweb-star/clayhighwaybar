@@ -207,6 +207,31 @@ export default async function EventPage({
             </div>
           )}
 
+          {/* VÍDEOS (vários players, um abaixo do outro) */}
+          {event.videos && event.videos.length > 0 && (
+            <div>
+              <h2 className="font-display text-2xl text-white">Vídeos</h2>
+              <div className="mt-4 space-y-4">
+                {event.videos.map((url, i) => (
+                  <div
+                    key={url}
+                    className="aspect-video overflow-hidden rounded-xl border border-border"
+                  >
+                    <iframe
+                      src={url}
+                      title={`${event.title}, vídeo ${i + 1}`}
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                      className="h-full w-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* ESTRUTURA E ATRAÇÕES (grade com ícone, estilo "A Estrutura do Clay") */}
           {event.highlights && event.highlights.length > 0 && (
             <div>
