@@ -76,6 +76,17 @@ export type ClayEvent = {
    * é um par título/texto, renderizado no bloco "Políticas do evento". Opcional.
    */
   policies?: { title: string; text: string }[];
+  /**
+   * Repertório/setlist em destaque: bandas cuja música vai tocar na noite.
+   * Renderizado como tags. Opcional.
+   */
+  setlist?: string[];
+  /**
+   * Vídeo incorporado na página do evento (ex.: YouTube). `url` deve ser o
+   * link de embed (https://www.youtube.com/embed/ID) e `title` é o título do
+   * bloco e do iframe (acessibilidade). Opcional.
+   */
+  video?: { url: string; title: string };
   /** Categoria recorrente para agrupar na agenda (ex.: "Curitiba Autoral Lab"). */
   category?: string;
   /** Destaque visual na agenda/home. */
@@ -669,6 +680,51 @@ export const events: ClayEvent[] = [
     venue: CLAY_HIGHWAY,
     description:
       "Sexta de rock ao vivo no Clay: Engenheiros do Hawaii CWB abre a noite às 21h30 com o melhor do rock nacional, e a banda The Dicksons fecha à 00h com rock, punk rock, grunge e nu metal. Clay Highway Bar, referência em rock e música ao vivo em Curitiba.",
+    policies: [
+      {
+        title: "Classificação etária",
+        text: "18 anos. Permitida a entrada de menores de 18 anos acompanhados por um dos pais, com documentos de ambos, ou com autorização por escrito de um dos pais assinada no gov.br.",
+      },
+    ],
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
+    id: "nu-metal-generation",
+    title: "Nu Metal Generation",
+    date: "2026-10-17",
+    genre: "Nu Metal · Ao vivo",
+    banner: "/nu-metal-generation-clay-highway-bar-17-10.webp",
+    bannerAlt:
+      "Banner de divulgação da noite Nu Metal Generation no Clay Highway Bar, tributo às bandas de nu metal dos anos 2000",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/generation",
+    lineup: [
+      { name: "Avenged Sevenfold Cover Brasil" },
+      { name: "Nu Metal Generation" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Se Linkin Park, SOAD, Korn e Slipknot fizeram parte da sua vida, essa noite é sua! Nu Metal Generation chega ao Clay Highway. Prepare-se para uma noite pesadíssima no Clay Highway Bar. Uma viagem direto para a geração que aumentava o volume no máximo, vestia preto e transformou o Nu Metal na trilha sonora dos anos 2000. Clay Highway Bar 10 anos, referência em rock e música ao vivo em Curitiba.",
+    callToAction: "Garanta seu ingresso antecipado.",
+    setlist: [
+      "System of a Down",
+      "Korn",
+      "Linkin Park",
+      "Slipknot",
+      "Limp Bizkit",
+      "Deftones",
+      "Papa Roach",
+      "Disturbed",
+      "Evanescence",
+      "Avenged Sevenfold",
+    ],
+    video: {
+      url: "https://www.youtube.com/embed/2PPvgHDoywI",
+      title: "O que você vai ouvir",
+    },
     policies: [
       {
         title: "Classificação etária",

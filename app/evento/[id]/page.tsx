@@ -167,6 +167,46 @@ export default async function EventPage({
             )}
           </div>
 
+          {/* REPERTÓRIO / SETLIST (tags) */}
+          {event.setlist && event.setlist.length > 0 && (
+            <div>
+              <h2 className="font-display text-2xl text-white">
+                No repertório da noite
+              </h2>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                {event.setlist.map((band) => (
+                  <span
+                    key={band}
+                    className="rounded-full border border-accent/40 bg-accent-soft/40 px-3 py-1 text-sm font-medium text-accent"
+                  >
+                    {band}
+                  </span>
+                ))}
+                <span className="text-sm text-muted">e muito mais</span>
+              </div>
+            </div>
+          )}
+
+          {/* VÍDEO DE DIVULGAÇÃO (iframe responsivo 16:9) */}
+          {event.video && (
+            <div>
+              <h2 className="font-display text-2xl text-white">
+                {event.video.title}
+              </h2>
+              <div className="mt-4 aspect-video overflow-hidden rounded-xl border border-border">
+                <iframe
+                  src={event.video.url}
+                  title={event.video.title}
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                  className="h-full w-full"
+                />
+              </div>
+            </div>
+          )}
+
           {/* LINE-UP */}
           <div>
             <h2 className="font-display text-2xl text-white">Line-up</h2>
