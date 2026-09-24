@@ -172,7 +172,7 @@ export default function HomePage() {
       <section className="border-y border-border bg-surface/40">
         <div className="mx-auto max-w-6xl px-5 py-16">
           <h2 className="font-display text-3xl text-white sm:text-4xl">
-            A estrutura do Clay
+            A Estrutura do Clay
           </h2>
           <p className="mt-1 text-muted">
             Mais que um bar de rock em Curitiba, o Clay é uma casa de shows ao
