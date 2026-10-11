@@ -24,6 +24,7 @@ const inter = Inter({
 import { SITE, whatsappLink } from "@/lib/site";
 import { SocialLinks } from "@/components/SocialLinks";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { ChromeGate } from "@/components/ChromeGate";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -348,10 +349,14 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${anton.variable} ${inter.variable}`}>
       <body className="min-h-screen bg-ink text-fog antialiased">
-        <Navbar />
+        <ChromeGate>
+          <Navbar />
+        </ChromeGate>
         <main>{children}</main>
-        <Footer />
-        <WhatsAppButton />
+        <ChromeGate>
+          <Footer />
+          <WhatsAppButton />
+        </ChromeGate>
       </body>
     </html>
   );
