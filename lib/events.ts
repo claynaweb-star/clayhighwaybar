@@ -381,6 +381,7 @@ export const events: ClayEvent[] = [
     genre: "Rock · Especial",
     banner: "/banner-halloween-24out.webp",
     featured: true,
+    nomeNaLista: true,
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/halloween",
     lineup: [

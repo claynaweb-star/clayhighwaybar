@@ -73,6 +73,11 @@ export function EventCard({ event }: { event: ClayEvent }) {
               Grátis
             </span>
           )}
+          {event.nomeNaLista && (
+            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-semibold text-accent">
+              Nome na Lista · R$ 20
+            </span>
+          )}
           {event.soldOut && (
             <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-semibold text-red-400">
               Esgotado

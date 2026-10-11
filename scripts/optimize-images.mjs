@@ -43,6 +43,42 @@ if (existsSync(heroSource)) {
   rows.push(`hero-poster.webp  ${kb(statSync(join(publicDir, "hero-poster.webp")).size)}  (novo)`);
 }
 
+// 1b) Promoção "Nome na Lista": gera versões leves em WebP (logo e arte) e
+// recomprime a arte em JPG (usada como imagem de compartilhamento / og:image).
+const nnlJobs = [
+  { base: "nome-na-lista-logo.png", webp: "nome-na-lista-logo.webp", largura: 640, q: 82 },
+  { base: "nome-na-lista-arte.jpg", webp: "nome-na-lista-arte.webp", largura: 1280, q: 74 },
+];
+for (const job of nnlJobs) {
+  const src = join(publicDir, job.base);
+  if (!existsSync(src)) continue;
+  const input = readFileSync(src);
+  const meta = await sharp(input).metadata();
+  const webpBuf = await sharp(input)
+    .resize(job.largura, null, { fit: "inside", withoutEnlargement: true })
+    .webp({ quality: job.q })
+    .toBuffer();
+  const webpMeta = await sharp(webpBuf).metadata();
+  writeFileSync(join(publicDir, job.webp), webpBuf);
+  rows.push(`${job.webp}  ${meta.width}x${meta.height} -> ${webpMeta.width}x${webpMeta.height} ${kb(webpBuf.length)}  (novo)`);
+}
+// Arte também em JPG leve (og:image / twitter:image, melhor compatibilidade social).
+const arteJpg = join(publicDir, "nome-na-lista-arte.jpg");
+if (existsSync(arteJpg)) {
+  const input = readFileSync(arteJpg);
+  const origSize = input.length;
+  const buf = await sharp(input)
+    .rotate()
+    .resize(1200, null, { fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality: 80, mozjpeg: true })
+    .toBuffer();
+  if (buf.length < origSize) {
+    writeFileSync(arteJpg, buf);
+    const m = await sharp(buf).metadata();
+    rows.push(`nome-na-lista-arte.jpg  ${kb(origSize)} -> ${m.width}x${m.height} ${kb(buf.length)}`);
+  }
+}
+
 // 2) Recompressão in-place das fotos rasterizadas pesadas (jpg/jpeg/webp).
 for (const ref of refs) {
   const file = join(publicDir, ref.replace(/^\//, ""));
