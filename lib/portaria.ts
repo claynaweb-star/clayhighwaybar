@@ -128,26 +128,53 @@ export function getClientIp(request: NextRequest): string {
 // ---- Webhook da lista ------------------------------------------------------
 
 /**
+ * Resultado da chamada ao webhook. Em caso de falha, `cause` traz só a causa
+ * TÉCNICA (sem nome, CPF ou e-mail), para registrar no log do servidor.
+ */
+export type WebhookResult =
+  | { ok: true; text: string }
+  | { ok: false; cause: string };
+
+/**
  * Chama o webhook externo da lista (LISTA_WEBHOOK_URL) passando o token e a
  * ação desejada. Sempre sem cache. Devolve o corpo como TEXTO: o backend
- * (Google Apps Script) responde em texto puro ("ok", "duplicate") para
- * cadastro/checkin e em JSON (string) para a lista. Quem chama decide como
- * interpretar.
+ * (Google Apps Script) responde em texto puro ("ok", "duplicate", "forbidden",
+ * "notfound") para cadastro/checkin e em JSON (string) para a lista. Quem chama
+ * decide como interpretar.
  */
 export async function callListaWebhook(
   payload: Record<string, unknown>,
-): Promise<string> {
+): Promise<WebhookResult> {
   const url = process.env.LISTA_WEBHOOK_URL;
   const token = process.env.LISTA_WEBHOOK_TOKEN;
-  if (!url || !token) throw new Error("Webhook da lista nao configurado");
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token, ...payload }),
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error(`Webhook respondeu ${res.status}`);
-  return res.text();
+  if (!url || !token) {
+    return {
+      ok: false,
+      cause: "variavel de ambiente ausente (LISTA_WEBHOOK_URL ou LISTA_WEBHOOK_TOKEN)",
+    };
+  }
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, ...payload }),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      return { ok: false, cause: `resposta HTTP ${res.status} do webhook` };
+    }
+    return { ok: true, text: await res.text() };
+  } catch {
+    return { ok: false, cause: "falha de rede ao chamar o webhook" };
+  }
+}
+
+/**
+ * Registra no log do servidor APENAS a causa técnica da falha do webhook.
+ * Nunca recebe nome, CPF ou e-mail.
+ */
+export function logWebhookFailure(acao: string, causa: string): void {
+  console.error(`[nome-na-lista] webhook "${acao}" falhou: ${causa}`);
 }
 
 // ---- Normalização da lista (defensiva, sem vazar CPF completo) -------------

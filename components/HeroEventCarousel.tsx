@@ -135,15 +135,6 @@ export function HeroEventCarousel({ events }: { events: ClayEvent[] }) {
           )}
         </div>
 
-        {event.nomeNaLista && (
-          <Link
-            href="/nome-na-lista"
-            className="mt-2 block w-full rounded-xl border border-accent/60 bg-accent-soft/40 px-6 py-3 text-center text-base font-bold text-accent transition-colors hover:bg-accent-soft"
-          >
-            Entrar na lista, R$ 20 ate 21h
-          </Link>
-        )}
-
         {count > 1 && (
           <div className="mt-3 flex justify-center gap-2">
             {events.map((e, i) => (

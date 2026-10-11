@@ -2,8 +2,13 @@
  * Backend da promocao "Nome na Lista" (Google Apps Script sobre uma Planilha).
  *
  * Este arquivo NAO faz parte do build do site. E o codigo que roda no Google
- * Apps Script, publicado como Web App, e que atende o webhook usado pelas rotas
+ * Apps Script, publicado como Web App, atendendo o webhook usado pelas rotas
  * /api/nome-na-lista (cadastro) e /api/portaria/* (lista e checkin).
+ *
+ * A promocao e uma CAMPANHA: uma linha por CPF por campanha (coluna "Evento"
+ * guarda o PROMO_ID). A coluna "Entradas" guarda uma entrada por dia valido
+ * (ex.: cada sexta) no formato "AAAA-MM-DD|HH:mm", separadas por ";", no fuso
+ * America/Sao_Paulo. "Total de entradas" guarda a contagem dessas entradas.
  *
  * Como publicar:
  *  1. Crie uma Planilha Google e abra Extensoes > Apps Script.
@@ -17,18 +22,19 @@
  *  LISTA_WEBHOOK_TOKEN = exatamente o mesmo valor de TOKEN abaixo
  *
  * Contrato com o site (o que o site envia em e.postData.contents):
- *  Cadastro:  { token, action: "signup",  evento, dataEvento, nome, cpf, email, aceitaNovidades }
- *  Lista:     { token, action: "list",    evento, dataEvento }
- *  Checkin:   { token, action: "checkin", id, entrou }   (entrou = true ou false)
+ *  Cadastro: { token, action: "signup",  evento, periodo, nome, cpf, email, aceitaNovidades }
+ *  Lista:    { token, action: "list",    evento, data }
+ *  Checkin:  { token, action: "checkin", id, entrou, data }   (entrou = true ou false)
  *
- * Respostas:
+ * Respostas (texto simples, exceto list que e JSON):
  *  signup  -> "ok" | "duplicate"
  *  checkin -> "ok" | "notfound"
  *  list    -> JSON de [{ id, nome, cpfMascarado, entrou, hora }] em ordem alfabetica
  *  token invalido -> "forbidden"
  */
 var TOKEN = 'TROQUE_POR_UM_SEGREDO';
-var HEADERS = ['ID', 'Cadastro em', 'Evento', 'Data do evento', 'Nome', 'CPF', 'E-mail', 'Aceita novidades', 'Entradas', 'Total de entradas'];
+var FUSO = 'America/Sao_Paulo';
+var HEADERS = ['ID', 'Cadastro em', 'Evento', 'Período', 'Nome', 'CPF', 'E-mail', 'Aceita novidades', 'Entradas', 'Total de entradas'];
 
 function sheet_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -36,8 +42,8 @@ function sheet_() {
   if (!sh) {
     sh = ss.insertSheet('Lista');
     sh.appendRow(HEADERS);
-    // Mantem CPF, e-mail, horas e contadores como texto, evitando que o CPF
-    // vire notacao cientifica ou perca zeros a esquerda.
+    // Mantem CPF, e-mail, datas/horas e contadores como texto, evitando que o
+    // CPF vire notacao cientifica ou perca zeros a esquerda.
     sh.getRange('C:J').setNumberFormat('@');
   }
   return sh;
@@ -62,10 +68,55 @@ function doPost(e) {
   }
 }
 
+/** So os digitos de um valor. */
+function digits_(s) {
+  return String(s == null ? '' : s).replace(/\D/g, '');
+}
+
+/** Mascara a partir dos 11 digitos: ***.456.789-**. */
+function mask_(cpf) {
+  var d = digits_(cpf);
+  if (d.length !== 11) return '***.***.***-**';
+  return '***.' + d.substr(3, 3) + '.' + d.substr(6, 3) + '-**';
+}
+
+/** "AAAA-MM-DD|HH:mm;AAAA-MM-DD|HH:mm" -> [{data, hora}]. */
+function parseEntradas_(valor) {
+  var out = [];
+  var txt = String(valor || '').trim();
+  if (!txt) return out;
+  var itens = txt.split(';');
+  for (var i = 0; i < itens.length; i++) {
+    if (!itens[i]) continue;
+    var partes = itens[i].split('|');
+    out.push({ data: partes[0] || '', hora: partes[1] || '' });
+  }
+  return out;
+}
+
+/** [{data, hora}] -> "AAAA-MM-DD|HH:mm;...". */
+function stringifyEntradas_(arr) {
+  var partes = [];
+  for (var i = 0; i < arr.length; i++) {
+    partes.push(arr[i].data + '|' + arr[i].hora);
+  }
+  return partes.join(';');
+}
+
+/** Hora registrada para uma data, ou "" se nao houver. */
+function horaDaData_(valor, data) {
+  var arr = parseEntradas_(valor);
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i].data === data) return arr[i].hora;
+  }
+  return '';
+}
+
 function register_(sh, d) {
   var rows = sh.getDataRange().getValues();
+  var cpf = digits_(d.cpf);
   for (var i = 1; i < rows.length; i++) {
-    if (String(rows[i][5]) === String(d.cpf) && String(rows[i][2]) === String(d.evento)) {
+    if (digits_(rows[i][5]) === cpf && String(rows[i][2]) === String(d.evento)) {
       return 'duplicate';
     }
   }
@@ -73,9 +124,9 @@ function register_(sh, d) {
     Utilities.getUuid(),
     new Date(),
     d.evento,
-    d.dataEvento,
+    d.periodo,
     d.nome,
-    d.cpf,
+    cpf,
     d.email,
     d.aceitaNovidades ? 'sim' : 'nao',
     '',
@@ -90,13 +141,11 @@ function list_(sh, d) {
   for (var i = 1; i < rows.length; i++) {
     var r = rows[i];
     if (String(r[2]) !== String(d.evento)) continue;
-    var cpf = String(r[5]);
-    var hora = String(r[8] || '');
+    var hora = horaDaData_(r[8], d.data);
     out.push({
       id: String(r[0]),
       nome: String(r[4]),
-      // Mascara no formato ***.456.789-** (esconde os 3 primeiros e os 2 ultimos).
-      cpfMascarado: '***.' + cpf.substr(3, 3) + '.' + cpf.substr(6, 3) + '-**',
+      cpfMascarado: mask_(r[5]),
       entrou: hora !== '',
       hora: hora
     });
@@ -112,13 +161,21 @@ function checkin_(sh, d) {
   for (var i = 1; i < rows.length; i++) {
     if (String(rows[i][0]) === String(d.id)) {
       var linha = i + 1;
-      if (d.entrou) {
-        var hora = Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'HH:mm');
-        sh.getRange(linha, 9).setValue(hora); // coluna I: Entradas (hora da liberacao)
-        sh.getRange(linha, 10).setValue(Number(rows[i][9] || 0) + 1); // coluna J: Total
-      } else {
-        sh.getRange(linha, 9).setValue(''); // desfaz a liberacao
+      var entradas = parseEntradas_(rows[i][8]);
+      var existe = -1;
+      for (var j = 0; j < entradas.length; j++) {
+        if (entradas[j].data === d.data) { existe = j; break; }
       }
+      if (d.entrou) {
+        if (existe === -1) {
+          var hora = Utilities.formatDate(new Date(), FUSO, 'HH:mm');
+          entradas.push({ data: d.data, hora: hora });
+        }
+      } else if (existe !== -1) {
+        entradas.splice(existe, 1);
+      }
+      sh.getRange(linha, 9).setValue(stringifyEntradas_(entradas)); // coluna I
+      sh.getRange(linha, 10).setValue(String(entradas.length)); // coluna J
       return 'ok';
     }
   }

@@ -110,12 +110,6 @@ export type ClayEvent = {
   category?: string;
   /** Destaque visual na agenda/home. */
   featured?: boolean;
-  /**
-   * Liga a promoção "Nome na Lista" para este show (ingresso promocional
-   * liberado na portaria). Quando true, o evento aparece no seletor da tela
-   * interna /portaria. Veja lib/nome-na-lista.ts.
-   */
-  nomeNaLista?: boolean;
   soldOut?: boolean;
   lineup: Artist[];
   venue: {
@@ -381,7 +375,6 @@ export const events: ClayEvent[] = [
     genre: "Rock · Especial",
     banner: "/banner-halloween-24out.webp",
     featured: true,
-    nomeNaLista: true,
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/halloween",
     lineup: [

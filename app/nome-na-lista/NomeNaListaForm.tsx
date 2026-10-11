@@ -2,23 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  formatCpf,
-  isValidCpf,
-  isValidEmail,
-  type PortariaEventRef,
-} from "@/lib/nome-na-lista";
+import { formatCpf, isValidCpf, isValidEmail } from "@/lib/nome-na-lista";
 
-function rotuloEvento(e: PortariaEventRef): string {
-  const data = new Date(`${e.date}T00:00:00`).toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-  });
-  return `${e.title} (${data})`;
-}
-
-export function NomeNaListaForm({ eventos }: { eventos: PortariaEventRef[] }) {
-  const [eventoId, setEventoId] = useState(eventos[0]?.id ?? "");
+export function NomeNaListaForm() {
   const [nome, setNome] = useState("");
   const [cpf, setCpf] = useState("");
   const [email, setEmail] = useState("");
@@ -28,35 +14,14 @@ export function NomeNaListaForm({ eventos }: { eventos: PortariaEventRef[] }) {
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
 
-  const eventoSelecionado =
-    eventos.find((e) => e.id === eventoId) ?? eventos[0];
-
-  if (eventos.length === 0) {
-    return (
-      <div className="mt-8 rounded-2xl border border-border bg-surface p-6">
-        <p className="text-fog">
-          No momento nao ha nenhum show com a promocao Nome na Lista aberta.
-          Acompanhe a agenda e as redes sociais para a proxima data.
-        </p>
-        <Link
-          href="/agenda"
-          className="mt-4 inline-block font-semibold text-accent hover:underline"
-        >
-          Ver agenda de shows
-        </Link>
-      </div>
-    );
-  }
-
   if (sucesso) {
     return (
       <div className="mt-8 rounded-2xl border border-green-700 bg-green-950 p-6">
         <h2 className="font-display text-2xl text-white">Nome na lista!</h2>
         <p className="mt-2 text-fog">
-          Seu nome entrou na lista de{" "}
-          <strong>{eventoSelecionado && rotuloEvento(eventoSelecionado)}</strong>
-          . Chegando ate as 21h, o ingresso sai por apenas R$ 20,00. E so chegar
-          e falar seu nome na portaria.
+          Seu nome entrou na lista VIP. Toda sexta, chegando ate as 21h, o
+          ingresso sai por apenas R$ 20,00. E so chegar e falar seu nome na
+          portaria.
         </p>
         <button
           type="button"
@@ -96,10 +61,6 @@ export function NomeNaListaForm({ eventos }: { eventos: PortariaEventRef[] }) {
       setErro("E preciso aceitar a politica de privacidade.");
       return;
     }
-    if (!eventoSelecionado) {
-      setErro("Selecione um evento.");
-      return;
-    }
 
     setEnviando(true);
     try {
@@ -110,8 +71,6 @@ export function NomeNaListaForm({ eventos }: { eventos: PortariaEventRef[] }) {
           nome: nome.trim(),
           cpf,
           email: email.trim(),
-          evento: eventoSelecionado.evento,
-          dataEvento: eventoSelecionado.dataEvento,
           aceite,
           aceitaNovidades: novidades,
         }),
@@ -135,30 +94,6 @@ export function NomeNaListaForm({ eventos }: { eventos: PortariaEventRef[] }) {
 
   return (
     <form onSubmit={enviar} className="mt-8 space-y-4">
-      {eventos.length > 1 ? (
-        <label className="block">
-          <span className="text-sm font-medium text-fog">Show</span>
-          <select
-            value={eventoId}
-            onChange={(e) => setEventoId(e.target.value)}
-            className={campo}
-          >
-            {eventos.map((e) => (
-              <option key={e.id} value={e.id}>
-                {rotuloEvento(e)}
-              </option>
-            ))}
-          </select>
-        </label>
-      ) : eventoSelecionado ? (
-        <div className="rounded-xl border border-border bg-surface px-4 py-3">
-          <span className="text-sm text-muted">Show</span>
-          <p className="text-lg font-semibold text-fog">
-            {rotuloEvento(eventoSelecionado)}
-          </p>
-        </div>
-      ) : null}
-
       <label className="block">
         <span className="text-sm font-medium text-fog">Nome completo</span>
         <input
@@ -205,13 +140,13 @@ export function NomeNaListaForm({ eventos }: { eventos: PortariaEventRef[] }) {
           className="mt-1 h-5 w-5 shrink-0 accent-accent"
         />
         <span className="text-sm leading-relaxed text-muted">
-          Autorizo o uso dos meus dados (nome, CPF e e-mail) para a conferencia
-          na portaria e contato sobre o show, conforme a{" "}
+          Autorizo o uso dos meus dados (nome, CPF e e-mail) para a conferência
+          na portaria, conforme a{" "}
           <Link
             href="/politica-de-privacidade"
             className="font-medium text-accent hover:underline"
           >
-            politica de privacidade
+            política de privacidade
           </Link>
           .
         </span>

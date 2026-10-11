@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getNomeNaListaEvents } from "@/lib/nome-na-lista";
 import { PortariaApp } from "./PortariaApp";
 
 /**
@@ -16,11 +15,8 @@ export const metadata: Metadata = {
   },
 };
 
-// Lista de eventos depende da data atual (corte de 3h), então sempre dinâmico.
 export const dynamic = "force-dynamic";
 
 export default function PortariaPage() {
-  // Só dados públicos (título, data, id) chegam ao navegador. Nenhum segredo.
-  const eventos = getNomeNaListaEvents();
-  return <PortariaApp eventos={eventos} />;
+  return <PortariaApp />;
 }

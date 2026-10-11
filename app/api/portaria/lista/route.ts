@@ -2,9 +2,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   callListaWebhook,
   COOKIE_NAME,
+  logWebhookFailure,
   normalizeLista,
   verifySessionToken,
 } from "@/lib/portaria";
+import { hojeSaoPauloISO, PROMO_ID } from "@/lib/nome-na-lista";
 
 export const dynamic = "force-dynamic";
 
@@ -16,32 +18,35 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let evento = "";
-  let dataEvento = "";
-  try {
-    const body = (await request.json()) as {
-      evento?: unknown;
-      dataEvento?: unknown;
-    };
-    if (typeof body?.evento === "string") evento = body.evento;
-    if (typeof body?.dataEvento === "string") dataEvento = body.dataEvento;
-  } catch {
-    // corpo inválido tratado abaixo
+  // Campanha e data de hoje (São Paulo) são definidas no servidor.
+  const resultado = await callListaWebhook({
+    action: "list",
+    evento: PROMO_ID,
+    data: hojeSaoPauloISO(),
+  });
+
+  if (!resultado.ok) {
+    logWebhookFailure("list", resultado.cause);
+    return NextResponse.json(
+      { ok: false, error: "Nao foi possivel carregar a lista." },
+      { status: 502 },
+    );
   }
 
-  if (!evento || !dataEvento) {
+  const texto = resultado.text.trim();
+  if (texto === "forbidden") {
+    logWebhookFailure("list", "token recusado pelo webhook");
     return NextResponse.json(
-      { ok: false, error: "Evento invalido." },
-      { status: 400 },
+      { ok: false, error: "Nao foi possivel carregar a lista." },
+      { status: 502 },
     );
   }
 
   try {
-    const texto = await callListaWebhook({ action: "list", evento, dataEvento });
     const lista = normalizeLista(JSON.parse(texto));
     return NextResponse.json({ ok: true, lista });
   } catch {
-    // Sem logar nome/CPF: mensagem genérica.
+    logWebhookFailure("list", "resposta inesperada do webhook (JSON invalido)");
     return NextResponse.json(
       { ok: false, error: "Nao foi possivel carregar a lista." },
       { status: 502 },

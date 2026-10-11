@@ -1,10 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { callListaWebhook, getClientIp } from "@/lib/portaria";
+import { callListaWebhook, getClientIp, logWebhookFailure } from "@/lib/portaria";
 import {
-  getNomeNaListaEvents,
   isValidCpf,
   isValidEmail,
   onlyDigits,
+  PROMO_ID,
+  PROMO_PERIODO,
 } from "@/lib/nome-na-lista";
 
 export const dynamic = "force-dynamic";
@@ -41,8 +42,6 @@ export async function POST(request: NextRequest) {
   let nome = "";
   let cpf = "";
   let email = "";
-  let evento = "";
-  let dataEvento = "";
   let aceite = false;
   let aceitaNovidades = false;
   try {
@@ -50,8 +49,6 @@ export async function POST(request: NextRequest) {
     if (typeof body.nome === "string") nome = body.nome.trim();
     if (typeof body.cpf === "string") cpf = body.cpf;
     if (typeof body.email === "string") email = body.email.trim();
-    if (typeof body.evento === "string") evento = body.evento;
-    if (typeof body.dataEvento === "string") dataEvento = body.dataEvento;
     aceite = body.aceite === true;
     aceitaNovidades = body.aceitaNovidades === true;
   } catch {
@@ -83,47 +80,42 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Só aceita eventos que realmente estão com a promoção ligada.
-  const evt = getNomeNaListaEvents().find(
-    (e) => e.evento === evento && e.dataEvento === dataEvento,
-  );
-  if (!evt) {
+  // Campanha e período vêm SEMPRE do servidor, nunca do navegador.
+  const resultado = await callListaWebhook({
+    action: "signup",
+    evento: PROMO_ID,
+    periodo: PROMO_PERIODO,
+    nome,
+    cpf: onlyDigits(cpf),
+    email,
+    aceitaNovidades,
+  });
+
+  if (!resultado.ok) {
+    logWebhookFailure("signup", resultado.cause);
     return NextResponse.json(
-      { ok: false, error: "Evento indisponivel para a promocao." },
-      { status: 400 },
+      { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
+      { status: 502 },
     );
   }
 
-  try {
-    const resposta = (
-      await callListaWebhook({
-        action: "signup",
-        evento: evt.evento,
-        dataEvento: evt.dataEvento,
-        nome,
-        cpf: onlyDigits(cpf),
-        email,
-        aceitaNovidades,
-      })
-    ).trim();
-    if (resposta === "ok") {
-      return NextResponse.json({ ok: true });
-    }
-    if (resposta === "duplicate") {
-      return NextResponse.json(
-        { ok: false, error: "Esse CPF ja esta na lista deste show." },
-        { status: 409 },
-      );
-    }
+  const resposta = resultado.text.trim();
+  if (resposta === "ok") {
+    return NextResponse.json({ ok: true });
+  }
+  if (resposta === "duplicate") {
     return NextResponse.json(
-      { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
-      { status: 502 },
-    );
-  } catch {
-    // Sem logar dados pessoais: mensagem genérica.
-    return NextResponse.json(
-      { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
-      { status: 502 },
+      { ok: false, error: "Você já está na lista." },
+      { status: 409 },
     );
   }
+  if (resposta === "forbidden") {
+    logWebhookFailure("signup", "token recusado pelo webhook");
+  } else {
+    logWebhookFailure("signup", `resposta inesperada do webhook: ${resposta.slice(0, 40)}`);
+  }
+  return NextResponse.json(
+    { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
+    { status: 502 },
+  );
 }
