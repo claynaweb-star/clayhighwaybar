@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
   let evento = "";
   let dataEvento = "";
   let aceite = false;
+  let aceitaNovidades = false;
   try {
     const body = (await request.json()) as Record<string, unknown>;
     if (typeof body.nome === "string") nome = body.nome.trim();
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
     if (typeof body.evento === "string") evento = body.evento;
     if (typeof body.dataEvento === "string") dataEvento = body.dataEvento;
     aceite = body.aceite === true;
+    aceitaNovidades = body.aceitaNovidades === true;
   } catch {
     // corpo inválido tratado abaixo
   }
@@ -93,15 +95,30 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await callListaWebhook({
-      action: "signup",
-      evento: evt.evento,
-      dataEvento: evt.dataEvento,
-      nome,
-      cpf: onlyDigits(cpf),
-      email,
-    });
-    return NextResponse.json({ ok: true });
+    const resposta = (
+      await callListaWebhook({
+        action: "signup",
+        evento: evt.evento,
+        dataEvento: evt.dataEvento,
+        nome,
+        cpf: onlyDigits(cpf),
+        email,
+        aceitaNovidades,
+      })
+    ).trim();
+    if (resposta === "ok") {
+      return NextResponse.json({ ok: true });
+    }
+    if (resposta === "duplicate") {
+      return NextResponse.json(
+        { ok: false, error: "Esse CPF ja esta na lista deste show." },
+        { status: 409 },
+      );
+    }
+    return NextResponse.json(
+      { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
+      { status: 502 },
+    );
   } catch {
     // Sem logar dados pessoais: mensagem genérica.
     return NextResponse.json(

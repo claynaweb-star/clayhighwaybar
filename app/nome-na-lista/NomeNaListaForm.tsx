@@ -23,6 +23,7 @@ export function NomeNaListaForm({ eventos }: { eventos: PortariaEventRef[] }) {
   const [cpf, setCpf] = useState("");
   const [email, setEmail] = useState("");
   const [aceite, setAceite] = useState(false);
+  const [novidades, setNovidades] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
@@ -65,6 +66,7 @@ export function NomeNaListaForm({ eventos }: { eventos: PortariaEventRef[] }) {
             setCpf("");
             setEmail("");
             setAceite(false);
+            setNovidades(false);
           }}
           className="mt-4 min-h-[48px] rounded-xl border border-green-600 px-5 font-semibold text-green-200"
         >
@@ -111,6 +113,7 @@ export function NomeNaListaForm({ eventos }: { eventos: PortariaEventRef[] }) {
           evento: eventoSelecionado.evento,
           dataEvento: eventoSelecionado.dataEvento,
           aceite,
+          aceitaNovidades: novidades,
         }),
         cache: "no-store",
       });
@@ -211,6 +214,19 @@ export function NomeNaListaForm({ eventos }: { eventos: PortariaEventRef[] }) {
             politica de privacidade
           </Link>
           .
+        </span>
+      </label>
+
+      <label className="flex items-start gap-3 py-1">
+        <input
+          type="checkbox"
+          checked={novidades}
+          onChange={(e) => setNovidades(e.target.checked)}
+          className="mt-1 h-5 w-5 shrink-0 accent-accent"
+        />
+        <span className="text-sm leading-relaxed text-muted">
+          Quero receber novidades e avisos de shows do Clay por e-mail
+          (opcional).
         </span>
       </label>
 

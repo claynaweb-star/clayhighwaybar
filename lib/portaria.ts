@@ -129,11 +129,14 @@ export function getClientIp(request: NextRequest): string {
 
 /**
  * Chama o webhook externo da lista (LISTA_WEBHOOK_URL) passando o token e a
- * ação desejada. Sempre sem cache.
+ * ação desejada. Sempre sem cache. Devolve o corpo como TEXTO: o backend
+ * (Google Apps Script) responde em texto puro ("ok", "duplicate") para
+ * cadastro/checkin e em JSON (string) para a lista. Quem chama decide como
+ * interpretar.
  */
 export async function callListaWebhook(
   payload: Record<string, unknown>,
-): Promise<unknown> {
+): Promise<string> {
   const url = process.env.LISTA_WEBHOOK_URL;
   const token = process.env.LISTA_WEBHOOK_TOKEN;
   if (!url || !token) throw new Error("Webhook da lista nao configurado");
@@ -144,7 +147,7 @@ export async function callListaWebhook(
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`Webhook respondeu ${res.status}`);
-  return res.json();
+  return res.text();
 }
 
 // ---- Normalização da lista (defensiva, sem vazar CPF completo) -------------

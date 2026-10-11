@@ -33,7 +33,15 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await callListaWebhook({ action: "checkin", id, entrou });
+    const resposta = (
+      await callListaWebhook({ action: "checkin", id, entrou })
+    ).trim();
+    if (resposta !== "ok") {
+      return NextResponse.json(
+        { ok: false, error: "Nao foi possivel salvar. Tente de novo." },
+        { status: 502 },
+      );
+    }
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json(

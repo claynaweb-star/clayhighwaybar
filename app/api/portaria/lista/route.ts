@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const raw = await callListaWebhook({ action: "list", evento, dataEvento });
-    const lista = normalizeLista(raw);
+    const texto = await callListaWebhook({ action: "list", evento, dataEvento });
+    const lista = normalizeLista(JSON.parse(texto));
     return NextResponse.json({ ok: true, lista });
   } catch {
     // Sem logar nome/CPF: mensagem genérica.
