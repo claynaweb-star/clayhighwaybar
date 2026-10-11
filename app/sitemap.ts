@@ -44,6 +44,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
+      url: `${SITE.url}/nome-na-lista`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    {
+      url: `${SITE.url}/politica-de-privacidade`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
+    {
       url: `${SITE.url}/informacoes`,
       lastModified: now,
       changeFrequency: "monthly",

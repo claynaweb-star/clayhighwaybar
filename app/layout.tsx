@@ -289,6 +289,9 @@ function Footer() {
           <Link href="/agenda" className="hover:text-accent">
             Agenda de shows
           </Link>
+          <Link href="/nome-na-lista" className="hover:text-accent">
+            Entrar na lista
+          </Link>
           <Link href="/bar-de-rock-curitiba" className="hover:text-accent">
             Bar de rock em Curitiba
           </Link>
@@ -312,6 +315,9 @@ function Footer() {
           </Link>
           <Link href="/politica-de-menores" className="hover:text-accent">
             Política de Menores
+          </Link>
+          <Link href="/politica-de-privacidade" className="hover:text-accent">
+            Política de Privacidade
           </Link>
           <Link href="/venha-tocar" className="hover:text-accent">
             Venha Tocar no Clay

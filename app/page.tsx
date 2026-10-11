@@ -135,6 +135,12 @@ export default function HomePage() {
               >
                 Ver agenda
               </Link>
+              <Link
+                href="/nome-na-lista"
+                className="rounded-xl border border-accent/60 bg-accent-soft/40 px-8 py-4 text-lg font-semibold text-accent backdrop-blur transition-colors hover:bg-accent-soft"
+              >
+                Entrar na lista
+              </Link>
               <a
                 href="#como-chegar"
                 className="rounded-xl border border-white/30 bg-white/10 px-8 py-4 text-lg font-semibold text-white backdrop-blur transition-colors hover:bg-white/20"
