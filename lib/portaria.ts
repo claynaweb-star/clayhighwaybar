@@ -147,34 +147,48 @@ export async function callListaWebhook(
 ): Promise<WebhookResult> {
   const url = process.env.LISTA_WEBHOOK_URL;
   const token = process.env.LISTA_WEBHOOK_TOKEN;
-  if (!url || !token) {
+  const faltando: string[] = [];
+  if (!url) faltando.push("LISTA_WEBHOOK_URL");
+  if (!token) faltando.push("LISTA_WEBHOOK_TOKEN");
+  if (faltando.length > 0) {
     return {
       ok: false,
-      cause: "variavel de ambiente ausente (LISTA_WEBHOOK_URL ou LISTA_WEBHOOK_TOKEN)",
+      cause: `variavel de ambiente ausente: ${faltando.join(", ")}`,
     };
   }
+  if (!url!.trim().endsWith("/exec")) {
+    return { ok: false, cause: "LISTA_WEBHOOK_URL nao termina em /exec" };
+  }
   try {
-    const res = await fetch(url, {
+    const res = await fetch(url!, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, ...payload }),
       cache: "no-store",
+      // Apps Script responde com 302 para googleusercontent; seguir o redirect.
+      redirect: "follow",
     });
-    if (!res.ok) {
-      return { ok: false, cause: `resposta HTTP ${res.status} do webhook` };
+    if (res.status !== 200) {
+      return { ok: false, cause: `resposta HTTP ${res.status} (esperado 200)` };
     }
     return { ok: true, text: await res.text() };
   } catch {
-    return { ok: false, cause: "falha de rede ao chamar o webhook" };
+    return { ok: false, cause: "sem resposta do webhook (falha de rede)" };
   }
+}
+
+/** Heurística: a resposta parece uma página HTML (login/erro do Google). */
+export function looksLikeHtml(text: string): boolean {
+  const t = text.trimStart().toLowerCase();
+  return t.startsWith("<!doctype") || t.startsWith("<html") || t.startsWith("<");
 }
 
 /**
  * Registra no log do servidor APENAS a causa técnica da falha do webhook.
- * Nunca recebe nome, CPF ou e-mail.
+ * Sempre com o prefixo [lista]. Nunca recebe nome, CPF ou e-mail.
  */
 export function logWebhookFailure(acao: string, causa: string): void {
-  console.error(`[nome-na-lista] webhook "${acao}" falhou: ${causa}`);
+  console.error(`[lista] ${acao}: ${causa}`);
 }
 
 // ---- Normalização da lista (defensiva, sem vazar CPF completo) -------------

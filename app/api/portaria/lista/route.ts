@@ -3,6 +3,7 @@ import {
   callListaWebhook,
   COOKIE_NAME,
   logWebhookFailure,
+  looksLikeHtml,
   normalizeLista,
   verifySessionToken,
 } from "@/lib/portaria";
@@ -34,8 +35,15 @@ export async function POST(request: NextRequest) {
   }
 
   const texto = resultado.text.trim();
+  if (looksLikeHtml(texto)) {
+    logWebhookFailure("list", "resposta parece pagina HTML (login ou erro do Google)");
+    return NextResponse.json(
+      { ok: false, error: "Nao foi possivel carregar a lista." },
+      { status: 502 },
+    );
+  }
   if (texto === "forbidden") {
-    logWebhookFailure("list", "token recusado pelo webhook");
+    logWebhookFailure("list", "forbidden (token diferente)");
     return NextResponse.json(
       { ok: false, error: "Nao foi possivel carregar a lista." },
       { status: 502 },
@@ -46,7 +54,7 @@ export async function POST(request: NextRequest) {
     const lista = normalizeLista(JSON.parse(texto));
     return NextResponse.json({ ok: true, lista });
   } catch {
-    logWebhookFailure("list", "resposta inesperada do webhook (JSON invalido)");
+    logWebhookFailure("list", "resposta inesperada (JSON invalido)");
     return NextResponse.json(
       { ok: false, error: "Nao foi possivel carregar a lista." },
       { status: 502 },

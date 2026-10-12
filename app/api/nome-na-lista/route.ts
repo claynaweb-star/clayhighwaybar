@@ -1,5 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { callListaWebhook, getClientIp, logWebhookFailure } from "@/lib/portaria";
+import {
+  callListaWebhook,
+  getClientIp,
+  logWebhookFailure,
+  looksLikeHtml,
+} from "@/lib/portaria";
 import {
   isValidCpf,
   isValidEmail,
@@ -100,6 +105,20 @@ export async function POST(request: NextRequest) {
   }
 
   const resposta = resultado.text.trim();
+  if (looksLikeHtml(resposta)) {
+    logWebhookFailure("signup", "resposta parece pagina HTML (login ou erro do Google)");
+    return NextResponse.json(
+      { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
+      { status: 502 },
+    );
+  }
+  if (resposta === "forbidden") {
+    logWebhookFailure("signup", "forbidden (token diferente)");
+    return NextResponse.json(
+      { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
+      { status: 502 },
+    );
+  }
   if (resposta === "ok") {
     return NextResponse.json({ ok: true });
   }
@@ -109,11 +128,7 @@ export async function POST(request: NextRequest) {
       { status: 409 },
     );
   }
-  if (resposta === "forbidden") {
-    logWebhookFailure("signup", "token recusado pelo webhook");
-  } else {
-    logWebhookFailure("signup", `resposta inesperada do webhook: ${resposta.slice(0, 40)}`);
-  }
+  logWebhookFailure("signup", `resposta inesperada: ${resposta.slice(0, 40)}`);
   return NextResponse.json(
     { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
     { status: 502 },

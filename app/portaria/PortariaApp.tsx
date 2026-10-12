@@ -35,6 +35,8 @@ export function PortariaApp() {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [agora, setAgora] = useState<Date>(() => new Date());
+  const [diag, setDiag] = useState<string[] | null>(null);
+  const [diagLoading, setDiagLoading] = useState(false);
 
   const buscaRef = useRef<HTMLInputElement>(null);
 
@@ -162,6 +164,42 @@ export function PortariaApp() {
     } finally {
       // Sincroniza com o servidor logo após liberar.
       carregarLista();
+    }
+  }
+
+  /** Teste de conexão com o webhook (so para a equipe, sem dados pessoais). */
+  async function testarConexao() {
+    setDiagLoading(true);
+    setDiag(null);
+    try {
+      const res = await fetch("/api/portaria/diagnostico", { cache: "no-store" });
+      if (res.status === 401) {
+        setAutenticado(false);
+        return;
+      }
+      const data = await res.json();
+      if (!res.ok || !data?.ok) {
+        setDiag(["Não foi possível testar a conexão."]);
+        return;
+      }
+      const execTexto =
+        data.urlTerminaExec === null
+          ? "URL ausente"
+          : data.urlTerminaExec
+            ? "sim"
+            : "não";
+      setDiag([
+        `LISTA_WEBHOOK_URL: ${data.ambiente.LISTA_WEBHOOK_URL}`,
+        `LISTA_WEBHOOK_TOKEN: ${data.ambiente.LISTA_WEBHOOK_TOKEN}`,
+        `PORTARIA_SENHA: ${data.ambiente.PORTARIA_SENHA}`,
+        `PORTARIA_SECRET: ${data.ambiente.PORTARIA_SECRET}`,
+        `URL termina em /exec: ${execTexto}`,
+        `Ping ao webhook: ${data.ping}`,
+      ]);
+    } catch {
+      setDiag(["Falha de conexão ao testar."]);
+    } finally {
+      setDiagLoading(false);
     }
   }
 
@@ -293,6 +331,22 @@ export function PortariaApp() {
                 : "Nenhum nome na lista ainda."}
           </p>
         ) : null}
+
+        {/* Teste de conexão (discreto, uso da equipe) */}
+        <div className="mt-10 border-t border-border pt-4">
+          <button
+            type="button"
+            onClick={testarConexao}
+            className="text-sm text-muted underline hover:text-accent"
+          >
+            {diagLoading ? "Testando..." : "Testar conexão"}
+          </button>
+          {diag ? (
+            <pre className="mt-3 whitespace-pre-wrap rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fog">
+              {diag.join("\n")}
+            </pre>
+          ) : null}
+        </div>
       </div>
     </main>
   );

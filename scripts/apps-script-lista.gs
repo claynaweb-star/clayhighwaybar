@@ -3,19 +3,22 @@
  *
  * Este arquivo NAO faz parte do build do site. E o codigo que roda no Google
  * Apps Script, publicado como Web App, atendendo o webhook usado pelas rotas
- * /api/nome-na-lista (cadastro) e /api/portaria/* (lista e checkin).
+ * /api/nome-na-lista (cadastro) e /api/portaria/* (lista, checkin e ping).
  *
  * A promocao e uma CAMPANHA: uma linha por CPF por campanha (coluna "Evento"
  * guarda o PROMO_ID). A coluna "Entradas" guarda uma entrada por dia valido
  * (ex.: cada sexta) no formato "AAAA-MM-DD|HH:mm", separadas por ";", no fuso
  * America/Sao_Paulo. "Total de entradas" guarda a contagem dessas entradas.
  *
- * Como publicar:
+ * COMO PUBLICAR E TESTAR:
  *  1. Crie uma Planilha Google e abra Extensoes > Apps Script.
  *  2. Cole este codigo e troque o valor de TOKEN por um segredo forte.
  *  3. Implantar > Nova implantacao > Tipo "App da Web".
  *     Executar como: eu. Quem tem acesso: qualquer pessoa.
  *  4. Copie a URL /exec gerada.
+ *  5. Abra a URL /exec no navegador: deve mostrar o texto "online".
+ *  6. No editor, rode testePing() e testeCadastro() e veja o Logger
+ *     (menu Executar, depois Ver registros).
  *
  * No Netlify, defina as variaveis de ambiente:
  *  LISTA_WEBHOOK_URL   = a URL /exec do Web App
@@ -25,12 +28,15 @@
  *  Cadastro: { token, action: "signup",  evento, periodo, nome, cpf, email, aceitaNovidades }
  *  Lista:    { token, action: "list",    evento, data }
  *  Checkin:  { token, action: "checkin", id, entrou, data }   (entrou = true ou false)
+ *  Ping:     { token, action: "ping" }
  *
  * Respostas (texto simples, exceto list que e JSON):
- *  signup  -> "ok" | "duplicate"
- *  checkin -> "ok" | "notfound"
- *  list    -> JSON de [{ id, nome, cpfMascarado, entrou, hora }] em ordem alfabetica
- *  token invalido -> "forbidden"
+ *  doGet            -> "online"
+ *  ping             -> "pong"
+ *  signup           -> "ok" | "duplicate"
+ *  checkin          -> "ok" | "notfound"
+ *  list             -> JSON de [{ id, nome, cpfMascarado, entrou, hora }] em ordem alfabetica
+ *  token invalido   -> "forbidden"
  */
 var TOKEN = 'TROQUE_POR_UM_SEGREDO';
 var FUSO = 'America/Sao_Paulo';
@@ -53,9 +59,15 @@ function text_(s) {
   return ContentService.createTextOutput(s);
 }
 
+/** Abrir a URL /exec no navegador mostra "online" (confirma que esta publico). */
+function doGet(e) {
+  return text_('online');
+}
+
 function doPost(e) {
   var d = JSON.parse(e.postData.contents);
   if (d.token !== TOKEN) return text_('forbidden');
+  if (d.action === 'ping') return text_('pong');
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
@@ -180,4 +192,36 @@ function checkin_(sh, d) {
     }
   }
   return 'notfound';
+}
+
+// =====================  TESTES (rodar dentro do editor)  ====================
+// Estes valores precisam ser os mesmos de lib/nome-na-lista.ts.
+var TESTE_PROMO_ID = 'nome-na-lista-outubro-2026';
+var TESTE_PROMO_PERIODO = '2026-10';
+
+/**
+ * Simula EXATAMENTE o cadastro que o site envia (mesmos campos e formato).
+ * Rode uma vez: deve mostrar "ok". Rode de novo com o mesmo CPF: "duplicate".
+ */
+function testeCadastro() {
+  var payload = {
+    token: TOKEN,
+    action: 'signup',
+    evento: TESTE_PROMO_ID,
+    periodo: TESTE_PROMO_PERIODO,
+    nome: 'Teste Silva',
+    cpf: '111.444.777-35',
+    email: 'teste@exemplo.com',
+    aceitaNovidades: false
+  };
+  var e = { postData: { contents: JSON.stringify(payload) } };
+  Logger.log(doPost(e).getContent());
+}
+
+/**
+ * Confere se o token esta certo pelo caminho real (deve mostrar "pong").
+ */
+function testePing() {
+  var e = { postData: { contents: JSON.stringify({ token: TOKEN, action: 'ping' }) } };
+  Logger.log(doPost(e).getContent());
 }

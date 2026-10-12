@@ -3,6 +3,7 @@ import {
   callListaWebhook,
   COOKIE_NAME,
   logWebhookFailure,
+  looksLikeHtml,
   verifySessionToken,
 } from "@/lib/portaria";
 import { hojeSaoPauloISO } from "@/lib/nome-na-lista";
@@ -51,15 +52,22 @@ export async function POST(request: NextRequest) {
   }
 
   const resposta = resultado.text.trim();
+  if (looksLikeHtml(resposta)) {
+    logWebhookFailure("checkin", "resposta parece pagina HTML (login ou erro do Google)");
+    return NextResponse.json(
+      { ok: false, error: "Nao foi possivel salvar. Tente de novo." },
+      { status: 502 },
+    );
+  }
   if (resposta === "ok") {
     return NextResponse.json({ ok: true });
   }
   if (resposta === "forbidden") {
-    logWebhookFailure("checkin", "token recusado pelo webhook");
+    logWebhookFailure("checkin", "forbidden (token diferente)");
   } else if (resposta === "notfound") {
-    logWebhookFailure("checkin", "registro nao encontrado no webhook");
+    logWebhookFailure("checkin", "registro nao encontrado (notfound)");
   } else {
-    logWebhookFailure("checkin", `resposta inesperada do webhook: ${resposta.slice(0, 40)}`);
+    logWebhookFailure("checkin", `resposta inesperada: ${resposta.slice(0, 40)}`);
   }
   return NextResponse.json(
     { ok: false, error: "Nao foi possivel salvar. Tente de novo." },
