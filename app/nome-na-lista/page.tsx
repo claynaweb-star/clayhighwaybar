@@ -3,7 +3,7 @@ import { SITE } from "@/lib/site";
 import { NomeNaListaForm } from "./NomeNaListaForm";
 
 const ARTE_ALT =
-  "Promocao Nome na Lista do Clay Highway Bar, ingresso por R$ 20 ate as 21h";
+  "Promoção Nome na Lista do Clay Highway Bar, ingresso por R$ 20 até as 21h";
 
 export const metadata: Metadata = {
   title: "Nome na Lista · Ingresso por R$ 20 ate as 21h | Clay Highway Bar",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
       "Entre na lista VIP de sexta. Chegando ate as 21h, o ingresso sai por apenas R$ 20,00.",
     url: `${SITE.url}/nome-na-lista`,
     images: [
-      { url: "/nome-na-lista-arte.jpg", width: 1200, height: 675, alt: ARTE_ALT },
+      { url: "/nome-na-lista-arte-v2.jpg", width: 1200, height: 675, alt: ARTE_ALT },
     ],
   },
   twitter: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: "Nome na Lista · Clay Highway Bar",
     description:
       "Entre na lista VIP de sexta. Chegando ate as 21h, o ingresso sai por apenas R$ 20,00.",
-    images: ["/nome-na-lista-arte.jpg"],
+    images: ["/nome-na-lista-arte-v2.jpg"],
   },
 };
 
@@ -58,7 +58,7 @@ export default function NomeNaListaPage() {
         <div className="md:order-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/nome-na-lista-arte.webp"
+            src="/nome-na-lista-arte-v2.webp"
             alt={ARTE_ALT}
             width={1280}
             height={720}

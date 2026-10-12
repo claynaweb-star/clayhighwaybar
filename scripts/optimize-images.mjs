@@ -47,7 +47,7 @@ if (existsSync(heroSource)) {
 // recomprime a arte em JPG (usada como imagem de compartilhamento / og:image).
 const nnlJobs = [
   { base: "nome-na-lista-logo.png", webp: "nome-na-lista-logo.webp", largura: 640, q: 82 },
-  { base: "nome-na-lista-arte.jpg", webp: "nome-na-lista-arte.webp", largura: 1280, q: 74 },
+  { base: "nome-na-lista-arte-v2.jpg", webp: "nome-na-lista-arte-v2.webp", largura: 1280, q: 74 },
 ];
 for (const job of nnlJobs) {
   const src = join(publicDir, job.base);
@@ -63,7 +63,7 @@ for (const job of nnlJobs) {
   rows.push(`${job.webp}  ${meta.width}x${meta.height} -> ${webpMeta.width}x${webpMeta.height} ${kb(webpBuf.length)}  (novo)`);
 }
 // Arte também em JPG leve (og:image / twitter:image, melhor compatibilidade social).
-const arteJpg = join(publicDir, "nome-na-lista-arte.jpg");
+const arteJpg = join(publicDir, "nome-na-lista-arte-v2.jpg");
 if (existsSync(arteJpg)) {
   const input = readFileSync(arteJpg);
   const origSize = input.length;
@@ -75,7 +75,7 @@ if (existsSync(arteJpg)) {
   if (buf.length < origSize) {
     writeFileSync(arteJpg, buf);
     const m = await sharp(buf).metadata();
-    rows.push(`nome-na-lista-arte.jpg  ${kb(origSize)} -> ${m.width}x${m.height} ${kb(buf.length)}`);
+    rows.push(`nome-na-lista-arte-v2.jpg  ${kb(origSize)} -> ${m.width}x${m.height} ${kb(buf.length)}`);
   }
 }
 
