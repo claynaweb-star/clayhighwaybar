@@ -351,22 +351,6 @@ export const events: ClayEvent[] = [
       "Segunda edição do palco autoral do Clay: Phanton Division (19h), The Hero Crown (20h) e Sr Barão (21h). Ingressos vendidos diretamente pelas bandas.",
   },
   {
-    id: "cassidy-paris-bittersweet",
-    title: 'Cassidy Paris: Turnê "Bittersweet" (Austrália)',
-    date: "2026-10-13",
-    time: "20:00",
-    genre: "Rock Internacional",
-    banner: "/evento-03-cassidy-paris-turne-brasil-13out.jpeg",
-    featured: true,
-    plataforma: "Meaple/Sympla",
-    linkIngresso: PLATAFORMA_URL["Meaple/Sympla"],
-    ticketNote: "Pôster autografado exclusivo apenas na pré-venda.",
-    lineup: [{ name: "Cassidy Paris", role: "Headliner · Frontiers Music (AUS)" }],
-    venue: CLAY_HIGHWAY,
-    description:
-      'A artista australiana Cassidy Paris (Frontiers Music) traz sua turnê internacional "Bittersweet" para Curitiba, com o single "Nothing Left to Lose" e grandes destaques da carreira. Pôsteres autografados exclusivos apenas para quem comprar na pré-venda.',
-  },
-  {
     id: "halloween-no-clay",
     title: "Halloween no Clay (Pitty Cover, RW, Jamp)",
     date: "2026-10-24",
