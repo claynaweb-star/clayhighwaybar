@@ -671,7 +671,7 @@ export const events: ClayEvent[] = [
     time: "21:30",
     timeNote: "Shows a partir das 21h30",
     genre: "Rock nacional · Ao vivo",
-    banner: "/the-dicksons-engenheiros-hawaii-clay-highway-bar-16-10.webp",
+    banner: "/the-dicksons-engenheiros-hawaii-clay-highway-bar-16-10-v2.webp",
     bannerAlt:
       "Banner de divulgação do show de The Dicksons e Engenheiros do Hawaii CWB no Clay Highway Bar",
     plataforma: "Meaple/Sympla",
