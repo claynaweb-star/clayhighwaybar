@@ -695,39 +695,22 @@ export const events: ClayEvent[] = [
     ],
   },
   {
-    id: "nu-metal-generation",
-    title: "Nu Metal Generation",
+    // PERSONALIZAR: adicionar line-up, horários e descrição completa quando recebidos.
+    id: "geracao-flashback",
+    title: "Geração Flashback",
+    seoDescription:
+      "Noite Geração Flashback no Clay Highway Bar, o bar de rock de Curitiba. Garanta seu ingresso antecipado. Sábado 17/10.",
     date: "2026-10-17",
-    genre: "Nu Metal · Ao vivo",
-    banner: "/nu-metal-generation-clay-highway-bar-17-10.webp",
+    genre: "Flashback",
+    banner: "/geracao-flashback-clay-highway-bar-17-10.webp",
     bannerAlt:
-      "Banner de divulgação da noite Nu Metal Generation no Clay Highway Bar, tributo às bandas de nu metal dos anos 2000",
+      "Banner de divulgação da Geração Flashback no Clay Highway Bar em Curitiba",
     plataforma: "Meaple/Sympla",
-    linkIngresso: "https://meaple.com.br/clayhighwaybar/generation",
-    lineup: [
-      { name: "Avenged Sevenfold Cover Brasil" },
-      { name: "Nu Metal Generation" },
-    ],
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/geracaoflashback",
+    lineup: [],
     venue: CLAY_HIGHWAY,
     description:
-      "Se Linkin Park, SOAD, Korn e Slipknot fizeram parte da sua vida, essa noite é sua! Nu Metal Generation chega ao Clay Highway. Prepare-se para uma noite pesadíssima no Clay Highway Bar. Uma viagem direto para a geração que aumentava o volume no máximo, vestia preto e transformou o Nu Metal na trilha sonora dos anos 2000. Clay Highway Bar 10 anos, referência em rock e música ao vivo em Curitiba.",
-    callToAction: "Garanta seu ingresso antecipado.",
-    setlist: [
-      "System of a Down",
-      "Korn",
-      "Linkin Park",
-      "Slipknot",
-      "Limp Bizkit",
-      "Deftones",
-      "Papa Roach",
-      "Disturbed",
-      "Evanescence",
-      "Avenged Sevenfold",
-    ],
-    video: {
-      url: "https://www.youtube.com/embed/2PPvgHDoywI",
-      title: "O que você vai ouvir",
-    },
+      "Noite Geração Flashback no Clay Highway Bar, o bar de rock de Curitiba. Garanta seu ingresso antecipado.",
     policies: [
       {
         title: "Classificação etária",

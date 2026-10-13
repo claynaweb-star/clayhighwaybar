@@ -91,10 +91,14 @@ export function eventSchema(
       name: SITE.name,
       address: postalAddress(),
     },
-    performer: event.lineup.map((artist) => ({
-      "@type": "MusicGroup",
-      name: artist.name,
-    })),
+    ...(event.lineup.length > 0
+      ? {
+          performer: event.lineup.map((artist) => ({
+            "@type": "MusicGroup",
+            name: artist.name,
+          })),
+        }
+      : {}),
     organizer: {
       "@type": "Organization",
       name: SITE.name,

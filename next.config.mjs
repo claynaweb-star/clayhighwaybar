@@ -9,6 +9,13 @@ const nextConfig = {
         destination: "/agenda",
         permanent: true,
       },
+      // Evento substituido: Nu Metal Generation virou Geração Flashback na
+      // mesma data (17/10). Links antigos caem no evento novo (301 permanente).
+      {
+        source: "/evento/nu-metal-generation",
+        destination: "/evento/geracao-flashback",
+        permanent: true,
+      },
     ];
   },
 };

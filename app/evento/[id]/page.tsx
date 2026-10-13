@@ -264,26 +264,28 @@ export default async function EventPage({
           )}
 
           {/* LINE-UP */}
-          <div>
-            <h2 className="font-display text-2xl text-white">Line-up</h2>
-            <ul className="mt-4 divide-y divide-border overflow-hidden rounded-xl border border-border">
-              {event.lineup.map((artist) => (
-                <li
-                  key={artist.name}
-                  className="flex items-center justify-between gap-4 bg-surface px-4 py-3"
-                >
-                  <span className="font-display text-lg text-white">
-                    {artist.name}
-                  </span>
-                  {artist.role && (
-                    <span className="text-right text-sm text-accent">
-                      {artist.role}
+          {event.lineup.length > 0 && (
+            <div>
+              <h2 className="font-display text-2xl text-white">Line-up</h2>
+              <ul className="mt-4 divide-y divide-border overflow-hidden rounded-xl border border-border">
+                {event.lineup.map((artist) => (
+                  <li
+                    key={artist.name}
+                    className="flex items-center justify-between gap-4 bg-surface px-4 py-3"
+                  >
+                    <span className="font-display text-lg text-white">
+                      {artist.name}
                     </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
+                    {artist.role && (
+                      <span className="text-right text-sm text-accent">
+                        {artist.role}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* LOCAL */}
           <div>
