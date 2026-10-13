@@ -11,6 +11,7 @@ import {
   getWeekHighlights,
 } from "@/lib/events";
 import { JsonLd } from "@/components/JsonLd";
+import { diasAbertos } from "@/lib/nome-na-lista";
 import { localBusinessSchema } from "@/lib/schema";
 import { SITE } from "@/lib/site";
 import { SocialLinks } from "@/components/SocialLinks";
@@ -68,6 +69,8 @@ export default function HomePage() {
   const weekHighlights = getWeekHighlights();
   // "Em destaque" (hero) exclui os eventos já exibidos em "Destaques da semana".
   const featuredEvents = getHeroFeaturedEvents();
+  // O botão "Entrar na lista" só aparece quando houver dia com lista aberta.
+  const listaAberta = diasAbertos().length > 0;
 
   return (
     <>
@@ -135,12 +138,14 @@ export default function HomePage() {
               >
                 Ver agenda
               </Link>
-              <Link
-                href="/nome-na-lista"
-                className="rounded-xl border border-accent/60 bg-accent-soft/40 px-8 py-4 text-lg font-semibold text-accent backdrop-blur transition-colors hover:bg-accent-soft"
-              >
-                Entrar na lista
-              </Link>
+              {listaAberta && (
+                <Link
+                  href="/nome-na-lista"
+                  className="rounded-xl border border-accent/60 bg-accent-soft/40 px-8 py-4 text-lg font-semibold text-accent backdrop-blur transition-colors hover:bg-accent-soft"
+                >
+                  Entrar na lista
+                </Link>
+              )}
               <a
                 href="#como-chegar"
                 className="rounded-xl border border-white/30 bg-white/10 px-8 py-4 text-lg font-semibold text-white backdrop-blur transition-colors hover:bg-white/20"

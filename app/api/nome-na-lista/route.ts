@@ -6,18 +6,16 @@ import {
   looksLikeHtml,
 } from "@/lib/portaria";
 import {
-  isValidCpf,
+  diasAbertos,
+  formatTelefone,
+  isNomeCompleto,
   isValidEmail,
-  onlyDigits,
-  PROMO_ID,
-  PROMO_PERIODO,
+  isValidTelefone,
 } from "@/lib/nome-na-lista";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Freio simples por IP contra spam de cadastro (em memória, por instância).
- */
+/** Freio simples por IP contra spam de cadastro (em memória, por instância). */
 type Balde = { count: number; resetAt: number };
 const envios = new Map<string, Balde>();
 const MAX_ENVIOS = 8;
@@ -45,30 +43,45 @@ export async function POST(request: NextRequest) {
   }
 
   let nome = "";
-  let cpf = "";
   let email = "";
+  let telefone = "";
   let aceite = false;
   let aceitaNovidades = false;
+  let honeypot = "";
+  let diasPedidos: string[] = [];
   try {
     const body = (await request.json()) as Record<string, unknown>;
     if (typeof body.nome === "string") nome = body.nome.trim();
-    if (typeof body.cpf === "string") cpf = body.cpf;
     if (typeof body.email === "string") email = body.email.trim();
+    if (typeof body.telefone === "string") telefone = body.telefone;
+    if (typeof body.empresa === "string") honeypot = body.empresa;
     aceite = body.aceite === true;
     aceitaNovidades = body.aceitaNovidades === true;
+    if (Array.isArray(body.dias)) {
+      diasPedidos = body.dias.filter((d): d is string => typeof d === "string");
+    }
   } catch {
     // corpo inválido tratado abaixo
   }
 
-  if (nome.length < 3) {
+  // Honeypot: campo oculto que humanos não preenchem.
+  if (honeypot.trim() !== "") {
+    logWebhookFailure("signup", "honeypot preenchido");
     return NextResponse.json(
-      { ok: false, error: "Informe seu nome completo." },
+      { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
       { status: 400 },
     );
   }
-  if (!isValidCpf(cpf)) {
+
+  if (!isNomeCompleto(nome)) {
     return NextResponse.json(
-      { ok: false, error: "CPF invalido." },
+      { ok: false, error: "Informe nome e sobrenome." },
+      { status: 400 },
+    );
+  }
+  if (!isValidTelefone(telefone)) {
+    return NextResponse.json(
+      { ok: false, error: "Telefone invalido. Confira o DDD e os numeros." },
       { status: 400 },
     );
   }
@@ -85,52 +98,61 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Campanha e período vêm SEMPRE do servidor, nunca do navegador.
-  const resultado = await callListaWebhook({
-    action: "signup",
-    evento: PROMO_ID,
-    periodo: PROMO_PERIODO,
-    nome,
-    cpf: onlyDigits(cpf),
-    email,
-    aceitaNovidades,
-  });
-
-  if (!resultado.ok) {
-    logWebhookFailure("signup", resultado.cause);
+  // Os dias válidos vêm SEMPRE do servidor (lib/events.ts), nunca do navegador.
+  const abertos = diasAbertos();
+  const dias = abertos.filter((d) => diasPedidos.includes(d.data));
+  if (dias.length === 0) {
     return NextResponse.json(
-      { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
-      { status: 502 },
+      { ok: false, error: "Escolha um dia com lista aberta." },
+      { status: 400 },
     );
   }
 
-  const resposta = resultado.text.trim();
-  if (looksLikeHtml(resposta)) {
-    logWebhookFailure("signup", "resposta parece pagina HTML (login ou erro do Google)");
+  const telefoneFmt = formatTelefone(telefone);
+  const resultados: { data: string; status: "ok" | "duplicate" }[] = [];
+
+  for (const dia of dias) {
+    const resultado = await callListaWebhook({
+      action: "signup",
+      data: dia.data,
+      nome,
+      email,
+      telefone: telefoneFmt,
+      aceitaNovidades,
+    });
+
+    if (!resultado.ok) {
+      logWebhookFailure("signup", resultado.cause);
+      return NextResponse.json(
+        { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
+        { status: 502 },
+      );
+    }
+    const resposta = resultado.text.trim();
+    if (looksLikeHtml(resposta)) {
+      logWebhookFailure("signup", "resposta parece pagina HTML (login ou erro do Google)");
+      return NextResponse.json(
+        { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
+        { status: 502 },
+      );
+    }
+    if (resposta === "forbidden") {
+      logWebhookFailure("signup", "forbidden (token diferente)");
+      return NextResponse.json(
+        { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
+        { status: 502 },
+      );
+    }
+    if (resposta === "ok" || resposta === "duplicate") {
+      resultados.push({ data: dia.data, status: resposta });
+      continue;
+    }
+    logWebhookFailure("signup", `resposta inesperada: ${resposta.slice(0, 40)}`);
     return NextResponse.json(
       { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
       { status: 502 },
     );
   }
-  if (resposta === "forbidden") {
-    logWebhookFailure("signup", "forbidden (token diferente)");
-    return NextResponse.json(
-      { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
-      { status: 502 },
-    );
-  }
-  if (resposta === "ok") {
-    return NextResponse.json({ ok: true });
-  }
-  if (resposta === "duplicate") {
-    return NextResponse.json(
-      { ok: false, error: "Você já está na lista." },
-      { status: 409 },
-    );
-  }
-  logWebhookFailure("signup", `resposta inesperada: ${resposta.slice(0, 40)}`);
-  return NextResponse.json(
-    { ok: false, error: "Nao foi possivel concluir. Tente de novo." },
-    { status: 502 },
-  );
+
+  return NextResponse.json({ ok: true, resultados });
 }

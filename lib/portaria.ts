@@ -5,7 +5,7 @@
  * Components. Ele lê segredos de ambiente (PORTARIA_SENHA, PORTARIA_SECRET,
  * LISTA_WEBHOOK_URL, LISTA_WEBHOOK_TOKEN) que NUNCA podem chegar ao navegador.
  *
- * Nada aqui registra nome ou CPF em log.
+ * Nada aqui registra nome, telefone ou e-mail em log.
  */
 import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
@@ -129,7 +129,7 @@ export function getClientIp(request: NextRequest): string {
 
 /**
  * Resultado da chamada ao webhook. Em caso de falha, `cause` traz só a causa
- * TÉCNICA (sem nome, CPF ou e-mail), para registrar no log do servidor.
+ * TÉCNICA (sem nome, telefone ou e-mail), para registrar no log do servidor.
  */
 export type WebhookResult =
   | { ok: true; text: string }
@@ -185,19 +185,19 @@ export function looksLikeHtml(text: string): boolean {
 
 /**
  * Registra no log do servidor APENAS a causa técnica da falha do webhook.
- * Sempre com o prefixo [lista]. Nunca recebe nome, CPF ou e-mail.
+ * Sempre com o prefixo [lista]. Nunca recebe nome, telefone ou e-mail.
  */
 export function logWebhookFailure(acao: string, causa: string): void {
   console.error(`[lista] ${acao}: ${causa}`);
 }
 
-// ---- Normalização da lista (defensiva, sem vazar CPF completo) -------------
+// ---- Normalização da lista -------------------------------------------------
 
 export type PortariaListItem = {
   id: string;
   nome: string;
-  /** Sempre mascarado, ex.: "***.456.789-**". Nunca o CPF completo. */
-  cpfMascarado: string;
+  /** Telefone completo (a portaria mostra inteiro para conferência). */
+  telefone: string;
   entrou: boolean;
   /** Hora da liberação, se já entrou (ex.: "21:04"). */
   hora: string | null;
@@ -209,26 +209,6 @@ function str(v: unknown): string {
   return String(v);
 }
 
-function onlyDigits(s: string): string {
-  return s.replace(/\D/g, "");
-}
-
-/** Monta a máscara "***.456.789-**" a partir de um CPF de 11 dígitos. */
-export function maskCpf(cpf: string): string {
-  const d = onlyDigits(cpf);
-  if (d.length !== 11) return cpf;
-  return `***.${d.slice(3, 6)}.${d.slice(6, 9)}-**`;
-}
-
-/**
- * Garante que o campo nunca carregue um CPF completo: se vier com 11+ dígitos,
- * remascara. Protege o navegador da portaria mesmo que o webhook falhe nisso.
- */
-function sanitizeMask(valor: string): string {
-  if (onlyDigits(valor).length >= 11) return maskCpf(valor);
-  return valor;
-}
-
 function toBool(v: unknown): boolean {
   return v === true || v === 1 || v === "1" || v === "true";
 }
@@ -236,8 +216,7 @@ function toBool(v: unknown): boolean {
 type RawItem = {
   id?: unknown;
   nome?: unknown;
-  cpf?: unknown;
-  cpfMascarado?: unknown;
+  telefone?: unknown;
   entrou?: unknown;
   hora?: unknown;
 };
@@ -254,25 +233,17 @@ function extractArray(raw: unknown): RawItem[] {
 }
 
 /**
- * Converte a resposta do webhook em itens seguros para o navegador, em ordem
- * alfabética correta para o português. O webhook já deve mandar ordenado; a
- * ordenação aqui é só uma garantia extra. Qualquer CPF completo é mascarado.
+ * Converte a resposta do webhook em itens para o navegador, em ordem
+ * alfabética correta para o português (garantia extra, o webhook já ordena).
  */
 export function normalizeLista(raw: unknown): PortariaListItem[] {
-  const itens = extractArray(raw).map((r): PortariaListItem => {
-    const mascaraBruta = r.cpfMascarado
-      ? str(r.cpfMascarado)
-      : r.cpf
-        ? maskCpf(str(r.cpf))
-        : "";
-    return {
-      id: str(r.id),
-      nome: str(r.nome),
-      cpfMascarado: sanitizeMask(mascaraBruta),
-      entrou: toBool(r.entrou),
-      hora: r.hora ? str(r.hora) : null,
-    };
-  });
+  const itens = extractArray(raw).map((r): PortariaListItem => ({
+    id: str(r.id),
+    nome: str(r.nome),
+    telefone: str(r.telefone),
+    entrou: toBool(r.entrou),
+    hora: r.hora ? str(r.hora) : null,
+  }));
   itens.sort((a, b) =>
     a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }),
   );

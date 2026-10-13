@@ -110,6 +110,12 @@ export type ClayEvent = {
   category?: string;
   /** Destaque visual na agenda/home. */
   featured?: boolean;
+  /**
+   * Promoção "Nome na Lista" deste dia. Presente só nos eventos com lista
+   * aberta; `preco` é o valor (em reais) pago na portaria chegando até as 21h.
+   * A data da lista é a própria data do evento. Veja lib/nome-na-lista.ts.
+   */
+  nomeNaLista?: { preco: number };
   soldOut?: boolean;
   lineup: Artist[];
   venue: {
@@ -674,6 +680,7 @@ export const events: ClayEvent[] = [
     banner: "/the-dicksons-engenheiros-hawaii-clay-highway-bar-16-10-v2.webp",
     bannerAlt:
       "Banner de divulgação do show de The Dicksons e Engenheiros do Hawaii CWB no Clay Highway Bar",
+    nomeNaLista: { preco: 20 },
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/thedicksons",
     lineup: [
@@ -705,6 +712,7 @@ export const events: ClayEvent[] = [
     banner: "/geracao-flashback-clay-highway-bar-17-10.webp",
     bannerAlt:
       "Banner de divulgação da Geração Flashback no Clay Highway Bar em Curitiba",
+    nomeNaLista: { preco: 25 },
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/geracaoflashback",
     lineup: [],

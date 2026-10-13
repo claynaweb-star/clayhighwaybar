@@ -7,7 +7,7 @@ import {
   normalizeLista,
   verifySessionToken,
 } from "@/lib/portaria";
-import { dataDaNoiteISO, PROMO_ID } from "@/lib/nome-na-lista";
+import { diasDaPortaria } from "@/lib/nome-na-lista";
 
 export const dynamic = "force-dynamic";
 
@@ -19,12 +19,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Campanha e data de hoje (São Paulo) são definidas no servidor.
-  const resultado = await callListaWebhook({
-    action: "list",
-    evento: PROMO_ID,
-    data: dataDaNoiteISO(),
-  });
+  let data = "";
+  try {
+    const body = (await request.json()) as { data?: unknown };
+    if (typeof body?.data === "string") data = body.data;
+  } catch {
+    // corpo inválido tratado abaixo
+  }
+
+  // Só dias válidos da portaria (a noite atual e os dias futuros marcados).
+  if (!diasDaPortaria().some((d) => d.data === data)) {
+    return NextResponse.json(
+      { ok: false, error: "Dia invalido." },
+      { status: 400 },
+    );
+  }
+
+  const resultado = await callListaWebhook({ action: "list", data });
 
   if (!resultado.ok) {
     logWebhookFailure("list", resultado.cause);

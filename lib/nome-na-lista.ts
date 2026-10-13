@@ -1,73 +1,33 @@
 /**
  * PONTO ÚNICO DE VERDADE da promoção "Nome na Lista".
  *
- * A promoção é uma CAMPANHA (não depende de evento): quem se cadastra entra em
- * uma lista única e, nos dias válidos, chegando até o horário limite, paga o
- * valor promocional da noite na portaria. O cadastro é único por CPF e vale
- * para todos os dias da campanha; a portaria libera cada noite separadamente.
+ * A lista existe SOMENTE nos eventos marcados com o campo `nomeNaLista` em
+ * lib/events.ts (a data da lista é a data do próprio evento). Quem se cadastra
+ * entra na lista daquele dia e, chegando até o horário limite, paga o valor
+ * promocional na portaria.
  *
- * COMO MUDAR A CAMPANHA (editar as constantes abaixo):
- *  - PROMO_ID:      identificador único da campanha (vai para a planilha e para
- *                   o webhook; troque ao começar uma campanha nova).
- *  - PROMO_PERIODO: rótulo do período, formato AAAA-MM (coluna "Período").
- *  - PROMO_INICIO / PROMO_FIM: primeiro e último dia válidos (ISO AAAA-MM-DD).
- *  - PROMO_PRECOS:  preço (em reais) por dia da semana válido. A chave é o dia
- *                   (0=domingo ... 5=sexta, 6=sábado). Os dias válidos saem
- *                   daqui (PROMO_DIAS), sem duplicar lista.
- *  - PROMO_LIMITE:  horário limite "HH:MM" (até ele, vale o valor promocional).
- *  - PROMO_VIRADA:  horário em que a "noite" do bar vira de dia. Antes dele, a
- *                   madrugada ainda conta como a noite do dia anterior.
+ * COMO MUDAR (editar as constantes abaixo):
+ *  - PROMO_LIMITE: horário limite "HH:MM" (até ele vale o valor promocional e
+ *                  até ele o cadastro do dia fica aberto).
+ *  - PROMO_VIRADA: horário em que a "noite" do bar vira de dia. Antes dele, a
+ *                  madrugada ainda conta como a noite do dia anterior.
+ * Para ligar a lista em um show, marque `nomeNaLista: { preco: N }` no evento.
  * Todas as datas e horas são avaliadas no fuso America/Sao_Paulo.
  */
+import { events } from "./events";
 
-export const PROMO_ID = "nome-na-lista-outubro-2026";
-export const PROMO_PERIODO = "2026-10";
-export const PROMO_INICIO = "2026-10-01";
-export const PROMO_FIM = "2026-10-31";
 export const PROMO_LIMITE = "21:00";
 export const PROMO_VIRADA = "06:00";
 
-/** Preço (reais) por dia da semana. 5 = sexta, 6 = sábado. */
-export const PROMO_PRECOS: Record<number, number> = { 5: 20, 6: 25 };
-
-/** Dias válidos, derivados de PROMO_PRECOS (sem duplicação). */
-export const PROMO_DIAS: number[] = Object.keys(PROMO_PRECOS)
-  .map(Number)
-  .sort((a, b) => a - b);
-
 const FUSO = "America/Sao_Paulo";
 
-const DIA_SINGULAR: Record<number, string> = {
-  0: "domingo",
-  1: "segunda",
-  2: "terça",
-  3: "quarta",
-  4: "quinta",
-  5: "sexta",
-  6: "sábado",
-};
-const DIA_PLURAL: Record<number, string> = {
-  0: "Domingos",
-  1: "Segundas",
-  2: "Terças",
-  3: "Quartas",
-  4: "Quintas",
-  5: "Sextas",
-  6: "Sábados",
-};
-const DIA_PREP: Record<number, string> = {
-  0: "no domingo",
-  1: "na segunda",
-  2: "na terça",
-  3: "na quarta",
-  4: "na quinta",
-  5: "na sexta",
-  6: "no sábado",
-};
+/** Um dia com lista aberta ou na portaria. */
+export type DiaNomeNaLista = { data: string; preco: number };
+
+// ---- Tempo (fuso de São Paulo) ---------------------------------------------
 
 /** Data de hoje no fuso de São Paulo, em ISO AAAA-MM-DD. */
 export function hojeSaoPauloISO(now: Date = new Date()): string {
-  // en-CA formata como "AAAA-MM-DD".
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: FUSO,
     year: "numeric",
@@ -114,20 +74,12 @@ function somaDiasISO(iso: string, dias: number): string {
   return `${yy}-${mm}-${dd}`;
 }
 
-/** Dia da semana (0=domingo ... 6=sábado) de uma data ISO AAAA-MM-DD. */
-function diaDaSemanaISO(iso: string): number {
-  const [y, m, d] = iso.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
-}
-
 /**
- * FUNÇÃO ÚNICA da "data da noite" (ISO AAAA-MM-DD, fuso São Paulo).
- * A noite do bar só vira de dia às PROMO_VIRADA (06:00). Entre 00:00 e 05:59,
- * a data da noite é a do dia anterior (ex.: sábado 00:30 ainda é a noite de
- * sexta). Serve de base para dia da semana, preço, validade, contadores e a
- * data enviada ao webhook na lista e no check-in.
+ * Data da "noite" atual (ISO AAAA-MM-DD, fuso São Paulo). A noite só vira de
+ * dia às PROMO_VIRADA (06:00). Entre 00:00 e 05:59 vale o dia anterior (ex.:
+ * sábado 00:30 ainda é a noite de sexta).
  */
-export function dataDaNoiteISO(now: Date = new Date()): string {
+export function dataDaNoite(now: Date = new Date()): string {
   const hoje = hojeSaoPauloISO(now);
   const [vh] = PROMO_VIRADA.split(":").map(Number);
   const { hora } = horaSaoPaulo(now);
@@ -135,34 +87,77 @@ export function dataDaNoiteISO(now: Date = new Date()): string {
   return hoje;
 }
 
-export type PromoStatus = "valida" | "encerrada" | "fora";
-
-/**
- * Situação da promoção agora, pela DATA DA NOITE (fuso São Paulo):
- *  - "valida":    noite de um dia com preço e antes do horário limite.
- *  - "encerrada": noite de um dia com preço, mas já passou do limite (inclui a
- *                 madrugada, que conta como a noite anterior).
- *  - "fora":      noite de um dia sem preço ou fora do período da campanha.
- */
-export function promoStatus(now: Date = new Date()): PromoStatus {
-  const noite = dataDaNoiteISO(now);
-  const dentroPeriodo = noite >= PROMO_INICIO && noite <= PROMO_FIM;
-  const diaValido =
-    dentroPeriodo && PROMO_PRECOS[diaDaSemanaISO(noite)] != null;
-  if (!diaValido) return "fora";
-  // Se a data da noite é de ontem (madrugada), já passou do limite daquela noite.
-  if (noite !== hojeSaoPauloISO(now)) return "encerrada";
+function antesDoLimite(now: Date): boolean {
   const [lh, lm] = PROMO_LIMITE.split(":").map(Number);
   const { hora, minuto } = horaSaoPaulo(now);
-  if (hora * 60 + minuto >= lh * 60 + lm) return "encerrada";
-  return "valida";
+  return hora * 60 + minuto < lh * 60 + lm;
 }
 
-/** Preço (reais) da noite atual, ou null se a noite não for dia de promoção. */
-export function precoDaNoite(now: Date = new Date()): number | null {
-  const preco = PROMO_PRECOS[diaDaSemanaISO(dataDaNoiteISO(now))];
-  return preco == null ? null : preco;
+// ---- Dias com lista (derivados de lib/events.ts) ---------------------------
+
+/** Todos os dias marcados com lista, em ordem cronológica. */
+function diasComLista(): DiaNomeNaLista[] {
+  return events
+    .filter((e) => e.nomeNaLista)
+    .map((e) => ({ data: e.date, preco: e.nomeNaLista!.preco }))
+    .sort((a, b) => a.data.localeCompare(b.data));
 }
+
+/** Preço do dia (ou null se o dia não tiver lista). */
+export function precoDoDia(dataISO: string): number | null {
+  const d = diasComLista().find((x) => x.data === dataISO);
+  return d ? d.preco : null;
+}
+
+/**
+ * Dias ABERTOS para cadastro no site: dias futuros marcados, incluindo hoje
+ * apenas antes das 21:00 (o cadastro de cada dia fecha às 21:00 do próprio dia).
+ */
+export function diasAbertos(now: Date = new Date()): DiaNomeNaLista[] {
+  const hoje = hojeSaoPauloISO(now);
+  const aberto = antesDoLimite(now);
+  return diasComLista().filter((d) => {
+    if (d.data > hoje) return true;
+    if (d.data === hoje) return aberto;
+    return false;
+  });
+}
+
+/** Dias que aparecem na PORTARIA: a noite atual e os dias futuros marcados. */
+export function diasDaPortaria(now: Date = new Date()): DiaNomeNaLista[] {
+  const hoje = hojeSaoPauloISO(now);
+  const noite = dataDaNoite(now);
+  return diasComLista().filter((d) => d.data === noite || d.data > hoje);
+}
+
+/** Dia selecionado por padrão na portaria (a noite atual, ou o próximo). */
+export function diaPadraoDaPortaria(now: Date = new Date()): string | null {
+  return diasDaPortaria(now)[0]?.data ?? null;
+}
+
+export type StatusDoDia = "valida" | "encerrada" | "futuro";
+
+/**
+ * Situação de um dia na portaria, pela data e pelo horário (fuso São Paulo):
+ *  - "valida":    é a noite de hoje e ainda antes das 21:00.
+ *  - "encerrada": é a noite de hoje depois das 21:00 (inclui a madrugada).
+ *  - "futuro":    é um dia que ainda vai acontecer.
+ */
+export function statusDoDia(
+  dataSelecionada: string,
+  now: Date = new Date(),
+): StatusDoDia {
+  const hoje = hojeSaoPauloISO(now);
+  if (dataSelecionada > hoje) return "futuro";
+  if (dataSelecionada === hoje) {
+    return antesDoLimite(now) ? "valida" : "encerrada";
+  }
+  // Data anterior a hoje: só aparece na portaria durante a madrugada da própria
+  // noite, e nesse caso a promoção daquele dia já encerrou.
+  return "encerrada";
+}
+
+// ---- Formatadores ----------------------------------------------------------
 
 /** Formata reais no padrão "R$ 20,00". */
 export function formatReais(n: number): string {
@@ -175,66 +170,76 @@ export function limiteHumano(): string {
   return m === "00" ? `${Number(h)}h` : `${Number(h)}h${m}`;
 }
 
-/** Rótulo da noite para a portaria, ex.: "R$ 20,00 (sexta)", ou null. */
-export function precoLabelNoite(now: Date = new Date()): string | null {
-  const dow = diaDaSemanaISO(dataDaNoiteISO(now));
-  const preco = PROMO_PRECOS[dow];
-  if (preco == null) return null;
-  return `${formatReais(preco)} (${DIA_SINGULAR[dow]})`;
+/** Dia curto com a primeira letra maiúscula, ex.: "Sexta, 16/10". */
+export function formatDiaLabel(dataISO: string): string {
+  const d = new Date(`${dataISO}T00:00:00`);
+  const semana = d
+    .toLocaleDateString("pt-BR", { weekday: "long" })
+    .replace("-feira", "");
+  const cap = semana.charAt(0).toUpperCase() + semana.slice(1);
+  const dm = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  return `${cap}, ${dm}`;
 }
 
-/** Texto público dos preços: "Sextas: R$ 20,00. Sábados: R$ 25,00. Chegando até as 21h." */
-export function textoPrecosPublico(): string {
-  const partes = PROMO_DIAS.map(
-    (d) => `${DIA_PLURAL[d]}: ${formatReais(PROMO_PRECOS[d])}`,
-  );
-  return `${partes.join(". ")}. Chegando até as ${limiteHumano()}.`;
+/** Dia por extenso, ex.: "sexta-feira, 16 de outubro de 2026". */
+export function formatDiaExtenso(dataISO: string): string {
+  return new Date(`${dataISO}T00:00:00`).toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 }
 
-/** Texto de pagamento por dia: "R$ 20,00 na sexta ou R$ 25,00 no sábado". */
-export function textoPagamentoPorDia(): string {
-  return PROMO_DIAS.map(
-    (d) => `${formatReais(PROMO_PRECOS[d])} ${DIA_PREP[d]}`,
-  ).join(" ou ");
-}
-
-// ---- Validadores (puros, usados no cliente e no servidor) ------------------
+// ---- Validadores e máscara (telefone e e-mail) -----------------------------
 
 /** Mantém apenas os dígitos de uma string. */
 export function onlyDigits(valor: string): string {
   return (valor || "").replace(/\D/g, "");
 }
 
-/** Formata um CPF enquanto o usuário digita: 000.000.000-00. */
-export function formatCpf(valor: string): string {
-  const d = onlyDigits(valor).slice(0, 11);
-  const p1 = d.slice(0, 3);
-  const p2 = d.slice(3, 6);
-  const p3 = d.slice(6, 9);
-  const p4 = d.slice(9, 11);
-  let out = p1;
-  if (p2) out += `.${p2}`;
-  if (p3) out += `.${p3}`;
-  if (p4) out += `-${p4}`;
-  return out;
+/**
+ * Dígitos do telefone, removendo o código do país (+55) quando ele deixa o
+ * número com 12 ou 13 dígitos. DDD 55 (10 ou 11 dígitos) é preservado.
+ */
+export function telefoneDigits(valor: string): string {
+  let d = onlyDigits(valor);
+  if (d.length >= 12 && d.startsWith("55")) d = d.slice(2);
+  return d.slice(0, 11);
 }
 
-/** Validação completa de CPF (comprimento e dígitos verificadores). */
-export function isValidCpf(entrada: string): boolean {
-  const cpf = onlyDigits(entrada);
-  if (cpf.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(cpf)) return false;
-  const digito = (base: string, fatorInicial: number): number => {
-    let soma = 0;
-    for (let i = 0; i < base.length; i++) {
-      soma += Number(base[i]) * (fatorInicial - i);
-    }
-    const resto = (soma * 10) % 11;
-    return resto === 10 ? 0 : resto;
-  };
-  if (digito(cpf.slice(0, 9), 10) !== Number(cpf[9])) return false;
-  if (digito(cpf.slice(0, 10), 11) !== Number(cpf[10])) return false;
+/** Formata o telefone enquanto digita: (00) 00000-0000 ou (00) 0000-0000. */
+export function formatTelefone(valor: string): string {
+  const d = telefoneDigits(valor);
+  if (!d) return "";
+  const ddd = d.slice(0, 2);
+  const resto = d.slice(2);
+  if (d.length <= 2) return `(${ddd}`;
+  if (resto.length <= 4) return `(${ddd}) ${resto}`;
+  if (d.length <= 10) {
+    const a = resto.slice(0, 4);
+    const b = resto.slice(4, 8);
+    return b ? `(${ddd}) ${a}-${b}` : `(${ddd}) ${a}`;
+  }
+  const a = resto.slice(0, 5);
+  const b = resto.slice(5, 9);
+  return b ? `(${ddd}) ${a}-${b}` : `(${ddd}) ${a}`;
+}
+
+/** Valida DDD e 10 ou 11 dígitos (11 dígitos exige o 9 do celular). */
+export function isValidTelefone(valor: string): boolean {
+  const d = telefoneDigits(valor);
+  if (d.length !== 10 && d.length !== 11) return false;
+  const ddd = Number(d.slice(0, 2));
+  if (ddd < 11 || ddd > 99) return false;
+  if (d.length === 11 && d[2] !== "9") return false;
   return true;
+}
+
+/** Exige nome e sobrenome (duas palavras com ao menos 2 letras cada). */
+export function isNomeCompleto(nome: string): boolean {
+  const partes = (nome || "").trim().split(/\s+/).filter(Boolean);
+  return partes.length >= 2 && partes.every((p) => p.length >= 2);
 }
 
 /** Validação simples de e-mail. */

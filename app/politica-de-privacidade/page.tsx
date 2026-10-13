@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SITE, fullAddress, whatsappLink } from "@/lib/site";
+import { SITE, fullAddress } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Politica de Privacidade | Clay Highway Bar",
   description:
-    "Como o Clay Highway Bar coleta, usa e protege os dados pessoais informados no site, incluindo o cadastro da promocao Nome na Lista (nome, CPF e e-mail), conforme a LGPD.",
+    "Como o Clay Highway Bar coleta, usa e protege os dados pessoais informados no site, incluindo o cadastro da promocao Nome na Lista (nome, e-mail e telefone), conforme a LGPD.",
   alternates: { canonical: "/politica-de-privacidade" },
 };
 
@@ -35,69 +35,66 @@ export default function PoliticaDePrivacidadePage() {
           Politica de Privacidade
         </h1>
         <p className="mt-3 max-w-2xl text-muted">
-          Esta politica explica como o {SITE.name} trata os dados pessoais
-          informados neste site, em especial no cadastro da promocao Nome na
-          Lista. Tratamos seus dados de acordo com a Lei Geral de Protecao de
-          Dados (Lei 13.709/2018).
+          Esta politica explica, em linguagem simples, como o {SITE.name}, o bar
+          de rock de Curitiba, trata os dados pessoais informados neste site, em
+          especial no cadastro da promocao Nome na Lista. Tratamos seus dados de
+          acordo com a Lei Geral de Protecao de Dados (Lei 13.709/2018).
         </p>
+        {/* PERSONALIZAR: incluir a razao social e o CNPJ da empresa responsavel
+            (controladora dos dados) quando forem informados. */}
       </header>
 
       <Section title="Quais dados coletamos">
         <p>
-          No cadastro da promocao Nome na Lista coletamos os dados que voce
-          mesmo informa: <strong>nome completo, CPF e e-mail</strong>, alem do
-          show escolhido. O CPF e usado apenas para identificar voce na portaria
-          e evitar cadastros duplicados.
+          No cadastro da promocao Nome na Lista coletamos os dados que voce mesmo
+          informa: <strong>nome, e-mail e telefone</strong>, e em qual dia voce
+          quer entrar na lista. Nao pedimos CPF.
         </p>
       </Section>
 
       <Section title="Para que usamos">
+        <p>Usamos esses dados para:</p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>conferir seu nome na portaria e aplicar o valor promocional;</li>
+          <li>
+            guardar seu cadastro de cliente, para facilitar proximas visitas;
+          </li>
+          <li>
+            enviar novidades e avisos de shows, somente se voce marcar essa
+            opcao no formulario.
+          </li>
+        </ul>
         <p>
-          Usamos esses dados para incluir seu nome na lista do show, conferir
-          sua entrada na portaria e aplicar o valor promocional. O e-mail pode
-          ser usado para contato sobre o evento. Nao vendemos seus dados nem os
-          usamos para finalidades diferentes destas.
-        </p>
-      </Section>
-
-      <Section title="Como protegemos">
-        <p>
-          O envio do cadastro e feito por conexao segura. Na tela interna da
-          portaria, o CPF aparece sempre mascarado para a equipe (por exemplo
-          ***.456.789-**); o numero completo nao fica visivel na tela de
-          atendimento. O acesso da equipe e protegido por senha.
+          Nao vendemos seus dados nem os usamos para finalidades diferentes
+          destas.
         </p>
       </Section>
 
       <Section title="Por quanto tempo guardamos">
         <p>
-          Mantemos os dados do cadastro pelo tempo necessario para operar a
-          promocao do show e cumprir obrigacoes legais. Depois disso, os dados
-          sao eliminados ou anonimizados.
+          As <strong>listas diarias</strong> (quem entrou na lista de cada noite)
+          ficam guardadas por ate <strong>14 dias</strong> e depois sao apagadas.
+        </p>
+        <p>
+          O <strong>cadastro de clientes</strong> (nome, e-mail e telefone) fica
+          guardado ate voce pedir a exclusao.
         </p>
       </Section>
 
-      <Section title="Seus direitos">
+      <Section title="Como protegemos">
         <p>
-          Voce pode solicitar a qualquer momento a confirmacao, o acesso, a
-          correcao ou a exclusao dos seus dados, bem como revogar o
-          consentimento. Para isso, fale com a gente pelos contatos abaixo.
+          O envio do cadastro e feito por conexao segura. A tela interna da
+          portaria, usada pela equipe para conferir a lista, e protegida por
+          senha.
         </p>
       </Section>
 
-      <Section title="Contato">
+      <Section title="Seus direitos e como pedir exclusao">
         <p>
-          Duvidas sobre privacidade ou pedidos sobre seus dados podem ser
-          enviados pelo{" "}
-          <a
-            href={whatsappLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-accent hover:underline"
-          >
-            WhatsApp {SITE.telephone}
-          </a>{" "}
-          ou por e-mail em{" "}
+          Voce pode pedir a qualquer momento a confirmacao, o acesso, a correcao
+          ou a exclusao dos seus dados, e tambem deixar de receber novidades.
+          Para isso, escreva para o e-mail de contato que aparece no rodape do
+          site:{" "}
           <a
             href={`mailto:${SITE.email}`}
             className="font-medium text-accent hover:underline"

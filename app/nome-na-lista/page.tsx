@@ -1,21 +1,21 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SITE } from "@/lib/site";
-import { textoPrecosPublico } from "@/lib/nome-na-lista";
+import { diasAbertos, formatDiaLabel, formatReais } from "@/lib/nome-na-lista";
 import { NomeNaListaForm } from "./NomeNaListaForm";
 
 const ARTE_ALT =
-  "Promoção Nome na Lista do Clay Highway Bar, ingresso por R$ 20 na sexta e R$ 25 no sábado, chegando até as 21h";
-
-// Texto público dos preços, vindo do ponto único de verdade.
-const PRECOS = textoPrecosPublico();
+  "Promoção Nome na Lista do Clay Highway Bar, ingresso com valor promocional chegando até as 21h";
 
 export const metadata: Metadata = {
-  title: "Nome na Lista · R$ 20 na sexta e R$ 25 no sábado | Clay Highway Bar",
-  description: `Entre na lista VIP do Clay. ${PRECOS} Cadastre nome, CPF e e-mail e garanta o valor promocional.`,
+  title: "Nome na Lista | Clay Highway Bar",
+  description:
+    "Entre na lista VIP do Clay, o bar de rock de Curitiba. Garanta o valor promocional da noite chegando até as 21h. Cadastre nome, telefone e e-mail.",
   alternates: { canonical: "/nome-na-lista" },
   openGraph: {
     title: "Nome na Lista · Clay Highway Bar",
-    description: `${PRECOS} Entre na lista VIP do Clay.`,
+    description:
+      "Entre na lista VIP do Clay. Garanta o valor promocional da noite chegando até as 21h.",
     url: `${SITE.url}/nome-na-lista`,
     images: [
       { url: "/nome-na-lista-arte-v2.jpg", width: 1200, height: 675, alt: ARTE_ALT },
@@ -24,7 +24,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Nome na Lista · Clay Highway Bar",
-    description: `${PRECOS} Entre na lista VIP do Clay.`,
+    description:
+      "Entre na lista VIP do Clay. Garanta o valor promocional da noite chegando até as 21h.",
     images: ["/nome-na-lista-arte-v2.jpg"],
   },
 };
@@ -32,6 +33,8 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default function NomeNaListaPage() {
+  const dias = diasAbertos();
+
   return (
     <section className="mx-auto max-w-5xl px-5 py-14">
       {/* Logo da promoção no topo, tamanho moderado */}
@@ -70,18 +73,42 @@ export default function NomeNaListaPage() {
           />
         </div>
 
-        {/* Texto + formulário */}
+        {/* Texto + dias + formulário */}
         <div className="md:order-1">
-          <p className="text-muted">
-            Cadastre seu nome e garanta o valor promocional na porta. {PRECOS}{" "}
-            Depois desse horário, vale o valor normal da noite.
-          </p>
+          {dias.length > 0 ? (
+            <>
+              <div className="space-y-3">
+                {dias.map((d) => (
+                  <div
+                    key={d.data}
+                    className="rounded-2xl border border-accent/40 bg-accent-soft/40 px-5 py-4"
+                  >
+                    <p className="font-display text-xl text-accent">
+                      {formatDiaLabel(d.data)}: ingresso por {formatReais(d.preco)}
+                    </p>
+                    <p className="mt-1 text-sm text-fog">
+                      chegando até as 21h.
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 text-sm text-muted">
+                Nos demais dias não há Nome na Lista.
+              </p>
 
-          <div className="mt-4 rounded-2xl border border-accent/40 bg-accent-soft/40 px-5 py-4">
-            <p className="font-display text-xl text-accent">{PRECOS}</p>
-          </div>
-
-          <NomeNaListaForm />
+              <NomeNaListaForm dias={dias} />
+            </>
+          ) : (
+            <div className="rounded-2xl border border-border bg-surface p-6">
+              <p className="text-fog">Nenhuma lista aberta no momento.</p>
+              <Link
+                href="/agenda"
+                className="mt-4 inline-block font-semibold text-accent hover:underline"
+              >
+                Ver agenda de shows
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -465,6 +465,15 @@ export default async function EventPage({
               </p>
             )}
 
+            {event.nomeNaLista && (
+              <Link
+                href="/nome-na-lista"
+                className="glow-accent mt-4 block w-full rounded-lg border border-accent/60 bg-accent-soft/40 px-6 py-3 text-center font-bold text-accent transition-colors hover:bg-accent-soft"
+              >
+                Nome na Lista: R$ {event.nomeNaLista.preco} até as 21h
+              </Link>
+            )}
+
             <Link
               href="/informacoes"
               className="mt-4 block text-center text-xs font-medium text-accent hover:underline"

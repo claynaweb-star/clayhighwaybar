@@ -6,7 +6,7 @@ import {
   looksLikeHtml,
   verifySessionToken,
 } from "@/lib/portaria";
-import { dataDaNoiteISO } from "@/lib/nome-na-lista";
+import { diasDaPortaria } from "@/lib/nome-na-lista";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +20,16 @@ export async function POST(request: NextRequest) {
 
   let id = "";
   let entrou = false;
+  let data = "";
   try {
-    const body = (await request.json()) as { id?: unknown; entrou?: unknown };
+    const body = (await request.json()) as {
+      id?: unknown;
+      entrou?: unknown;
+      data?: unknown;
+    };
     if (typeof body?.id === "string") id = body.id;
     entrou = body?.entrou === true;
+    if (typeof body?.data === "string") data = body.data;
   } catch {
     // corpo inválido tratado abaixo
   }
@@ -34,13 +40,18 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
+  if (!diasDaPortaria().some((d) => d.data === data)) {
+    return NextResponse.json(
+      { ok: false, error: "Dia invalido." },
+      { status: 400 },
+    );
+  }
 
-  // A data de hoje (São Paulo) é definida no servidor.
   const resultado = await callListaWebhook({
     action: "checkin",
     id,
     entrou,
-    data: dataDaNoiteISO(),
+    data,
   });
 
   if (!resultado.ok) {
