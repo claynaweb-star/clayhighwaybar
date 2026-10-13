@@ -6,7 +6,7 @@ import {
   looksLikeHtml,
   verifySessionToken,
 } from "@/lib/portaria";
-import { hojeSaoPauloISO } from "@/lib/nome-na-lista";
+import { dataDaNoiteISO } from "@/lib/nome-na-lista";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     action: "checkin",
     id,
     entrou,
-    data: hojeSaoPauloISO(),
+    data: dataDaNoiteISO(),
   });
 
   if (!resultado.ok) {

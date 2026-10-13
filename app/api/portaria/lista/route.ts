@@ -7,7 +7,7 @@ import {
   normalizeLista,
   verifySessionToken,
 } from "@/lib/portaria";
-import { hojeSaoPauloISO, PROMO_ID } from "@/lib/nome-na-lista";
+import { dataDaNoiteISO, PROMO_ID } from "@/lib/nome-na-lista";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   const resultado = await callListaWebhook({
     action: "list",
     evento: PROMO_ID,
-    data: hojeSaoPauloISO(),
+    data: dataDaNoiteISO(),
   });
 
   if (!resultado.ok) {

@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   horaSaoPaulo,
+  precoDaNoite,
+  precoLabelNoite,
   PROMO_LIMITE,
-  PROMO_VALOR,
   promoStatus,
   type PromoStatus,
 } from "@/lib/nome-na-lista";
@@ -216,12 +217,17 @@ export function PortariaApp() {
     return <TelaSenha aoEntrar={() => carregarLista()} />;
   }
 
+  // Preço da noite atual (pela data da noite) e rótulo do botão Liberar.
+  const precoNoite = precoDaNoite(agora);
+  const rotuloLiberar =
+    precoNoite != null ? `Liberar R$ ${precoNoite}` : "Liberar";
+
   // ---- FAIXA DO TOPO (muda de cor conforme a situação) ---------------------
   const faixa =
     status === "valida"
       ? {
           classe: "border-green-700 bg-green-950",
-          texto: `Promoção ${PROMO_VALOR} válida até ${PROMO_LIMITE}`,
+          texto: `Promoção de hoje: ${precoLabelNoite(agora)}, válida até ${PROMO_LIMITE}`,
           cor: "text-green-200",
         }
       : status === "encerrada"
@@ -315,7 +321,7 @@ export function PortariaApp() {
                       : "bg-accent text-ink"
                   }`}
                 >
-                  {item.entrou ? "Desfazer" : `Liberar ${PROMO_VALOR}`}
+                  {item.entrou ? "Desfazer" : rotuloLiberar}
                 </button>
               </div>
             </li>

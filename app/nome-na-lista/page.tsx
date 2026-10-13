@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
 import { SITE } from "@/lib/site";
+import { textoPrecosPublico } from "@/lib/nome-na-lista";
 import { NomeNaListaForm } from "./NomeNaListaForm";
 
 const ARTE_ALT =
-  "Promoção Nome na Lista do Clay Highway Bar, ingresso por R$ 20 até as 21h";
+  "Promoção Nome na Lista do Clay Highway Bar, ingresso por R$ 20 na sexta e R$ 25 no sábado, chegando até as 21h";
+
+// Texto público dos preços, vindo do ponto único de verdade.
+const PRECOS = textoPrecosPublico();
 
 export const metadata: Metadata = {
-  title: "Nome na Lista · Ingresso por R$ 20 ate as 21h | Clay Highway Bar",
-  description:
-    "Entre na lista VIP de sexta do Clay Highway Bar. Chegando ate as 21h, o ingresso sai por apenas R$ 20,00. Cadastre nome, CPF e e-mail e garanta o valor promocional.",
+  title: "Nome na Lista · R$ 20 na sexta e R$ 25 no sábado | Clay Highway Bar",
+  description: `Entre na lista VIP do Clay. ${PRECOS} Cadastre nome, CPF e e-mail e garanta o valor promocional.`,
   alternates: { canonical: "/nome-na-lista" },
   openGraph: {
     title: "Nome na Lista · Clay Highway Bar",
-    description:
-      "Entre na lista VIP de sexta. Chegando ate as 21h, o ingresso sai por apenas R$ 20,00.",
+    description: `${PRECOS} Entre na lista VIP do Clay.`,
     url: `${SITE.url}/nome-na-lista`,
     images: [
       { url: "/nome-na-lista-arte-v2.jpg", width: 1200, height: 675, alt: ARTE_ALT },
@@ -22,8 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Nome na Lista · Clay Highway Bar",
-    description:
-      "Entre na lista VIP de sexta. Chegando ate as 21h, o ingresso sai por apenas R$ 20,00.",
+    description: `${PRECOS} Entre na lista VIP do Clay.`,
     images: ["/nome-na-lista-arte-v2.jpg"],
   },
 };
@@ -49,7 +50,7 @@ export default function NomeNaListaPage() {
           NOME NA LISTA
         </p>
         <h1 className="font-display mt-2 text-4xl text-white sm:text-5xl">
-          Entre na lista VIP de sexta
+          Entre na lista VIP do Clay!
         </h1>
       </header>
 
@@ -72,15 +73,12 @@ export default function NomeNaListaPage() {
         {/* Texto + formulário */}
         <div className="md:order-1">
           <p className="text-muted">
-            Cadastre seu nome e garanta o valor promocional na porta. Toda sexta,
-            chegando ate as 21h, o ingresso sai por apenas R$ 20,00. Depois desse
-            horario, vale o valor normal da noite.
+            Cadastre seu nome e garanta o valor promocional na porta. {PRECOS}{" "}
+            Depois desse horário, vale o valor normal da noite.
           </p>
 
           <div className="mt-4 rounded-2xl border border-accent/40 bg-accent-soft/40 px-5 py-4">
-            <p className="font-display text-xl text-accent">
-              Até às 21h: ingresso por R$ 20,00
-            </p>
+            <p className="font-display text-xl text-accent">{PRECOS}</p>
           </div>
 
           <NomeNaListaForm />

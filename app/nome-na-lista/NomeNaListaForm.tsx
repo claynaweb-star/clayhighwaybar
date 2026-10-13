@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { formatCpf, isValidCpf, isValidEmail } from "@/lib/nome-na-lista";
+import {
+  formatCpf,
+  isValidCpf,
+  isValidEmail,
+  limiteHumano,
+  textoPagamentoPorDia,
+} from "@/lib/nome-na-lista";
 
 export function NomeNaListaForm() {
   const [nome, setNome] = useState("");
@@ -15,13 +21,14 @@ export function NomeNaListaForm() {
   const [sucesso, setSucesso] = useState(false);
 
   if (sucesso) {
+    const primeiroNome = nome.trim().split(/\s+/)[0] || "você";
     return (
       <div className="mt-8 rounded-2xl border border-green-700 bg-green-950 p-6">
         <h2 className="font-display text-2xl text-white">Nome na lista!</h2>
         <p className="mt-2 text-fog">
-          Seu nome entrou na lista VIP. Toda sexta, chegando ate as 21h, o
-          ingresso sai por apenas R$ 20,00. E so chegar e falar seu nome na
-          portaria.
+          Pronto, {primeiroNome}! Seu nome está na lista. Chegue até as{" "}
+          {limiteHumano()} e informe seu nome ou CPF na portaria para pagar{" "}
+          {textoPagamentoPorDia()}.
         </p>
         <button
           type="button"
