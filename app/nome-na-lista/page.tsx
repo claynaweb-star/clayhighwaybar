@@ -77,9 +77,7 @@ export default function NomeNaListaPage() {
         <div className="md:order-1">
           {dias.length > 0 ? (
             <>
-              <p className="text-fog">
-                Seu cadastro vale para todos os dias abaixo.
-              </p>
+              <p className="text-fog">Escolha os dias em que você vem.</p>
               <div className="mt-3 space-y-3">
                 {dias.map((d) => (
                   <div
@@ -99,7 +97,7 @@ export default function NomeNaListaPage() {
                 Nos demais dias não há Nome na Lista.
               </p>
 
-              <NomeNaListaForm />
+              <NomeNaListaForm dias={dias} />
             </>
           ) : (
             <div className="rounded-2xl border border-border bg-surface p-6">

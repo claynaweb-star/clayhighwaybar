@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
   let aceite = false;
   let aceitaNovidades = false;
   let honeypot = "";
+  let diasPedidos: string[] = [];
   try {
     const body = (await request.json()) as Record<string, unknown>;
     if (typeof body.nome === "string") nome = body.nome.trim();
@@ -86,6 +87,9 @@ export async function POST(request: NextRequest) {
     if (typeof body.empresa === "string") honeypot = body.empresa;
     aceite = body.aceite === true;
     aceitaNovidades = body.aceitaNovidades === true;
+    if (Array.isArray(body.dias)) {
+      diasPedidos = body.dias.filter((d): d is string => typeof d === "string");
+    }
   } catch {
     // corpo inválido tratado abaixo
   }
@@ -109,19 +113,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "aceite" }, { status: 400 });
   }
 
-  // Os dias saem SEMPRE do servidor (lib/events.ts). O cadastro vale para todos
-  // os dias abertos; o navegador não escolhe nem envia dia.
+  // O navegador escolhe os dias, mas o servidor confere cada um contra os dias
+  // abertos (lib/events.ts) e recusa qualquer dia fora da lista.
   const abertos = diasAbertos();
-  if (abertos.length === 0) {
-    return NextResponse.json(
-      { ok: false, error: "Nenhuma lista aberta no momento." },
-      { status: 400 },
-    );
+  const escolhidos = abertos.filter((d) => diasPedidos.includes(d.data));
+  if (escolhidos.length === 0) {
+    return NextResponse.json({ ok: false, error: "dia" }, { status: 400 });
   }
 
   const payload = {
     action: "signup",
-    datas: abertos.map((d) => d.data),
+    datas: escolhidos.map((d) => d.data),
     nome,
     email,
     telefone: formatTelefone(telefone),
@@ -148,6 +150,6 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    dias: abertos.map((d) => ({ data: d.data, preco: d.preco })),
+    dias: escolhidos.map((d) => ({ data: d.data, preco: d.preco })),
   });
 }
