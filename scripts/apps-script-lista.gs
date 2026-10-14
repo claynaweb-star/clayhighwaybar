@@ -353,22 +353,25 @@ function testeLimpeza() {
   Logger.log('Aba antiga removida: ' + sumiu + ' | Clientes preservada: ' + clientesOk);
 }
 
-/** Remove das abas e da aba "Clientes" tudo com o telefone de teste e apaga abas de teste vazias. */
+/**
+ * Limpa SOMENTE os dados de teste: o telefone de teste nas abas de teste de
+ * 2000 (DATAS_TESTE) e na aba "Clientes". Nunca toca em abas de dias reais,
+ * nem em "Lista" ou "Página1". So apaga uma aba se for de teste e ficar vazia.
+ */
 function apagarDadosDeTeste() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var tel = digits_(TEL_TESTE);
-  var abas = ss.getSheets();
   var removidas = 0;
-  for (var i = 0; i < abas.length; i++) {
-    var sh = abas[i];
-    var nome = sh.getName();
-    if (/^Lista \d{4}-\d{2}-\d{2}$/.test(nome)) {
-      removidas += removeLinhasPorTelefone_(sh, 5, tel); // col E
-      if (sh.getLastRow() <= 1) ss.deleteSheet(sh); // aba de teste vazia
-    } else if (nome === 'Clientes') {
-      removidas += removeLinhasPorTelefone_(sh, 1, tel); // col A
-    }
+  // Abas de teste de 2000: remove o telefone de teste e apaga se ficar vazia.
+  for (var i = 0; i < DATAS_TESTE.length; i++) {
+    var sh = ss.getSheetByName(nomeAbaDia_(DATAS_TESTE[i]));
+    if (!sh) continue;
+    removidas += removeLinhasPorTelefone_(sh, 5, tel); // col E
+    if (sh.getLastRow() <= 1) ss.deleteSheet(sh); // so a aba de teste vazia
   }
+  // Aba "Clientes": remove so as linhas do telefone de teste (nunca apaga a aba).
+  var clientes = ss.getSheetByName('Clientes');
+  if (clientes) removidas += removeLinhasPorTelefone_(clientes, 1, tel); // col A
   Logger.log('Linhas de teste removidas: ' + removidas);
 }
 
