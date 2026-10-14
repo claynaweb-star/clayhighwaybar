@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SITE } from "@/lib/site";
-import { diasAbertos, formatDiaLabel, formatReais } from "@/lib/nome-na-lista";
+import { SITE, ogImageForBanner } from "@/lib/site";
+import { events } from "@/lib/events";
+import { diasAbertos } from "@/lib/nome-na-lista";
 import { NomeNaListaForm } from "./NomeNaListaForm";
 
 const ARTE_ALT =
@@ -33,7 +34,15 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default function NomeNaListaPage() {
-  const dias = diasAbertos();
+  // Dias abertos + a arte (versão leve /og) do evento marcado de cada data.
+  const dias = diasAbertos().map((d) => {
+    const ev = events.find((e) => e.date === d.data && e.nomeNaLista);
+    return {
+      data: d.data,
+      preco: d.preco,
+      banner: ev?.banner ? ogImageForBanner(ev.banner) : undefined,
+    };
+  });
 
   return (
     <section className="mx-auto max-w-5xl px-5 py-14">
@@ -76,29 +85,7 @@ export default function NomeNaListaPage() {
         {/* Texto + dias + formulário */}
         <div className="md:order-1">
           {dias.length > 0 ? (
-            <>
-              <p className="text-fog">Escolha os dias em que você vem.</p>
-              <div className="mt-3 space-y-3">
-                {dias.map((d) => (
-                  <div
-                    key={d.data}
-                    className="rounded-2xl border border-accent/40 bg-accent-soft/40 px-5 py-4"
-                  >
-                    <p className="font-display text-xl text-accent">
-                      {formatDiaLabel(d.data)}: ingresso por {formatReais(d.preco)}
-                    </p>
-                    <p className="mt-1 text-sm text-fog">
-                      chegando até as 21h.
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-3 text-sm text-muted">
-                Nos demais dias não há Nome na Lista.
-              </p>
-
-              <NomeNaListaForm dias={dias} />
-            </>
+            <NomeNaListaForm dias={dias} />
           ) : (
             <div className="rounded-2xl border border-border bg-surface p-6">
               <p className="text-fog">Nenhuma lista aberta no momento.</p>

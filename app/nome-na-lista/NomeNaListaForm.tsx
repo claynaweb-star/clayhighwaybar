@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   formatDiaLabel,
@@ -9,10 +10,12 @@ import {
   isNomeCompleto,
   isValidEmail,
   isValidTelefone,
-  type DiaNomeNaLista,
 } from "@/lib/nome-na-lista";
 
-export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
+type DiaItem = { data: string; preco: number; banner?: string };
+type Confirmado = { data: string; preco: number };
+
+export function NomeNaListaForm({ dias }: { dias: DiaItem[] }) {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
@@ -25,9 +28,15 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
   const [novidades, setNovidades] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
-  const [confirmados, setConfirmados] = useState<DiaNomeNaLista[] | null>(null);
+  const [erroDia, setErroDia] = useState<string | null>(null);
+  const [confirmados, setConfirmados] = useState<Confirmado[] | null>(null);
+
+  const diasRef = useRef<HTMLDivElement>(null);
+
+  const bannerDe = (data: string) => dias.find((d) => d.data === data)?.banner;
 
   function toggleDia(data: string) {
+    setErroDia(null);
     setSelecionados((atual) =>
       atual.includes(data) ? atual.filter((d) => d !== data) : [...atual, data],
     );
@@ -45,6 +54,31 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
           Pronto, {primeiroNome}! Seu nome está na lista de {listaTexto}. Chegue
           até as 21h e informe seu nome completo na portaria.
         </p>
+        <div className="mt-4 space-y-2">
+          {confirmados.map((d) => {
+            const banner = bannerDe(d.data);
+            return (
+              <div
+                key={d.data}
+                className="flex items-center gap-3 rounded-xl border border-green-700/60 bg-green-900/30 px-3 py-2"
+              >
+                {banner ? (
+                  <Image
+                    src={banner}
+                    alt={`Arte do evento de ${formatDiaLabel(d.data).toLowerCase()}`}
+                    width={64}
+                    height={64}
+                    loading="lazy"
+                    className="h-16 w-16 shrink-0 rounded-lg object-cover"
+                  />
+                ) : null}
+                <span className="text-fog">
+                  {formatDiaLabel(d.data)}: {formatReais(d.preco)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
         <button
           type="button"
           onClick={() => {
@@ -82,7 +116,8 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
       return;
     }
     if (selecionados.length === 0) {
-      setErro("Marque pelo menos um dia.");
+      setErroDia("Marque pelo menos um dia.");
+      diasRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
     if (!aceite) {
@@ -108,7 +143,7 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data?.ok && Array.isArray(data.dias)) {
-        setConfirmados(data.dias as DiaNomeNaLista[]);
+        setConfirmados(data.dias as Confirmado[]);
         return;
       }
       // Mensagens curtas, em português, pela situação (sem limpar os campos).
@@ -123,7 +158,8 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
       } else if (res.status === 400 && data?.error === "aceite") {
         setErro("Marque a caixinha para continuar.");
       } else if (res.status === 400 && data?.error === "dia") {
-        setErro("Marque pelo menos um dia.");
+        setErroDia("Marque pelo menos um dia.");
+        diasRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       } else if (res.status >= 500) {
         setErro("Estamos com instabilidade. Toque em Tentar de novo.");
       } else {
@@ -140,7 +176,7 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
     "mt-1 min-h-[52px] w-full rounded-xl border border-border bg-surface px-4 text-lg text-fog placeholder:text-muted focus:border-accent focus:outline-none";
 
   return (
-    <form onSubmit={enviar} className="mt-8 space-y-4">
+    <form onSubmit={enviar} className="mt-6 space-y-4">
       {/* Honeypot: invisível para pessoas, só bots preenchem. */}
       <input
         type="text"
@@ -152,6 +188,81 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
         onChange={(e) => setEmpresa(e.target.value)}
         className="absolute left-[-9999px] h-0 w-0 opacity-0"
       />
+
+      {/* Seletor de dia: cada retângulo é uma caixinha grande. */}
+      <div>
+        <p className="text-fog">Escolha os dias em que você vem.</p>
+        <p className="mt-1 text-sm text-muted">
+          Toque no dia para marcar. Pode marcar os dois.
+        </p>
+
+        <div ref={diasRef} className="mt-3 space-y-3">
+          {dias.map((d) => {
+            const marcado = selecionados.includes(d.data);
+            const banner = bannerDe(d.data);
+            return (
+              <label
+                key={d.data}
+                className={`flex min-h-[56px] cursor-pointer items-center gap-3 rounded-2xl px-4 py-3 transition-all focus-within:ring-2 focus-within:ring-accent ${
+                  marcado
+                    ? "border-2 border-accent bg-accent-soft/40"
+                    : "border border-border bg-surface"
+                } ${erroDia ? "border-red-600" : ""}`}
+              >
+                <input
+                  type="checkbox"
+                  className="peer sr-only"
+                  checked={marcado}
+                  onChange={() => toggleDia(d.data)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      toggleDia(d.data);
+                    }
+                  }}
+                  aria-label={`${formatDiaLabel(d.data)}, ingresso ${formatReais(d.preco)} até as 21h`}
+                />
+                {banner ? (
+                  <Image
+                    src={banner}
+                    alt={`Arte do evento de ${formatDiaLabel(d.data).toLowerCase()}`}
+                    width={64}
+                    height={64}
+                    loading="lazy"
+                    className="h-16 w-16 shrink-0 rounded-lg object-cover"
+                  />
+                ) : null}
+                <span className="min-w-0 flex-1">
+                  <span className="block font-display text-lg leading-tight text-fog">
+                    {formatDiaLabel(d.data)}: {formatReais(d.preco)} até as 21h
+                  </span>
+                  <span className="mt-0.5 block text-xs text-muted">
+                    {marcado ? "Marcado" : "Toque para marcar"}
+                  </span>
+                </span>
+                <span
+                  aria-hidden
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold transition-colors ${
+                    marcado
+                      ? "border-accent bg-accent text-ink"
+                      : "border-muted text-transparent"
+                  }`}
+                >
+                  ✓
+                </span>
+              </label>
+            );
+          })}
+        </div>
+
+        {erroDia ? (
+          <p className="mt-2 text-sm font-medium text-red-300">{erroDia}</p>
+        ) : null}
+
+        <p className="mt-3 text-sm text-muted">
+          Nos demais dias não há Nome na Lista.
+        </p>
+      </div>
 
       <label className="block">
         <span className="text-sm font-medium text-fog">Nome completo</span>
@@ -192,30 +303,6 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
           className={campo}
         />
       </label>
-
-      <fieldset className="rounded-xl border border-border bg-surface p-4">
-        <legend className="px-1 text-sm font-medium text-fog">
-          Em qual dia?
-        </legend>
-        <div className="mt-1 space-y-2">
-          {dias.map((d) => (
-            <label
-              key={d.data}
-              className="flex min-h-[52px] cursor-pointer items-center gap-3 rounded-xl border border-border bg-surface-2 px-4 py-2"
-            >
-              <input
-                type="checkbox"
-                checked={selecionados.includes(d.data)}
-                onChange={() => toggleDia(d.data)}
-                className="h-6 w-6 shrink-0 accent-accent"
-              />
-              <span className="text-lg text-fog">
-                {formatDiaLabel(d.data)}: {formatReais(d.preco)} até as 21h
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
 
       <label className="flex items-start gap-3 py-1">
         <input
