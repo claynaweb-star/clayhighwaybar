@@ -6,9 +6,9 @@
  * /api/nome-na-lista (cadastro) e /api/portaria/* (lista, checkin e ping).
  *
  * MODELO: uma aba por dia, chamada "Lista AAAA-MM-DD", com uma linha por
- * telefone. Uma aba "Clientes" guarda uma linha por telefone (cadastro unico
- * da pessoa). As listas diarias sao apagadas depois de RETENCAO_DIAS dias;
- * a aba "Clientes" nunca e apagada automaticamente.
+ * telefone. Uma aba "Clientes" guarda uma linha por telefone. As listas
+ * diarias sao apagadas depois de RETENCAO_DIAS dias; "Clientes" nunca e
+ * apagada automaticamente.
  *
  * COMO PUBLICAR E TESTAR:
  *  1. Crie uma Planilha Google e abra Extensoes > Apps Script.
@@ -17,15 +17,16 @@
  *     Executar como: eu. Quem tem acesso: qualquer pessoa.
  *  4. Copie a URL /exec gerada. Abra no navegador: deve mostrar "online".
  *  5. No editor, rode instalarLimpeza() uma vez (gatilho diario de limpeza).
- *  6. Para testar: testePing(), testeCadastro(), testeLimpeza() e, no fim,
- *     apagarDadosDeTeste(). Veja o Logger (menu Executar > Ver registros).
+ *  6. Para testar: testePing(), testeCadastro(), testeCasoReal(),
+ *     testeLimpeza() e, no fim, apagarDadosDeTeste(). Veja o Logger.
  *
  * No Netlify, defina as variaveis de ambiente:
  *  LISTA_WEBHOOK_URL   = a URL /exec do Web App
  *  LISTA_WEBHOOK_TOKEN = exatamente o mesmo valor de TOKEN abaixo
  *
  * Contrato com o site (e.postData.contents):
- *  Cadastro: { token, action: "signup",  data, nome, email, telefone, aceitaNovidades }
+ *  Cadastro: { token, action: "signup", datas: ["AAAA-MM-DD", ...], nome, email, telefone, aceitaNovidades }
+ *            (ainda aceita "data" como texto unico, para compatibilidade)
  *  Lista:    { token, action: "list",    data }
  *  Checkin:  { token, action: "checkin", id, entrou, data }  (entrou = true/false)
  *  Ping:     { token, action: "ping" }
@@ -33,7 +34,7 @@
  * Respostas (texto simples, exceto list que e JSON):
  *  doGet          -> "online"
  *  ping           -> "pong"
- *  signup         -> "ok" | "duplicate"
+ *  signup         -> "ok" (sempre que processado; repetir nao duplica) | "invalid"
  *  checkin        -> "ok" | "notfound"
  *  list           -> JSON de [{ id, nome, telefone, entrou, hora }] (ordem alfabetica)
  *  token invalido -> "forbidden"
@@ -41,6 +42,7 @@
 var TOKEN = 'TROQUE_POR_UM_SEGREDO';
 var FUSO = 'America/Sao_Paulo';
 var RETENCAO_DIAS = 14;
+var MAX_DATAS = 7;
 
 var COLS_DIA = ['ID', 'Cadastro em', 'Nome', 'E-mail', 'Telefone', 'Aceita novidades', 'Entrou', 'Hora da entrada'];
 var COLS_CLIENTES = ['Telefone', 'Nome', 'E-mail', 'Aceita novidades', 'Primeiro cadastro', 'Último cadastro', 'Dias na lista'];
@@ -59,11 +61,11 @@ function doPost(e) {
   if (d.token !== TOKEN) return text_('forbidden');
   if (d.action === 'ping') return text_('pong');
   var lock = LockService.getScriptLock();
-  lock.waitLock(15000);
+  lock.waitLock(20000);
   try {
     if (d.action === 'list') return text_(JSON.stringify(list_(d)));
     if (d.action === 'checkin') return text_(checkin_(d));
-    return text_(register_(d));
+    return text_(signup_(d));
   } finally {
     lock.releaseLock();
   }
@@ -116,35 +118,52 @@ function sheetClientes_(ss) {
   return sh;
 }
 
-// ---- Acoes -----------------------------------------------------------------
-
-function register_(d) {
-  if (!dataValida_(d.data)) return 'invalid';
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sh = sheetDoDia_(ss, d.data, true);
-  var tel = digits_(d.telefone);
-
+/** O telefone (so digitos) ja esta na aba do dia? */
+function telefoneExiste_(sh, tel) {
   var rows = sh.getDataRange().getValues();
   for (var i = 1; i < rows.length; i++) {
-    if (digits_(rows[i][4]) === tel) return 'duplicate'; // col E = Telefone
+    if (digits_(rows[i][4]) === tel) return true; // col E = Telefone
+  }
+  return false;
+}
+
+// ---- Acoes -----------------------------------------------------------------
+
+function signup_(d) {
+  var datas = [];
+  if (Array.isArray(d.datas)) datas = d.datas.slice();
+  else if (d.data) datas = [d.data];
+  if (datas.length === 0 || datas.length > MAX_DATAS) return 'invalid';
+  for (var i = 0; i < datas.length; i++) {
+    if (!dataValida_(datas[i])) return 'invalid';
   }
 
-  sh.appendRow([
-    Utilities.getUuid(),
-    new Date(),
-    protegeFormula_(d.nome),
-    protegeFormula_(d.email),
-    protegeFormula_(d.telefone),
-    d.aceitaNovidades ? 'sim' : 'nao',
-    '',
-    ''
-  ]);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var tel = digits_(d.telefone);
+  var adicionados = 0;
 
-  upsertCliente_(ss, d);
+  for (var i = 0; i < datas.length; i++) {
+    var sh = sheetDoDia_(ss, datas[i], true);
+    if (!telefoneExiste_(sh, tel)) {
+      sh.appendRow([
+        Utilities.getUuid(),
+        new Date(),
+        protegeFormula_(d.nome),
+        protegeFormula_(d.email),
+        protegeFormula_(d.telefone),
+        d.aceitaNovidades ? 'sim' : 'nao',
+        '',
+        ''
+      ]);
+      adicionados++;
+    }
+  }
+
+  upsertCliente_(ss, d, adicionados);
   return 'ok';
 }
 
-function upsertCliente_(ss, d) {
+function upsertCliente_(ss, d, adicionados) {
   var sh = sheetClientes_(ss);
   var tel = digits_(d.telefone);
   var agora = new Date();
@@ -156,7 +175,7 @@ function upsertCliente_(ss, d) {
       sh.getRange(linha, 3).setValue(protegeFormula_(d.email)); // E-mail
       sh.getRange(linha, 4).setValue(d.aceitaNovidades ? 'sim' : 'nao'); // mais recente
       sh.getRange(linha, 6).setValue(agora); // Último cadastro
-      sh.getRange(linha, 7).setValue(Number(rows[i][6] || 0) + 1); // Dias na lista
+      sh.getRange(linha, 7).setValue(Number(rows[i][6] || 0) + adicionados); // Dias na lista
       return;
     }
   }
@@ -167,7 +186,7 @@ function upsertCliente_(ss, d) {
     d.aceitaNovidades ? 'sim' : 'nao',
     agora,
     agora,
-    1
+    adicionados
   ]);
 }
 
@@ -261,27 +280,65 @@ function instalarLimpeza() {
 
 // =====================  TESTES (rodar dentro do editor)  ====================
 var TEL_TESTE = '(41) 99999-0000';
-var DATA_TESTE = '2099-12-31'; // dia futuro, so para teste
+var DATAS_TESTE = ['2000-01-01', '2000-01-02'];
 
-/** Simula o cadastro que o site envia. 1a vez: "ok". 2a vez: "duplicate". */
-function testeCadastro() {
-  var payload = {
-    token: TOKEN,
+/** Monta um request de teste com o token correto. */
+function reqTeste_(payload) {
+  payload.token = TOKEN;
+  return { postData: { contents: JSON.stringify(payload) } };
+}
+
+function corpoTeste_(datas) {
+  return {
     action: 'signup',
-    data: DATA_TESTE,
+    datas: datas,
     nome: 'Teste Silva',
     email: 'teste@exemplo.com',
     telefone: TEL_TESTE,
     aceitaNovidades: false
   };
-  var e = { postData: { contents: JSON.stringify(payload) } };
-  Logger.log(doPost(e).getContent());
+}
+
+/** Conta quantas linhas da aba tem o telefone (so digitos). */
+function contaTelefone_(sh, tel) {
+  if (!sh) return 0;
+  var rows = sh.getDataRange().getValues();
+  var n = 0;
+  var t = digits_(tel);
+  for (var i = 1; i < rows.length; i++) {
+    if (digits_(rows[i][4]) === t) n++;
+  }
+  return n;
+}
+
+/** Cadastra dois dias de uma vez; rodando duas vezes, ambas "ok" e sem duplicar. */
+function testeCadastro() {
+  var a = doPost(reqTeste_(corpoTeste_(DATAS_TESTE))).getContent();
+  var b = doPost(reqTeste_(corpoTeste_(DATAS_TESTE))).getContent();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  Logger.log(
+    '1a: ' + a + ' | 2a: ' + b +
+    ' | linhas 01: ' + contaTelefone_(ss.getSheetByName('Lista 2000-01-01'), TEL_TESTE) +
+    ' | linhas 02: ' + contaTelefone_(ss.getSheetByName('Lista 2000-01-02'), TEL_TESTE)
+  );
+}
+
+/** Caso real: telefone ja na lista de um dia; cadastrar os dois so adiciona o que falta. */
+function testeCasoReal() {
+  apagarDadosDeTeste();
+  var so1 = doPost(reqTeste_(corpoTeste_(['2000-01-01']))).getContent();
+  var dois = doPost(reqTeste_(corpoTeste_(DATAS_TESTE))).getContent();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  Logger.log(
+    'so 01: ' + so1 + ' | os dois: ' + dois +
+    ' | linhas 01: ' + contaTelefone_(ss.getSheetByName('Lista 2000-01-01'), TEL_TESTE) +
+    ' | linhas 02: ' + contaTelefone_(ss.getSheetByName('Lista 2000-01-02'), TEL_TESTE)
+  );
 }
 
 /** Confere se o token esta certo pelo caminho real (deve mostrar "pong"). */
 function testePing() {
-  var e = { postData: { contents: JSON.stringify({ token: TOKEN, action: 'ping' }) } };
-  Logger.log(doPost(e).getContent());
+  Logger.log(doPost(reqTeste_({ action: 'ping' })).getContent());
 }
 
 /** Cria uma aba antiga de teste, roda a limpeza e confirma que ela sumiu e que "Clientes" ficou. */
@@ -289,14 +346,14 @@ function testeLimpeza() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var nome = 'Lista 2000-01-01';
   if (!ss.getSheetByName(nome)) ss.insertSheet(nome).appendRow(COLS_DIA);
-  sheetClientes_(ss); // garante que "Clientes" existe
+  sheetClientes_(ss);
   limparListasAntigas();
   var sumiu = ss.getSheetByName(nome) === null;
   var clientesOk = ss.getSheetByName('Clientes') !== null;
   Logger.log('Aba antiga removida: ' + sumiu + ' | Clientes preservada: ' + clientesOk);
 }
 
-/** Remove dos dados e das abas tudo com o telefone de teste e apaga abas de teste vazias. */
+/** Remove das abas e da aba "Clientes" tudo com o telefone de teste e apaga abas de teste vazias. */
 function apagarDadosDeTeste() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var tel = digits_(TEL_TESTE);

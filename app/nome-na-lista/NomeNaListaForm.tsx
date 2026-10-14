@@ -12,69 +12,38 @@ import {
   type DiaNomeNaLista,
 } from "@/lib/nome-na-lista";
 
-type Resultado = { data: string; status: "ok" | "duplicate" };
-
-export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
+export function NomeNaListaForm() {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
   const [empresa, setEmpresa] = useState(""); // honeypot
-  const [selecionados, setSelecionados] = useState<string[]>(
-    dias.length === 1 ? [dias[0].data] : [],
-  );
   const [aceite, setAceite] = useState(false);
   const [novidades, setNovidades] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
-  const [resultados, setResultados] = useState<Resultado[] | null>(null);
+  const [confirmados, setConfirmados] = useState<DiaNomeNaLista[] | null>(null);
 
-  const precoPorData = (data: string) =>
-    dias.find((d) => d.data === data)?.preco ?? 0;
-
-  function toggleDia(data: string) {
-    setSelecionados((atual) =>
-      atual.includes(data)
-        ? atual.filter((d) => d !== data)
-        : [...atual, data],
-    );
-  }
-
-  if (resultados) {
+  if (confirmados) {
     const primeiroNome = nome.trim().split(/\s+/)[0] || "você";
-    const entrou = resultados.filter((r) => r.status === "ok");
-    const jaEstava = resultados.filter((r) => r.status === "duplicate");
-    const listaTexto = (rs: Resultado[], comPreco: boolean) =>
-      rs
-        .map(
-          (r) =>
-            `${formatDiaLabel(r.data)}${comPreco ? ` (${formatReais(precoPorData(r.data))})` : ""}`,
-        )
-        .join(" e ");
+    const listaTexto = confirmados
+      .map((d) => `${formatDiaLabel(d.data)} (${formatReais(d.preco)})`)
+      .join(" e ");
     return (
       <div className="mt-8 rounded-2xl border border-green-700 bg-green-950 p-6">
         <h2 className="font-display text-2xl text-white">Nome na lista!</h2>
-        {entrou.length > 0 ? (
-          <p className="mt-2 text-fog">
-            Pronto, {primeiroNome}! Seu nome está na lista de{" "}
-            {listaTexto(entrou, true)}. Chegue até as 21h e informe seu nome
-            completo na portaria.
-          </p>
-        ) : null}
-        {jaEstava.length > 0 ? (
-          <p className="mt-2 text-fog">
-            Você já está na lista de {listaTexto(jaEstava, false)}.
-          </p>
-        ) : null}
+        <p className="mt-2 text-fog">
+          Pronto, {primeiroNome}! Seu nome está na lista de {listaTexto}. Chegue
+          até as 21h e informe seu nome completo na portaria.
+        </p>
         <button
           type="button"
           onClick={() => {
-            setResultados(null);
+            setConfirmados(null);
             setNome("");
             setTelefone("");
             setEmail("");
             setAceite(false);
             setNovidades(false);
-            setSelecionados(dias.length === 1 ? [dias[0].data] : []);
           }}
           className="mt-4 min-h-[48px] rounded-xl border border-green-600 px-5 font-semibold text-green-200"
         >
@@ -86,6 +55,7 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
+    if (enviando) return; // evita clique duplo
     setErro(null);
 
     if (!isNomeCompleto(nome)) {
@@ -93,19 +63,15 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
       return;
     }
     if (!isValidTelefone(telefone)) {
-      setErro("Telefone invalido. Confira o DDD e os numeros.");
+      setErro("Confira o telefone, com DDD.");
       return;
     }
     if (!isValidEmail(email)) {
-      setErro("E-mail invalido.");
-      return;
-    }
-    if (selecionados.length === 0) {
-      setErro("Escolha pelo menos um dia.");
+      setErro("Confira o e-mail.");
       return;
     }
     if (!aceite) {
-      setErro("E preciso aceitar a politica de privacidade.");
+      setErro("Marque a caixinha para continuar.");
       return;
     }
 
@@ -119,20 +85,34 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
           telefone,
           email: email.trim(),
           empresa,
-          dias: selecionados,
           aceite,
           aceitaNovidades: novidades,
         }),
         cache: "no-store",
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data?.ok && Array.isArray(data.resultados)) {
-        setResultados(data.resultados as Resultado[]);
+      if (res.ok && data?.ok && Array.isArray(data.dias)) {
+        setConfirmados(data.dias as DiaNomeNaLista[]);
         return;
       }
-      setErro(data?.error ?? "Nao foi possivel concluir. Tente de novo.");
+      // Mensagens curtas, em português, pela situação (sem limpar os campos).
+      if (res.status === 429) {
+        setErro("Muitas tentativas. Espere 1 minuto e tente de novo.");
+      } else if (res.status === 400 && data?.error === "nome") {
+        setErro("Informe seu nome e sobrenome.");
+      } else if (res.status === 400 && data?.error === "telefone") {
+        setErro("Confira o telefone, com DDD.");
+      } else if (res.status === 400 && data?.error === "email") {
+        setErro("Confira o e-mail.");
+      } else if (res.status === 400 && data?.error === "aceite") {
+        setErro("Marque a caixinha para continuar.");
+      } else if (res.status >= 500) {
+        setErro("Estamos com instabilidade. Toque em Tentar de novo.");
+      } else {
+        setErro("Não foi possível concluir. Tente de novo.");
+      }
     } catch {
-      setErro("Falha de conexao. Tente de novo.");
+      setErro("Sem conexão. Confira a internet e tente de novo.");
     } finally {
       setEnviando(false);
     }
@@ -195,27 +175,6 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
         />
       </label>
 
-      <fieldset className="rounded-xl border border-border bg-surface p-4">
-        <legend className="px-1 text-sm font-medium text-fog">
-          Em qual dia?
-        </legend>
-        <div className="mt-1 space-y-2">
-          {dias.map((d) => (
-            <label key={d.data} className="flex items-center gap-3 py-1">
-              <input
-                type="checkbox"
-                checked={selecionados.includes(d.data)}
-                onChange={() => toggleDia(d.data)}
-                className="h-5 w-5 shrink-0 accent-accent"
-              />
-              <span className="text-fog">
-                {formatDiaLabel(d.data)}: {formatReais(d.preco)} até as 21h
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
       <label className="flex items-start gap-3 py-1">
         <input
           type="checkbox"
@@ -260,7 +219,7 @@ export function NomeNaListaForm({ dias }: { dias: DiaNomeNaLista[] }) {
         disabled={enviando}
         className="glow-accent min-h-[52px] w-full rounded-xl bg-accent px-6 text-lg font-bold text-ink transition-colors hover:bg-accent-strong disabled:opacity-50"
       >
-        {enviando ? "Enviando..." : "Entrar na lista"}
+        {enviando ? "Enviando..." : erro ? "Tentar de novo" : "Entrar na lista"}
       </button>
     </form>
   );

@@ -144,6 +144,7 @@ export type WebhookResult =
  */
 export async function callListaWebhook(
   payload: Record<string, unknown>,
+  opts: { timeoutMs?: number } = {},
 ): Promise<WebhookResult> {
   const url = process.env.LISTA_WEBHOOK_URL;
   const token = process.env.LISTA_WEBHOOK_TOKEN;
@@ -159,6 +160,11 @@ export async function callListaWebhook(
   if (!url!.trim().endsWith("/exec")) {
     return { ok: false, cause: "LISTA_WEBHOOK_URL nao termina em /exec" };
   }
+  // O Apps Script pode demorar numa chamada fria; corta por tempo para não
+  // prender a função serverless indefinidamente.
+  const timeoutMs = opts.timeoutMs ?? 9000;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     const res = await fetch(url!, {
       method: "POST",
@@ -167,13 +173,21 @@ export async function callListaWebhook(
       cache: "no-store",
       // Apps Script responde com 302 para googleusercontent; seguir o redirect.
       redirect: "follow",
+      signal: ctrl.signal,
     });
     if (res.status !== 200) {
       return { ok: false, cause: `resposta HTTP ${res.status} (esperado 200)` };
     }
     return { ok: true, text: await res.text() };
   } catch {
-    return { ok: false, cause: "sem resposta do webhook (falha de rede)" };
+    return {
+      ok: false,
+      cause: ctrl.signal.aborted
+        ? `tempo limite (${timeoutMs}ms) ao chamar o webhook`
+        : "sem resposta do webhook (falha de rede)",
+    };
+  } finally {
+    clearTimeout(timer);
   }
 }
 
