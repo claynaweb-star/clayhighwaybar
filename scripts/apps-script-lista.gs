@@ -171,8 +171,8 @@ function upsertCliente_(ss, d, adicionados) {
   for (var i = 1; i < rows.length; i++) {
     if (digits_(rows[i][0]) === tel) {
       var linha = i + 1;
-      sh.getRange(linha, 2).setValue(protegeFormula_(d.nome)); // Nome
-      sh.getRange(linha, 3).setValue(protegeFormula_(d.email)); // E-mail
+      // Nome e E-mail de uma linha ja existente NAO sao sobrescritos (mantem os
+      // primeiros valores). So atualiza o resto.
       sh.getRange(linha, 4).setValue(d.aceitaNovidades ? 'sim' : 'nao'); // mais recente
       sh.getRange(linha, 6).setValue(agora); // Último cadastro
       sh.getRange(linha, 7).setValue(Number(rows[i][6] || 0) + adicionados); // Dias na lista
