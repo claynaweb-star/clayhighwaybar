@@ -149,6 +149,42 @@ const PLATAFORMA_URL: Record<Exclude<Plataforma, "Bandas" | "Gratuito">, string>
 
 export const events: ClayEvent[] = [
   {
+    id: "nu-metal-generation-14-11",
+    title: "NU METAL GENERATION",
+    seoTitle:
+      "NU METAL GENERATION, Nu Metal no bar de rock em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "NU METAL GENERATION no Clay Highway Bar, o bar de rock em Curitiba. Fuck the System (System of a Down), Mein Teil (Rammstein cover) e Nameless. Sábado 14/11, Nu Metal dos anos 2000.",
+    date: "2026-11-14",
+    time: "20:30",
+    timeNote: "Shows a partir das 20h30",
+    genre: "Nu Metal · Ao vivo",
+    banner: "/nu-metal-generation-clay-highway-bar-14-11.webp",
+    bannerAlt:
+      "NU METAL GENERATION no Clay Highway Bar, sábado 14 de novembro, Curitiba",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/nugeneration",
+    lineup: [
+      { name: "Nameless", role: "20h30" },
+      { name: "Fuck the System", role: "22h30 · System of a Down" },
+      { name: "Mein Teil", role: "01h00 · Rammstein cover" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Atenção Curitiba, a banda FUCK THE SYSTEM (System of a Down), o maior cover da América Latina, volta a Curitiba para uma noite inesquecível. A noite que quem viveu o Nu Metal não pode perder.\n\nNo sábado, o Clay mergulha nos anos 2000, pesado, intenso e do jeito que você curte. Se essas bandas marcaram a sua história, essa noite é compromisso.\n\nNão é apenas um show. É uma viagem para a geração que transformou música em identidade.\n\nUma noite feita para quem viveu intensamente os anos 2000. Para quem cantava cada palavra sem precisar olhar a letra. Para quem carregou essas músicas como trilha sonora da própria história.\n\nO QUE VOCÊ VAI OUVIR: System of a Down, Rammstein, Marilyn Manson, Trivium, Korn, Slipknot, Papa Roach, Disturbed e muito mais!",
+    callToAction: "Garanta seu ingresso antecipado.",
+    policies: [
+      {
+        title: "Classificação etária",
+        text: "18 anos. Permitida a entrada de menores de 18 anos acompanhados por um dos pais, com documentos de ambos, ou com autorização por escrito de um dos pais assinada no gov.br.",
+      },
+    ],
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
     id: "roupa-nova-cover-varal-do-wando",
     title: "Roupa Nova Cover + Varal do Wando",
     date: "2026-09-04",

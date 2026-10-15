@@ -157,7 +157,7 @@ export default async function EventPage({
         <div className="space-y-10">
           <div>
             <h2 className="font-display text-2xl text-white">Sobre o show</h2>
-            <p className="mt-3 leading-relaxed text-fog">
+            <p className="mt-3 whitespace-pre-line leading-relaxed text-fog">
               {event.description}
             </p>
             {event.callToAction && (
