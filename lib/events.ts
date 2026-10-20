@@ -401,6 +401,7 @@ export const events: ClayEvent[] = [
     genre: "Rock · Especial",
     banner: "/banner-halloween-24out.webp",
     featured: true,
+    nomeNaLista: { preco: 25 },
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/halloween",
     lineup: [
@@ -579,6 +580,7 @@ export const events: ClayEvent[] = [
     time: "21:30",
     genre: "Cover · Rock 90/2000",
     banner: "/pearl-jam-linkin-park-cover-23-10.jpg",
+    nomeNaLista: { preco: 20 },
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/pearljam",
     lineup: [
