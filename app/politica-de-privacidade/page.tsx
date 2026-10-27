@@ -111,7 +111,7 @@ export default function PoliticaDePrivacidadePage() {
           href="/nome-na-lista"
           className="glow-accent inline-block rounded-lg bg-accent px-6 py-3 font-semibold text-ink transition-colors hover:bg-accent-strong"
         >
-          Entrar na lista
+          Nome na Lista
         </Link>
       </div>
     </div>

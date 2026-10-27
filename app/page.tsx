@@ -69,7 +69,7 @@ export default function HomePage() {
   const weekHighlights = getWeekHighlights();
   // "Em destaque" (hero) exclui os eventos já exibidos em "Destaques da semana".
   const featuredEvents = getHeroFeaturedEvents();
-  // O botão "Entrar na lista" só aparece quando houver dia com lista aberta.
+  // O botão "Nome na Lista" só aparece quando houver dia com lista aberta.
   const listaAberta = diasAbertos().length > 0;
 
   return (
@@ -143,7 +143,7 @@ export default function HomePage() {
                   href="/nome-na-lista"
                   className="rounded-xl border border-accent/60 bg-accent-soft/40 px-8 py-4 text-lg font-semibold text-accent backdrop-blur transition-colors hover:bg-accent-soft"
                 >
-                  Entrar na lista
+                  Nome na Lista
                 </Link>
               )}
               <a

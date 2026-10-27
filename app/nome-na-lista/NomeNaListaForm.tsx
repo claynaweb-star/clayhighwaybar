@@ -348,7 +348,7 @@ export function NomeNaListaForm({ dias }: { dias: DiaItem[] }) {
         disabled={enviando}
         className="glow-accent min-h-[52px] w-full rounded-xl bg-accent px-6 text-lg font-bold text-ink transition-colors hover:bg-accent-strong disabled:opacity-50"
       >
-        {enviando ? "Enviando..." : erro ? "Tentar de novo" : "Entrar na lista"}
+        {enviando ? "Enviando..." : erro ? "Tentar de novo" : "Nome na Lista"}
       </button>
     </form>
   );

@@ -290,7 +290,7 @@ function Footer() {
             Agenda de shows
           </Link>
           <Link href="/nome-na-lista" className="hover:text-accent">
-            Entrar na lista
+            Nome na Lista
           </Link>
           <Link href="/bar-de-rock-curitiba" className="hover:text-accent">
             Bar de rock em Curitiba
