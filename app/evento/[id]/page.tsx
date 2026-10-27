@@ -13,6 +13,11 @@ import {
 import { JsonLd } from "@/components/JsonLd";
 import { eventSchema } from "@/lib/schema";
 import { SITE, camaroteWhatsappUrl, ogImageForBanner } from "@/lib/site";
+import { nomeNaListaVisivel } from "@/lib/nome-na-lista";
+
+// Revalida de hora em hora para o selo/botão do Nome na Lista sumir sozinho
+// depois do dia do evento, sem precisar de novo deploy.
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return events.map((event) => ({ id: event.id }));
@@ -465,13 +470,18 @@ export default async function EventPage({
               </p>
             )}
 
-            {event.nomeNaLista && (
-              <Link
-                href="/nome-na-lista"
-                className="glow-accent mt-4 block w-full rounded-lg border border-accent/60 bg-accent-soft/40 px-6 py-3 text-center font-bold text-accent transition-colors hover:bg-accent-soft"
-              >
-                Nome na Lista: R$ {event.nomeNaLista.preco} até as 21h
-              </Link>
+            {event.nomeNaLista && nomeNaListaVisivel(event.date) && (
+              <div className="mt-4">
+                <span className="inline-block rounded-full bg-accent/15 px-3 py-1 text-xs font-bold tracking-wide text-accent">
+                  NOME NA LISTA
+                </span>
+                <Link
+                  href="/nome-na-lista"
+                  className="glow-accent mt-2 block w-full rounded-lg border border-accent/60 bg-accent-soft/40 px-6 py-3 text-center font-bold text-accent transition-colors hover:bg-accent-soft"
+                >
+                  Colocar meu nome na lista
+                </Link>
+              </div>
             )}
 
             <Link

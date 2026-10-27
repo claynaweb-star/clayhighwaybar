@@ -135,6 +135,18 @@ export function diaPadraoDaPortaria(now: Date = new Date()): string | null {
   return diasDaPortaria(now)[0]?.data ?? null;
 }
 
+/**
+ * O selo e o botão do Nome na Lista no card e na página do evento ficam
+ * visíveis até o fim do dia do evento (23h59 no fuso de São Paulo). A partir
+ * do dia seguinte, somem sozinhos.
+ */
+export function nomeNaListaVisivel(
+  dataEventoISO: string,
+  now: Date = new Date(),
+): boolean {
+  return hojeSaoPauloISO(now) <= dataEventoISO;
+}
+
 export type StatusDoDia = "valida" | "encerrada" | "futuro";
 
 /**

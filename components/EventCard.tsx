@@ -6,6 +6,7 @@ import {
   type ClayEvent,
 } from "@/lib/events";
 import { ogImageForBanner } from "@/lib/site";
+import { nomeNaListaVisivel } from "@/lib/nome-na-lista";
 
 export function DateBadge({ date }: { date: string }) {
   const d = formatEventDate(date);
@@ -78,9 +79,9 @@ export function EventCard({ event }: { event: ClayEvent }) {
               Esgotado
             </span>
           )}
-          {event.nomeNaLista && (
-            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-semibold text-accent">
-              Nome na Lista: R$ {event.nomeNaLista.preco} até as 21h
+          {event.nomeNaLista && nomeNaListaVisivel(event.date) && (
+            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-semibold tracking-wide text-accent">
+              NOME NA LISTA
             </span>
           )}
         </div>

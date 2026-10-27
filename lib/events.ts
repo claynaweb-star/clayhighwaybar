@@ -401,7 +401,6 @@ export const events: ClayEvent[] = [
     genre: "Rock · Especial",
     banner: "/banner-halloween-24out.webp",
     featured: true,
-    nomeNaLista: { preco: 25 },
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/halloween",
     lineup: [
@@ -580,7 +579,6 @@ export const events: ClayEvent[] = [
     time: "21:30",
     genre: "Cover · Rock 90/2000",
     banner: "/pearl-jam-linkin-park-cover-23-10.jpg",
-    nomeNaLista: { preco: 20 },
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/pearljam",
     lineup: [
@@ -718,7 +716,6 @@ export const events: ClayEvent[] = [
     banner: "/the-dicksons-engenheiros-hawaii-clay-highway-bar-16-10-v2.webp",
     bannerAlt:
       "Banner de divulgação do show de The Dicksons e Engenheiros do Hawaii CWB no Clay Highway Bar",
-    nomeNaLista: { preco: 20 },
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/thedicksons",
     lineup: [
@@ -750,7 +747,6 @@ export const events: ClayEvent[] = [
     banner: "/geracao-flashback-clay-highway-bar-17-10.webp",
     bannerAlt:
       "Banner de divulgação da Geração Flashback no Clay Highway Bar em Curitiba",
-    nomeNaLista: { preco: 25 },
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/geracaoflashback",
     lineup: [],
@@ -820,6 +816,7 @@ export const events: ClayEvent[] = [
     timeNote: "Shows a partir das 21h30",
     genre: "Reggae · Ao vivo",
     banner: "/reggae-no-clay-highway-bar-30-10.webp",
+    nomeNaLista: { preco: 20 },
     bannerAlt:
       "Banner de divulgação da noite de reggae no Clay Highway Bar, especial Natiruts com a Banda Castanheira",
     plataforma: "Meaple/Sympla",
