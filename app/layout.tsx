@@ -79,7 +79,7 @@ function Navbar() {
         <Link href="/" className="flex shrink-0 items-center" aria-label="Clay Highway Bar, página inicial">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo-clay-highway.png"
+            src="/logo-clay-highway.webp"
             alt="Clay Highway Bar"
             width={64}
             height={64}
@@ -87,42 +87,45 @@ function Navbar() {
           />
         </Link>
         <nav className="ml-4 flex items-center gap-4 overflow-x-auto whitespace-nowrap text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <Link href="/" className="text-fog transition-colors hover:text-accent">
+          <Link
+            href="/"
+            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
+          >
             Home
           </Link>
           <Link
             href="/agenda"
-            className="text-fog transition-colors hover:text-accent"
+            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
           >
             Agenda
           </Link>
           <Link
             href="/cardapio"
-            className="text-fog transition-colors hover:text-accent"
+            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
           >
             Cardápio
           </Link>
           <Link
             href="/galeria"
-            className="text-fog transition-colors hover:text-accent"
+            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
           >
             Galeria
           </Link>
           <Link
             href="/promocoes"
-            className="text-fog transition-colors hover:text-accent"
+            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
           >
             Promoções
           </Link>
           <Link
             href="/bar-de-rock-curitiba"
-            className="text-fog transition-colors hover:text-accent"
+            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
           >
             Sobre
           </Link>
           <a
             href="#contato"
-            className="text-fog transition-colors hover:text-accent"
+            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
           >
             Contato
           </a>
@@ -249,7 +252,7 @@ function Footer() {
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo-clay-highway.png"
+            src="/logo-clay-highway.webp"
             alt="Clay Highway Bar"
             width={72}
             height={72}

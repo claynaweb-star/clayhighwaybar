@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -130,8 +131,7 @@ export default async function EventPage({
           </div>
 
           {event.banner && (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
+            <Image
               src={ogImageForBanner(event.banner)}
               alt={
                 event.bannerAlt ??
@@ -139,6 +139,8 @@ export default async function EventPage({
               }
               width={1200}
               height={675}
+              priority
+              sizes="(min-width: 1024px) 896px, 100vw"
               className="mt-6 aspect-video w-full rounded-2xl border border-border object-cover"
             />
           )}

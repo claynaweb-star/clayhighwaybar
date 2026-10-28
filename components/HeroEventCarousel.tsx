@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   formatEventDate,
@@ -31,16 +32,16 @@ export function HeroEventCarousel({ events }: { events: ClayEvent[] }) {
           className="absolute inset-0 block"
         >
           {event.banner ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
+            <Image
               src={ogImageForBanner(event.banner)}
               alt={
                 event.bannerAlt ??
                 `Evento em destaque: ${event.title} no Clay Highway Bar`
               }
-              width={1200}
-              height={675}
-              className="absolute inset-0 h-full w-full object-cover"
+              fill
+              priority
+              sizes="(min-width: 768px) 420px, 100vw"
+              className="object-cover"
             />
           ) : (
             <div className="flex h-full items-center justify-center">

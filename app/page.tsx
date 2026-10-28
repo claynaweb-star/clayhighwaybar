@@ -11,6 +11,7 @@ import {
   getWeekHighlights,
 } from "@/lib/events";
 import { JsonLd } from "@/components/JsonLd";
+import { HeroVideo } from "@/components/HeroVideo";
 import { diasAbertos } from "@/lib/nome-na-lista";
 import { localBusinessSchema } from "@/lib/schema";
 import { SITE } from "@/lib/site";
@@ -89,20 +90,9 @@ export default function HomePage() {
           sizes="100vw"
           className="object-cover"
         />
-        {/* Vídeo de fundo (mudo, em loop) — só no desktop; o mobile não baixa o
-            MP4 pesado (preload none + hidden), o que derruba o LCP no celular. */}
-        <video
-          className="absolute inset-0 hidden h-full w-full object-cover md:block"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="none"
-          poster="/hero-poster.webp"
-          aria-hidden
-        >
-          <source src={SITE.heroVideo.desktop} type="video/mp4" />
-        </video>
+        {/* Vídeo de fundo (mudo, em loop). Só no desktop e carregado depois que
+            a página abre; no celular fica só o pôster, sem baixar o MP4. */}
+        <HeroVideo src={SITE.heroVideo.desktop} poster="/hero-poster.webp" />
         {/* Overlay pra legibilidade */}
         <div
           aria-hidden

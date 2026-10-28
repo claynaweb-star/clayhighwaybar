@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { SITE } from "@/lib/site";
 
@@ -35,18 +36,17 @@ export default function GaleriaPage() {
         {SITE.galleryPhotos.map((photo, i) => (
           <figure
             key={photo.src}
-            className={`group relative overflow-hidden rounded-xl border border-border ${
+            className={`group relative aspect-square overflow-hidden rounded-xl border border-border ${
               i % 5 === 0 ? "col-span-2 row-span-2" : ""
             }`}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={photo.src}
               alt={photo.alt}
-              loading="lazy"
-              className={`w-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-                i % 5 === 0 ? "aspect-square lg:h-full" : "aspect-square"
-              }`}
+              fill
+              priority={i === 0}
+              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
             <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 to-transparent px-3 pb-2 pt-8 text-xs font-medium text-fog">
               {photo.caption}

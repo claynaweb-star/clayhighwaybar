@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   formatEventDate,
@@ -47,13 +48,12 @@ export function EventCard({ event }: { event: ClayEvent }) {
       }`}
     >
       {event.banner && (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
+        <Image
           src={ogImageForBanner(event.banner)}
           alt={event.bannerAlt ?? `Arte do evento ${event.title} no Clay Highway Bar`}
-          loading="lazy"
           width={128}
           height={80}
+          sizes="128px"
           className="hidden h-20 w-32 shrink-0 rounded-lg border border-border object-cover sm:block"
         />
       )}
