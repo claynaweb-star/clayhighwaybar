@@ -9,9 +9,10 @@ const ARTE_ALT =
   "Promoção Nome na Lista do Clay Highway Bar, ingresso com valor promocional chegando até as 21h";
 
 export const metadata: Metadata = {
-  title: "Nome na Lista | Clay Highway Bar",
+  // `absolute` evita o nome duplicado do template do layout ("%s · Clay Highway Bar").
+  title: { absolute: "Nome na Lista | Clay Highway Bar" },
   description:
-    "Entre na lista VIP do Clay, o bar de rock de Curitiba. Garanta o valor promocional da noite chegando até as 21h. Cadastre nome, telefone e e-mail.",
+    "Entre na lista VIP do Clay, bar de rock em Curitiba. Chegando até as 21h o ingresso sai no valor promocional. Cadastre nome, telefone e e-mail.",
   alternates: { canonical: "/nome-na-lista" },
   openGraph: {
     title: "Nome na Lista · Clay Highway Bar",

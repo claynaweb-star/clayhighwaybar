@@ -59,6 +59,48 @@ export default function ShowsEmCuritibaPage() {
           ))}
         </div>
 
+        <div className="mt-14 max-w-2xl space-y-5 leading-relaxed text-fog">
+          <h2 className="font-display text-2xl text-white">
+            A agenda de música ao vivo em Curitiba
+          </h2>
+          <p>
+            O Clay Highway Bar virou parada certa pra quem busca shows em
+            Curitiba sem roteiro repetido. A programação é semanal e muda o tempo
+            todo: cada sexta e cada sábado tem uma banda diferente no palco, e o
+            domingo costuma ter matinê mais cedo, pra quem prefere música ao vivo
+            em Curitiba sem virar a madrugada.
+          </p>
+          <p>
+            As noites de sexta e sábado são o coração da casa. É quando sobem ao
+            palco os shows maiores, com uma banda de abertura e o nome principal
+            fechando a noite. Se a dúvida é o que fazer em Curitiba no fim de
+            semana, a resposta aqui é simples: chegar cedo, pegar um lugar perto
+            do palco e deixar a banda conduzir. Pra quem procura balada em
+            Curitiba com música de verdade, e não só pista, o clima é esse.
+          </p>
+          <p>
+            Boa parte da agenda é de tributos. Passam pela casa homenagens a
+            nomes do rock nacional e internacional, do nu metal dos anos 2000 ao
+            reggae, do flashback oitentista aos clássicos que todo mundo canta de
+            cor. São noites temáticas, pensadas pra reviver uma fase inteira da
+            música num show só.
+          </p>
+          <p>
+            Entre um tributo e outro, o Clay abre espaço pra cena autoral de
+            Curitiba. Bandas da cidade mostram música própria pro público da
+            casa, e é aí que muita gente descobre o próximo nome que vai estourar.
+            Dar palco pra quem compõe faz parte da ideia desde o começo.
+          </p>
+          <p>
+            Pra decidir onde ir em Curitiba à noite, vale ver o line-up de cada
+            data. Em cada show você encontra o horário, as bandas, o valor e o
+            link pra comprar o ingresso com antecedência. As datas mais
+            concorridas esgotam, então garantir o ingresso antes evita fila e
+            decepção na porta. Se você quer música ao vivo em Curitiba toda
+            semana, é só escolher a próxima noite e garantir seu lugar.
+          </p>
+        </div>
+
         <div className="mt-10 flex flex-wrap gap-3">
           <Link
             href="/agenda"

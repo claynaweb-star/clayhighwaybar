@@ -24,11 +24,20 @@ export function generateStaticParams() {
   return events.map((event) => ({ id: event.id }));
 }
 
-/** Meta description ~150 caracteres com bandas, cidade e data. */
+/** Tipo do show pelo gênero real do evento, ex.: "Show de Reggae em Curitiba". */
+function generoEmCuritiba(event: ClayEvent): string {
+  const genero = event.genre?.split("·")[0].trim();
+  return genero ? `Show de ${genero} em Curitiba` : "Show ao vivo em Curitiba";
+}
+
+/** Meta description ~150 caracteres com gênero, bandas, cidade e data. */
 function metaDescription(event: ClayEvent): string {
   const bands = event.lineup.map((a) => a.name).join(", ");
   const date = formatEventDate(event.date).numeric;
-  const base = `${event.title} no Clay Highway Bar, Curitiba, em ${date}. Com ${bands}.`;
+  const genero = event.genre?.split("·")[0].trim();
+  const tipo = genero ? `show de ${genero.toLowerCase()}` : "show ao vivo";
+  const comBandas = bands ? ` Com ${bands}.` : "";
+  const base = `${event.title}, ${tipo} em Curitiba no Clay Highway Bar, ${date}.${comBandas}`;
   return base.length > 157 ? `${base.slice(0, 154)}…` : base;
 }
 
@@ -41,9 +50,10 @@ export async function generateMetadata({
   const event = getEventById(id);
   if (!event) return { title: "Evento não encontrado, Clay Highway" };
 
-  // Padrão SEO local: "[Nome do show] — Show de Rock em Curitiba | Clay Highway Bar".
+  // Padrão SEO local usando o gênero real do evento, ex.:
+  // "Reggae no Clay, Show de Reggae em Curitiba | Clay Highway Bar".
   // `absolute` evita que o template do layout ("%s · Clay Highway Bar") duplique o sufixo.
-  const title = `${event.title}, Show de Rock em Curitiba | Clay Highway Bar`;
+  const title = `${event.title}, ${generoEmCuritiba(event)} | Clay Highway Bar`;
   const description = event.seoDescription ?? metaDescription(event);
   // Usa a versão leve da arte do evento (og/) — WhatsApp não renderiza a arte
   // original (2–3 MB). Sem banner, cai na imagem padrão do site.

@@ -63,6 +63,38 @@ export default function BarDeRockCuritibaPage() {
           </p>
         </div>
 
+        <div className="mt-10 max-w-2xl space-y-5 leading-relaxed text-fog">
+          <h2 className="font-display text-2xl text-white">A estrutura da casa</h2>
+          <p>
+            A casa foi pensada pra show: palco amplo, som potente e uma pista que
+            comporta o público nas noites mais cheias sem perder o aconchego. Tem
+            área de bar com atendimento rápido, praça de alimentação com petiscos
+            e hambúrgueres e espaço pra circular entre uma banda e outra.
+          </p>
+          <p>
+            Pra quem quer curtir com o grupo de um lugar privilegiado, a casa tem
+            camarotes. É a opção de quem prefere assistir ao show do alto, com
+            mais conforto e espaço reservado. A reserva é feita direto com a casa
+            pelo WhatsApp, e nas datas mais concorridas vale garantir com
+            antecedência.
+          </p>
+          <h2 className="font-display mt-2 text-2xl text-white">
+            Localização e estacionamento
+          </h2>
+          <p>
+            O Clay fica na Linha Verde, no Capão Raso, na zona sul de Curitiba, à
+            beira da antiga BR-116. É um ponto de fácil acesso pra quem vem do
+            centro, das cidades da região metropolitana ou dos bairros do sul da
+            cidade, com o letreiro iluminado bem visível na via.
+          </p>
+          <p>
+            Chegar de carro ou de moto é tranquilo: a região tem estacionamento e
+            vagas na rua no entorno da casa, o que facilita a vida de quem quer
+            ficar até o fim da noite. Quem prefere aplicativo de transporte também
+            encontra a casa sem dificuldade pelo endereço na Linha Verde.
+          </p>
+        </div>
+
         {/* Bloco de informações práticas */}
         <div className="mt-10 grid gap-4 rounded-2xl border border-border bg-surface p-6 sm:grid-cols-2">
           <div>
