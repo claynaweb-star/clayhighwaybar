@@ -53,7 +53,9 @@ export async function generateMetadata({
   // Padrão SEO local usando o gênero real do evento, ex.:
   // "Reggae no Clay, Show de Reggae em Curitiba | Clay Highway Bar".
   // `absolute` evita que o template do layout ("%s · Clay Highway Bar") duplique o sufixo.
-  const title = `${event.title}, ${generoEmCuritiba(event)} | Clay Highway Bar`;
+  const title =
+    event.tituloSeo ??
+    `${event.title}, ${generoEmCuritiba(event)} | Clay Highway Bar`;
   const description = event.seoDescription ?? metaDescription(event);
   // Usa a versão leve da arte do evento (og/) — WhatsApp não renderiza a arte
   // original (2–3 MB). Sem banner, cai na imagem padrão do site.
@@ -161,9 +163,9 @@ export default async function EventPage({
 
           <p className="mt-4 text-lg text-fog">
             <span className="capitalize">{date.full}</span>
-            {event.time && ` · ${event.time}`}
+            {event.time && !event.ocultarHorario && ` · ${event.time}`}
           </p>
-          {event.timeNote && (
+          {event.timeNote && !event.ocultarHorario && (
             <p className="mt-1 text-sm text-muted">{event.timeNote}</p>
           )}
         </div>
@@ -363,12 +365,14 @@ export default async function EventPage({
                 <span>Data</span>
                 <span className="text-fog">{date.numeric}</span>
               </div>
-              <div className="flex justify-between">
-                <span>{event.time ? "Início" : "Horário"}</span>
-                <span className="text-right text-fog">
-                  {event.time ?? event.timeNote ?? "Em breve"}
-                </span>
-              </div>
+              {!event.ocultarHorario && (
+                <div className="flex justify-between">
+                  <span>{event.time ? "Início" : "Horário"}</span>
+                  <span className="text-right text-fog">
+                    {event.time ?? event.timeNote ?? "Em breve"}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span>Local</span>
                 <span className="text-fog">{event.venue.name}</span>

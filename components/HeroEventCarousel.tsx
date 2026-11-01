@@ -82,7 +82,9 @@ export function HeroEventCarousel({ events }: { events: ClayEvent[] }) {
           <span className="font-display text-base capitalize text-fog">
             {d.short}
           </span>
-          {event.time && <span className="text-muted">· {event.time}</span>}
+          {event.time && !event.ocultarHorario && (
+            <span className="text-muted">· {event.time}</span>
+          )}
           {isFree(event) && (
             <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-400">
               Grátis

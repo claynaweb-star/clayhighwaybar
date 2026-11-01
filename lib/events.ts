@@ -116,6 +116,18 @@ export type ClayEvent = {
    * A data da lista é a própria data do evento. Veja lib/nome-na-lista.ts.
    */
   nomeNaLista?: { preco: number };
+  /**
+   * Esconde TODOS os horários visíveis deste evento (no card e na página:
+   * abertura, line-up com horário e "shows a partir de"). O schema MusicEvent
+   * continua usando `time` para o startDate, então o horário segue completo
+   * nos dados estruturados, só não aparece na tela.
+   */
+  ocultarHorario?: boolean;
+  /**
+   * Title de SEO exato, quando o padrão automático "{título}, Show de {gênero}
+   * em Curitiba | Clay Highway Bar" não serve. Usado só quando presente.
+   */
+  tituloSeo?: string;
   soldOut?: boolean;
   lineup: Artist[];
   venue: {
@@ -149,13 +161,78 @@ const PLATAFORMA_URL: Record<Exclude<Plataforma, "Bandas" | "Gratuito">, string>
 
 export const events: ClayEvent[] = [
   {
+    id: "festival-brasil-hits",
+    title: "Festival Brasil Hits",
+    tituloSeo:
+      "Festival Brasil Hits, Rock Nacional Anos 80 em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "Festival Brasil Hits no Clay Highway Bar, Curitiba, em 20/11/2026. Os hinos do rock nacional com Kid Abelha Cover Curitiba e Geração Coca Cola Hits 80.",
+    date: "2026-11-20",
+    time: "20:00",
+    ocultarHorario: true,
+    genre: "Rock nacional anos 80",
+    banner: "/festival-brasil-hits-clay-highway-bar-20-11.jfif",
+    bannerAlt:
+      "Banner do Festival Brasil Hits no Clay Highway Bar em Curitiba, noite de rock nacional anos 80 com Kid Abelha Cover Curitiba e Geração Coca Cola Hits 80",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/brasilhits",
+    lineup: [
+      { name: "Kid Abelha Cover Curitiba" },
+      { name: "Geração Coca Cola Hits 80" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "O Festival Brasil Hits está de volta! Uma noite inteira dedicada aos maiores hinos do rock nacional. Kid Abelha Cover Curitiba traz sucessos como Como Eu Quero, Pintura Íntima e Fixação, e a Geração Coca Cola Hits 80 revive Legião Urbana, Cazuza, Barão Vermelho, RPM, Paralamas, Titãs, Ultraje a Rigor e Engenheiros do Hawaii. É a trilha sonora da sua juventude ao vivo. Se os anos 80 fazem parte da sua história, essa noite é obrigatória. Não é só festa. É Clay!",
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
+    id: "festival-cada-um-na-sua",
+    title: "Festival Cada Um Na Sua",
+    tituloSeo:
+      "Festival Cada Um Na Sua, Tributos ao Rock em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "Festival Cada Um Na Sua no Clay Highway Bar, Curitiba, em 19/11/2026, véspera de feriado. Rock ao vivo com blocos nacional, feminino e internacional.",
+    date: "2026-11-19",
+    time: "20:00",
+    ocultarHorario: true,
+    genre: "Tributo / Rock",
+    banner: "/festival-cada-um-na-sua-clay-highway-bar-19-11.webp",
+    bannerAlt:
+      "Banner do Festival Cada Um Na Sua no Clay Highway Bar em Curitiba",
+    plataforma: "Meaple/Sympla",
+    linkIngresso:
+      "https://meaple.com.br/festivalcadaumnasua/festival-cada-um-na-sua-em-curitiba19112026",
+    lineup: [
+      { name: "Palinha" },
+      { name: "Anderson Correia" },
+      { name: "Diego Bovo" },
+      { name: "Pearl Jam Cover Ribeirão" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Diferenças conectando existências! Na véspera de feriado, três vocalistas convidados, Palinha, Anderson Correia e Diego Bovo, com a banda base Pearl Jam Cover Ribeirão, comandam uma noite de rock com blocos nacional, feminino e internacional, além de cardápio e drinks especiais. Não é só festa. É Clay!",
+    policies: [
+      {
+        title: "Classificação etária",
+        text: "Evento somente para maiores de 18 anos.",
+      },
+    ],
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
     id: "sabado-revival",
     title: "Sábado Revival",
     seoDescription:
       "Sábado Revival no Clay Highway Bar, Curitiba, em 07/11/2026. Uma noite inteira de flashbacks com Varal do Wando, Club Soda e Boogie Night.",
     date: "2026-11-07",
     time: "20:30",
-    timeNote: "Casa abre 20h · shows a partir das 20h30",
+    ocultarHorario: true,
     genre: "Flashback",
     banner: "/sabado-revival-clay-highway-bar-07-11.png",
     bannerAlt:
@@ -163,13 +240,13 @@ export const events: ClayEvent[] = [
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/sabadorevivel",
     lineup: [
-      { name: "Varal do Wando", role: "20h30" },
-      { name: "Club Soda", role: "22h30" },
-      { name: "Boogie Night", role: "01h00" },
+      { name: "Varal do Wando" },
+      { name: "Club Soda" },
+      { name: "Boogie Night" },
     ],
     venue: CLAY_HIGHWAY,
     description:
-      "Uma noite inteira de flashbacks, de A a Z, só com os melhores! Neste sábado, 07/11, o Clay prepara uma viagem pelas músicas que marcaram gerações. Você vai cantar e dançar do início ao fim, com os hits que marcaram as suas noites de volta ao palco. Varal do Wando abre a noite às 20h30, Club Soda sobe ao palco às 22h30 e Boogie Night fecha a festa a partir da 01h. Clay Highway Bar, bar de rock e música ao vivo em Curitiba, na Linha Verde.",
+      "Uma noite inteira de flashbacks, de A a Z, só com os melhores! O Clay prepara uma viagem pelas músicas que marcaram gerações, para cantar e dançar do início ao fim com Varal do Wando, Club Soda e Boogie Night.",
     policies: [
       {
         title: "Classificação etária",
@@ -180,6 +257,28 @@ export const events: ClayEvent[] = [
       "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
       "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
     ],
+  },
+  {
+    id: "curitiba-autoral-lab-3",
+    title: "Curitiba Autoral Lab",
+    tituloSeo:
+      "Curitiba Autoral Lab, Rock Autoral em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "Curitiba Autoral Lab no Clay Highway Bar em 08/11/2026. Noite de rock autoral com Stereo Overdrive e Alty F4. Entrada gratuita.",
+    date: "2026-11-08",
+    time: "20:00",
+    ocultarHorario: true,
+    genre: "Rock autoral",
+    category: "Curitiba Autoral Lab",
+    banner: "/curitiba-autoral-lab-clay-highway-bar-08-11.jpg",
+    bannerAlt:
+      "Banner do Curitiba Autoral Lab no Clay Highway Bar, noite de rock autoral com entrada gratuita",
+    plataforma: "Gratuito",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/rock",
+    lineup: [{ name: "Stereo Overdrive" }, { name: "Alty F4" }],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Uma noite dedicada ao rock feito aqui, por bandas daqui. O projeto valoriza e impulsiona as bandas autorais de Curitiba e região. Nesta edição, Stereo Overdrive e Alty F4. Entrada gratuita.",
   },
   {
     id: "nu-metal-generation-14-11",

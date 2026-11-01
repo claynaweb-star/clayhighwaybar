@@ -89,7 +89,8 @@ export function EventCard({ event }: { event: ClayEvent }) {
           {event.title}
         </h3>
         <p className="mt-0.5 truncate text-sm text-muted">
-          {time} · {event.venue.name} · {ticketLabel(event)}
+          {!event.ocultarHorario && `${time} · `}
+          {event.venue.name} · {ticketLabel(event)}
         </p>
       </div>
 
