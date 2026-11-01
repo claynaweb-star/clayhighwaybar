@@ -161,6 +161,29 @@ const PLATAFORMA_URL: Record<Exclude<Plataforma, "Bandas" | "Gratuito">, string>
 
 export const events: ClayEvent[] = [
   {
+    id: "festa-american-pie",
+    title: "American Pie, A Festa",
+    tituloSeo: "American Pie, A Festa em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "American Pie no Clay Highway Bar, Curitiba, em 04/12/2026. A energia das festinhas americanas invade o Clay. A noite promete, a dignidade não!",
+    date: "2026-12-04",
+    time: "20:00",
+    ocultarHorario: true,
+    genre: "Festa temática",
+    banner: "/festa-american-pie-clay-highway-bar-04-12.jpg",
+    bannerAlt: "Banner da festa American Pie no Clay Highway Bar em Curitiba",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/festa-american-pie",
+    lineup: [],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Se sua mãe perguntar, você nem foi. Se seu ex descobrir, você nega. E se lembrar de tudo no dia seguinte, é porque bebeu pouco! American Pie: a noite promete, a dignidade não. No dia 04/12, a energia das festinhas americanas invade o Clay Highway. Uma noite em que o juízo pede demissão e todo mundo volta a ter 17 anos, só que agora com boleto, dor nas costas e menos cabelo. Prepare-se para diversão, histórias que não podem sair do grupo do WhatsApp e decisões que vão render arrependimento até o Natal!",
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
     id: "festival-brasil-hits",
     title: "Festival Brasil Hits",
     tituloSeo:
