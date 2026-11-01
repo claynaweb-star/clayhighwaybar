@@ -63,6 +63,23 @@ export function eventSchema(
     ? `${event.date}T${event.time}:00-03:00`
     : event.date;
 
+  // endDate pelo horário de fechamento do bar no dia do evento (fuso -03:00):
+  // domingo até 23h00; sexta até 03h00 e sábado até 03h30 do dia seguinte.
+  // Dias especiais fora de sex/sáb/dom usam 03h00 do dia seguinte.
+  const [ey, em, ed] = event.date.split("-").map(Number);
+  const diaSemana = new Date(Date.UTC(ey, em - 1, ed)).getUTCDay();
+  const proximo = new Date(Date.UTC(ey, em - 1, ed));
+  proximo.setUTCDate(proximo.getUTCDate() + 1);
+  const proximoISO = `${proximo.getUTCFullYear()}-${String(
+    proximo.getUTCMonth() + 1,
+  ).padStart(2, "0")}-${String(proximo.getUTCDate()).padStart(2, "0")}`;
+  const endDate =
+    diaSemana === 0
+      ? `${event.date}T23:00:00-03:00`
+      : diaSemana === 6
+        ? `${proximoISO}T03:30:00-03:00`
+        : `${proximoISO}T03:00:00-03:00`;
+
   const offer: Record<string, unknown> = {
     "@type": "Offer",
     url: event.linkIngresso ?? `${SITE.url}/evento/${event.id}`,
@@ -84,6 +101,7 @@ export function eventSchema(
     description: event.description,
     ...(event.banner ? { image: `${SITE.url}${event.banner}` } : {}),
     startDate,
+    endDate,
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
     location: {

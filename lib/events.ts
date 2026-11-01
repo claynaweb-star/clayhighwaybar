@@ -149,6 +149,39 @@ const PLATAFORMA_URL: Record<Exclude<Plataforma, "Bandas" | "Gratuito">, string>
 
 export const events: ClayEvent[] = [
   {
+    id: "sabado-revival",
+    title: "Sábado Revival",
+    seoDescription:
+      "Sábado Revival no Clay Highway Bar, Curitiba, em 07/11/2026. Uma noite inteira de flashbacks com Varal do Wando, Club Soda e Boogie Night.",
+    date: "2026-11-07",
+    time: "20:30",
+    timeNote: "Casa abre 20h · shows a partir das 20h30",
+    genre: "Flashback",
+    banner: "/sabado-revival-clay-highway-bar-07-11.png",
+    bannerAlt:
+      "Banner do Sábado Revival no Clay Highway Bar em Curitiba, noite de flashbacks com Varal do Wando, Club Soda e Boogie Night",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/sabadorevivel",
+    lineup: [
+      { name: "Varal do Wando", role: "20h30" },
+      { name: "Club Soda", role: "22h30" },
+      { name: "Boogie Night", role: "01h00" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Uma noite inteira de flashbacks, de A a Z, só com os melhores! Neste sábado, 07/11, o Clay prepara uma viagem pelas músicas que marcaram gerações. Você vai cantar e dançar do início ao fim, com os hits que marcaram as suas noites de volta ao palco. Varal do Wando abre a noite às 20h30, Club Soda sobe ao palco às 22h30 e Boogie Night fecha a festa a partir da 01h. Clay Highway Bar, bar de rock e música ao vivo em Curitiba, na Linha Verde.",
+    policies: [
+      {
+        title: "Classificação etária",
+        text: "18 anos. Permitida a entrada de menores de 18 anos acompanhados por um dos pais, com documentos de ambos, ou com autorização por escrito de um dos pais assinada no gov.br.",
+      },
+    ],
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
     id: "nu-metal-generation-14-11",
     title: "NU METAL GENERATION",
     seoTitle:
