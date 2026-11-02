@@ -494,9 +494,6 @@ export default async function EventPage({
                 <p className="mt-2 font-display text-xl text-accent">
                   R$ {event.nomeNaLista.preco} até 21h
                 </p>
-                <p className="text-xs text-muted">
-                  Valor normal: R$ {event.nomeNaLista.preco + 5}
-                </p>
                 <Link
                   href="/nome-na-lista"
                   className="glow-accent mt-3 block w-full rounded-lg bg-accent px-6 py-3 text-center font-bold text-ink transition-colors hover:bg-accent-strong"

@@ -234,9 +234,6 @@ export function NomeNaListaForm({ dias }: { dias: DiaItem[] }) {
                 <p className="mt-2 font-display text-xl text-accent">
                   R$ {d.preco} até 21h
                 </p>
-                <p className="text-xs text-muted">
-                  Valor normal: R$ {d.valorNormal}
-                </p>
                 <button
                   type="button"
                   onClick={() => selecionarEAbrir(d.data)}
