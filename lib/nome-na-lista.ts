@@ -14,8 +14,6 @@
  * Para ligar a lista em um show, marque `nomeNaLista: { preco: N }` no evento.
  * Todas as datas e horas são avaliadas no fuso America/Sao_Paulo.
  */
-import { events } from "./events";
-
 export const PROMO_LIMITE = "21:00";
 export const PROMO_VIRADA = "06:00";
 
@@ -23,6 +21,38 @@ const FUSO = "America/Sao_Paulo";
 
 /** Um dia com lista aberta ou na portaria. */
 export type DiaNomeNaLista = { data: string; preco: number };
+
+/** Quanto o valor normal fica acima do valor com Nome na Lista. */
+export const VALOR_NORMAL_ADICIONAL = 5;
+
+/**
+ * LISTA MESTRA das datas da promoção Nome na Lista, com o preço (até as 21h) de
+ * cada uma. O valor normal é sempre VALOR_NORMAL_ADICIONAL a mais. Esta é a
+ * fonte única das datas: para ligar/desligar uma data, edite aqui. Se a data
+ * tiver um evento em lib/events.ts, marque também `nomeNaLista: { preco }` no
+ * evento (mesmo preço) para o selo e o botão aparecerem no card e na página do
+ * evento. Datas sem evento aparecem só em /nome-na-lista e na portaria.
+ */
+export const DATAS_NOME_NA_LISTA: DiaNomeNaLista[] = [
+  { data: "2026-11-07", preco: 25 },
+  { data: "2026-11-14", preco: 30 },
+  { data: "2026-11-19", preco: 25 },
+  { data: "2026-11-20", preco: 20 },
+  { data: "2026-11-21", preco: 25 },
+  { data: "2026-11-27", preco: 20 },
+  { data: "2026-11-28", preco: 25 },
+  { data: "2026-12-04", preco: 25 },
+  { data: "2026-12-05", preco: 25 },
+  { data: "2026-12-11", preco: 20 },
+  { data: "2026-12-18", preco: 20 },
+  { data: "2026-12-19", preco: 25 },
+  { data: "2026-12-26", preco: 25 },
+];
+
+/** Valor normal (cheio) a partir do valor com Nome na Lista. */
+export function valorNormal(preco: number): number {
+  return preco + VALOR_NORMAL_ADICIONAL;
+}
 
 // ---- Tempo (fuso de São Paulo) ---------------------------------------------
 
@@ -93,14 +123,13 @@ function antesDoLimite(now: Date): boolean {
   return hora * 60 + minuto < lh * 60 + lm;
 }
 
-// ---- Dias com lista (derivados de lib/events.ts) ---------------------------
+// ---- Dias com lista (da lista mestra DATAS_NOME_NA_LISTA) -------------------
 
-/** Todos os dias marcados com lista, em ordem cronológica. */
+/** Todos os dias com lista, em ordem cronológica. */
 function diasComLista(): DiaNomeNaLista[] {
-  return events
-    .filter((e) => e.nomeNaLista)
-    .map((e) => ({ data: e.date, preco: e.nomeNaLista!.preco }))
-    .sort((a, b) => a.data.localeCompare(b.data));
+  return [...DATAS_NOME_NA_LISTA].sort((a, b) =>
+    a.data.localeCompare(b.data),
+  );
 }
 
 /** Preço do dia (ou null se o dia não tiver lista). */

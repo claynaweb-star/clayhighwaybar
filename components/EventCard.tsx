@@ -81,7 +81,7 @@ export function EventCard({ event }: { event: ClayEvent }) {
           )}
           {event.nomeNaLista && nomeNaListaVisivel(event.date) && (
             <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-semibold tracking-wide text-accent">
-              NOME NA LISTA
+              Nome na Lista
             </span>
           )}
         </div>

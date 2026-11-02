@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE, ogImageForBanner } from "@/lib/site";
 import { events } from "@/lib/events";
-import { diasAbertos } from "@/lib/nome-na-lista";
+import { diasAbertos, valorNormal } from "@/lib/nome-na-lista";
 import { NomeNaListaForm } from "./NomeNaListaForm";
+
+// Imagem usada nas datas que não têm evento cadastrado.
+const IMAGEM_SEM_EVENTO = "/nome-na-lista-destaque.jpg";
 
 const ARTE_ALT =
   "Promoção Nome na Lista do Clay Highway Bar, ingresso com valor promocional chegando até as 21h";
@@ -35,13 +38,16 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default function NomeNaListaPage() {
-  // Dias abertos + a arte (versão leve /og) do evento marcado de cada data.
+  // Datas abertas, enriquecidas com preço, valor normal, arte e nome do evento.
+  // Datas com evento usam a arte do evento; as sem evento usam a imagem padrão.
   const dias = diasAbertos().map((d) => {
-    const ev = events.find((e) => e.date === d.data && e.nomeNaLista);
+    const ev = events.find((e) => e.date === d.data);
     return {
       data: d.data,
       preco: d.preco,
-      banner: ev?.banner ? ogImageForBanner(ev.banner) : undefined,
+      valorNormal: valorNormal(d.preco),
+      banner: ev?.banner ? ogImageForBanner(ev.banner) : IMAGEM_SEM_EVENTO,
+      titulo: ev?.title,
     };
   });
 
@@ -68,7 +74,14 @@ export default function NomeNaListaPage() {
       </header>
 
       <div className="mt-6 grid gap-8 md:grid-cols-[1fr_minmax(0,420px)] md:items-start">
-        {/* Arte: no celular aparece abaixo do título; no computador, ao lado do texto. */}
+        {/* Texto no computador à esquerda; a arte à direita. */}
+        <div className="md:order-1">
+          <p className="text-fog">
+            Garanta o valor promocional da noite: escolha uma data, entre na Nome
+            na Lista e chegue até as 21h. Depois desse horário, vale o valor
+            normal da noite.
+          </p>
+        </div>
         <div className="md:order-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -82,23 +95,22 @@ export default function NomeNaListaPage() {
             className="aspect-video w-full rounded-2xl border border-border object-cover"
           />
         </div>
+      </div>
 
-        {/* Texto + dias + formulário */}
-        <div className="md:order-1">
-          {dias.length > 0 ? (
-            <NomeNaListaForm dias={dias} />
-          ) : (
-            <div className="rounded-2xl border border-border bg-surface p-6">
-              <p className="text-fog">Nenhuma lista aberta no momento.</p>
-              <Link
-                href="/agenda"
-                className="mt-4 inline-block font-semibold text-accent hover:underline"
-              >
-                Ver agenda de shows
-              </Link>
-            </div>
-          )}
-        </div>
+      <div className="mt-10">
+        {dias.length > 0 ? (
+          <NomeNaListaForm dias={dias} />
+        ) : (
+          <div className="rounded-2xl border border-border bg-surface p-6">
+            <p className="text-fog">Nenhuma lista aberta no momento.</p>
+            <Link
+              href="/agenda"
+              className="mt-4 inline-block font-semibold text-accent hover:underline"
+            >
+              Ver agenda de shows
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );

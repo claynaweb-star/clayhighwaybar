@@ -487,13 +487,19 @@ export default async function EventPage({
             )}
 
             {event.nomeNaLista && nomeNaListaVisivel(event.date) && (
-              <div className="mt-4">
+              <div className="mt-4 rounded-lg border border-accent/40 bg-accent-soft/40 p-4 text-center">
                 <span className="inline-block rounded-full bg-accent/15 px-3 py-1 text-xs font-bold tracking-wide text-accent">
-                  NOME NA LISTA
+                  Nome na Lista
                 </span>
+                <p className="mt-2 font-display text-xl text-accent">
+                  R$ {event.nomeNaLista.preco} até 21h
+                </p>
+                <p className="text-xs text-muted">
+                  Valor normal: R$ {event.nomeNaLista.preco + 5}
+                </p>
                 <Link
                   href="/nome-na-lista"
-                  className="glow-accent mt-2 block w-full rounded-lg border border-accent/60 bg-accent-soft/40 px-6 py-3 text-center font-bold text-accent transition-colors hover:bg-accent-soft"
+                  className="glow-accent mt-3 block w-full rounded-lg bg-accent px-6 py-3 text-center font-bold text-ink transition-colors hover:bg-accent-strong"
                 >
                   Nome na Lista
                 </Link>
