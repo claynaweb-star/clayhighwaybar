@@ -161,6 +161,36 @@ const PLATAFORMA_URL: Record<Exclude<Plataforma, "Bandas" | "Gratuito">, string>
 
 export const events: ClayEvent[] = [
   {
+    id: "baile-do-hawaii",
+    title: "Baile do Hawaii, Flashbacks Party",
+    tituloSeo:
+      "Baile do Hawaii, Festa de Flashback em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "Baile do Hawaii no Clay Highway Bar, Curitiba, em 28/11/2026. Flashbacks dos anos 70, 80, 90 e 2000 com Gold Times, Delorean e Silvermoon.",
+    date: "2026-11-28",
+    time: "20:00",
+    ocultarHorario: true,
+    genre: "Flashback",
+    nomeNaLista: { preco: 25 },
+    banner: "/baile-do-hawaii-clay-highway-bar-28-11.jpeg",
+    bannerAlt:
+      "Banner do Baile do Hawaii no Clay Highway Bar em Curitiba, festa de flashbacks com Gold Times, Delorean e Silvermoon",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/bailedohawaii",
+    lineup: [
+      { name: "Gold Times" },
+      { name: "Delorean" },
+      { name: "Silvermoon" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Prepare-se para uma noite tropical, cheia de nostalgia, energia e os maiores hits que fizeram gerações inteiras dançarem até o amanhecer! Dos embalos da Disco Music aos grandes sucessos do Pop, da Dance Music e dos flashbacks dos anos 70, 80, 90 e 2000, com Bee Gees, ABBA, Madonna, Michael Jackson, A-ha, Roxette, Cyndi Lauper, Queen e muitos outros. No palco, Gold Times, Delorean e Silvermoon. Uma noite para sair da rotina e viver algo diferente!",
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
     id: "festa-american-pie",
     title: "American Pie, A Festa",
     tituloSeo: "American Pie, A Festa em Curitiba | Clay Highway Bar",
