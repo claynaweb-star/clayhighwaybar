@@ -25,6 +25,7 @@ import { SITE, whatsappLink } from "@/lib/site";
 import { SocialLinks } from "@/components/SocialLinks";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { ChromeGate } from "@/components/ChromeGate";
+import { WhatsAppGroupButton } from "@/components/WhatsAppGroupButton";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -340,6 +341,7 @@ function Footer() {
               {SITE.email}
             </a>
           </p>
+          <WhatsAppGroupButton className="mt-3" />
           <p className="mt-3 text-muted">
             © {new Date().getFullYear()} Clay Highway. Todos os direitos
             reservados.

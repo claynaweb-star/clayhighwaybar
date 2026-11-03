@@ -16,6 +16,7 @@ import { diasAbertos } from "@/lib/nome-na-lista";
 import { localBusinessSchema } from "@/lib/schema";
 import { SITE } from "@/lib/site";
 import { SocialLinks } from "@/components/SocialLinks";
+import { WhatsAppGroupButton } from "@/components/WhatsAppGroupButton";
 import { Testimonials } from "@/components/Testimonials";
 import { testimonials } from "@/lib/testimonials";
 
@@ -159,6 +160,7 @@ export default function HomePage() {
             </div>
 
             <SocialLinks className="mt-8" />
+            <WhatsAppGroupButton className="mt-4" />
           </div>
 
           {/* Coluna direita: carrossel dos eventos em destaque + botão grande */}
