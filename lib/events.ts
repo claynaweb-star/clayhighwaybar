@@ -20,6 +20,7 @@ export type Artist = {
 export type Plataforma =
   | "Meaple/Sympla"
   | "Sympla"
+  | "Pensa no Evento"
   | "Blueticket"
   | "Articket"
   | "Bandas"
@@ -161,6 +162,7 @@ const CLAY_HIGHWAY = {
 const PLATAFORMA_URL: Record<Exclude<Plataforma, "Bandas" | "Gratuito">, string> = {
   "Meaple/Sympla": "https://www.sympla.com.br",
   Sympla: "https://www.sympla.com.br",
+  "Pensa no Evento": "https://www.pensanoevento.com.br",
   Blueticket: "https://www.blueticket.com.br",
   Articket: "https://www.articket.com.br",
 };
@@ -789,8 +791,9 @@ export const events: ClayEvent[] = [
     date: "2026-11-06",
     genre: "Rock · Banda Hippie",
     banner: "/banner-ventania-06nov.png",
-    plataforma: "Meaple/Sympla",
-    linkIngresso: PLATAFORMA_URL["Meaple/Sympla"],
+    plataforma: "Pensa no Evento",
+    linkIngresso:
+      "https://www.pensanoevento.com.br/eventos/105819/ventania-banda-hippie-clay-high-way-curitiba",
     lineup: [{ name: "Ventania", role: "Banda Hippie" }],
     venue: CLAY_HIGHWAY,
     description:
