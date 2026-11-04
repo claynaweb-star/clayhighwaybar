@@ -161,6 +161,35 @@ const PLATAFORMA_URL: Record<Exclude<Plataforma, "Bandas" | "Gratuito">, string>
 
 export const events: ClayEvent[] = [
   {
+    id: "fever-night-abba-bee-gees",
+    title: "Fever Night, ABBA Revivel + Bee Gees SC Cover",
+    tituloSeo:
+      "Fever Night, Tributo ABBA e Bee Gees em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "Fever Night no Clay Highway Bar, Curitiba, em 11/12/2026. Tributo ao ABBA e aos Bee Gees com ABBA Revivel Cover e Bee Gees SC Cover.",
+    date: "2026-12-11",
+    time: "20:00",
+    ocultarHorario: true,
+    genre: "Flashback / Disco",
+    nomeNaLista: { preco: 20 },
+    banner: "/fever-night-abba-bee-gees-clay-highway-bar-11-12.png",
+    bannerAlt:
+      "Banner da Fever Night no Clay Highway Bar em Curitiba, tributo ao ABBA e aos Bee Gees",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/abbabeegees",
+    lineup: [
+      { name: "Bee Gees SC Cover" },
+      { name: "ABBA Revivel Cover" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Uma noite de pura nostalgia, energia e hits que você conhece de cor! A Bee Gees SC Cover revive a magia da era Disco com Stayin' Alive, Night Fever, How Deep Is Your Love e You Should Be Dancing. A ABBA Revivel Cover traz os hinos Dancing Queen, Gimme! Gimme! Gimme!, Mamma Mia, Waterloo e Take a Chance on Me. Duas lendas da música e uma noite para dançar do começo ao fim. Não é só show. É Clay!",
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
     id: "baile-do-hawaii",
     title: "Baile do Hawaii, Flashbacks Party",
     tituloSeo:
