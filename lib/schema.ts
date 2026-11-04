@@ -73,8 +73,9 @@ export function eventSchema(
   const proximoISO = `${proximo.getUTCFullYear()}-${String(
     proximo.getUTCMonth() + 1,
   ).padStart(2, "0")}-${String(proximo.getUTCDate()).padStart(2, "0")}`;
-  const endDate =
-    diaSemana === 0
+  const endDate = event.horaFim
+    ? `${event.date}T${event.horaFim}:00-03:00`
+    : diaSemana === 0
       ? `${event.date}T23:00:00-03:00`
       : diaSemana === 6
         ? `${proximoISO}T03:30:00-03:00`

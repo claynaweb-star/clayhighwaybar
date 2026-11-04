@@ -128,6 +128,12 @@ export type ClayEvent = {
    * em Curitiba | Clay Highway Bar" não serve. Usado só quando presente.
    */
   tituloSeo?: string;
+  /**
+   * Hora de término "HH:MM" (fuso -03:00) para o endDate do schema, quando o
+   * fechamento não segue a regra padrão do dia (ex.: evento de tarde). Usado só
+   * quando presente; o término fica no mesmo dia da data do evento.
+   */
+  horaFim?: string;
   soldOut?: boolean;
   lineup: Artist[];
   venue: {
@@ -160,6 +166,29 @@ const PLATAFORMA_URL: Record<Exclude<Plataforma, "Bandas" | "Gratuito">, string>
 };
 
 export const events: ClayEvent[] = [
+  {
+    id: "cwb-game-festival-6-edicao",
+    title: "CWB Game Festival, 6ª Edição",
+    tituloSeo:
+      "CWB Game Festival 6ª Edição, Festival Gamer em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "CWB Game Festival 6ª edição no Clay Highway Bar, Curitiba, em 29/11/2026. Torneios, RPG, cosplay, área indie, painéis e shows. Ingressos limitados.",
+    date: "2026-11-29",
+    time: "13:00",
+    horaFim: "22:30",
+    ocultarHorario: true,
+    genre: "Festival gamer",
+    plataforma: "Sympla",
+    linkIngresso:
+      "https://www.sympla.com.br/evento/cwb-game-festival---6-edicao/3560294",
+    banner: "/cwb-game-festival-6-edicao-clay-highway-bar-29-11.png",
+    bannerAlt:
+      "Banner do CWB Game Festival 6ª edição no Clay Highway Bar em Curitiba",
+    lineup: [],
+    venue: CLAY_HIGHWAY,
+    description:
+      "A maior celebração gamer de Curitiba está de volta para a sua sexta edição! Depois de cinco edições seguidas com ingressos esgotados, o CWB Game Festival retorna ainda maior e mais épico, com um dia inteiro de experiências:\n- Painéis e bate-papos com convidados especiais\n- Mesas de RPG para todos os estilos de jogadores\n- Torneios presenciais com energia de arena\n- Dois shows musicais exclusivos\n- Criadores de conteúdo interagindo com o público\n- Área Indie com novos talentos e jogos autorais\n- Expositores locais com produtos e novidades\n- Concurso Cosplay e Cosplay Meme, ambos com premiação em dinheiro\nO encontro oficial da comunidade gamer curitibana. Os ingressos são limitados e todas as edições anteriores esgotaram rápido!",
+  },
   {
     id: "fever-night-abba-bee-gees",
     title: "Fever Night, ABBA Revivel + Bee Gees SC Cover",
