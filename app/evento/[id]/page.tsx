@@ -503,6 +503,15 @@ export default async function EventPage({
               </div>
             )}
 
+            {event.id === "halloween-no-clay" && (
+              <Link
+                href="/fotos/halloween-2026"
+                className="glow-accent mt-4 block w-full rounded-lg bg-accent px-6 py-3 text-center font-bold text-ink transition-colors hover:bg-accent-strong"
+              >
+                Ver fotos da festa
+              </Link>
+            )}
+
             <Link
               href="/informacoes"
               className="mt-4 block text-center text-xs font-medium text-accent hover:underline"

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { SITE } from "@/lib/site";
+import { getEventById } from "@/lib/events";
+import { SITE, ogImageForBanner } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Galeria · Fotos dos shows e do público | Clay Highway Bar",
@@ -32,7 +33,38 @@ export default function GaleriaPage() {
         </p>
       </header>
 
-      <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <Link
+        href="/fotos/halloween-2026"
+        className="group mt-10 flex items-center gap-4 overflow-hidden rounded-2xl border border-accent/50 bg-surface p-3 transition-colors hover:border-accent sm:p-4"
+      >
+        <Image
+          src={ogImageForBanner(getEventById("halloween-no-clay")?.banner)}
+          alt="Fotos do Halloween 2026 no Clay Highway Bar"
+          width={160}
+          height={100}
+          sizes="160px"
+          className="h-20 w-32 shrink-0 rounded-lg border border-border object-cover sm:h-24 sm:w-40"
+        />
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold tracking-widest text-accent">
+            ÁLBUM
+          </p>
+          <h2 className="font-display mt-1 text-2xl text-white transition-colors group-hover:text-accent">
+            Fotos do Halloween 2026
+          </h2>
+          <p className="mt-0.5 text-sm text-muted">
+            Veja e baixe as fotos da festa.
+          </p>
+        </div>
+        <span
+          aria-hidden
+          className="hidden shrink-0 text-accent transition-transform group-hover:translate-x-1 sm:block"
+        >
+          →
+        </span>
+      </Link>
+
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {SITE.galleryPhotos.map((photo, i) => (
           <figure
             key={photo.src}
