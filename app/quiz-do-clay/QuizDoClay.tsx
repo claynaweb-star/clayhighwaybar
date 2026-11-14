@@ -5,12 +5,13 @@ import Link from "next/link";
 import {
   formatTelefone,
   isNomeCompleto,
-  isValidTelefone,
+  telefoneDigits,
 } from "@/lib/nome-na-lista";
 import {
   TEMPO_MS,
   SEGUNDOS_VERMELHO,
   PERGUNTAS_POR_PARTIDA,
+  isWhatsappQuizValido,
   type PerguntaCliente,
   type ResultadoPergunta,
   type ResultadoFinal,
@@ -20,6 +21,37 @@ import {
 import { TextoCanvas } from "./TextoCanvas";
 
 const SITE_URL = "clayhighwaybar.com.br/quiz-do-clay";
+const GAME_URL = "https://clayhighwaybar.com.br/quiz-do-clay";
+
+// Limite por APARELHO: no máximo 2 números de WhatsApp diferentes por dia neste
+// navegador (o limite por rede/IP é feito no servidor). Guardado em localStorage.
+const DISPOSITIVO_KEY = "quiz_wa_dispositivo";
+const MAX_WA_DISPOSITIVO = 2;
+
+/**
+ * Registra o WhatsApp usado hoje neste aparelho. Devolve false se já houver
+ * MAX_WA_DISPOSITIVO números diferentes no dia (bloqueia a partida). Sem
+ * localStorage (navegação privada etc.), nunca bloqueia.
+ */
+function registrarWaDispositivo(wa: string): boolean {
+  try {
+    const hoje = new Date().toISOString().slice(0, 10);
+    const raw = localStorage.getItem(DISPOSITIVO_KEY);
+    let obj: { dia: string; numeros: string[] } =
+      raw ? JSON.parse(raw) : { dia: hoje, numeros: [] };
+    if (!obj || obj.dia !== hoje || !Array.isArray(obj.numeros)) {
+      obj = { dia: hoje, numeros: [] };
+    }
+    if (!obj.numeros.includes(wa)) {
+      if (obj.numeros.length >= MAX_WA_DISPOSITIVO) return false;
+      obj.numeros.push(wa);
+    }
+    localStorage.setItem(DISPOSITIVO_KEY, JSON.stringify(obj));
+    return true;
+  } catch {
+    return true;
+  }
+}
 
 const POSES = {
   rock: "/claytinho_v3_rock.webp",
@@ -238,12 +270,16 @@ export function QuizDoClay({ datasAbertas }: { datasAbertas: DataPremio[] }) {
       setErroForm("Escreve seu nome e sobrenome, por favor.");
       return;
     }
-    if (!isValidTelefone(whatsapp)) {
-      setErroForm("Confere o WhatsApp com DDD, tá?");
+    if (!isWhatsappQuizValido(whatsapp)) {
+      setErroForm("Coloca um celular de verdade, com DDD e o 9 (vamos conferir no prêmio).");
       return;
     }
     if (!aceite) {
       setErroForm("Precisa marcar que tem 18+ e aceita o regulamento.");
+      return;
+    }
+    if (!registrarWaDispositivo(telefoneDigits(whatsapp))) {
+      setErroForm("Limite de partidas atingido hoje.");
       return;
     }
     setCarregando(true);
@@ -262,9 +298,11 @@ export function QuizDoClay({ datasAbertas }: { datasAbertas: DataPremio[] }) {
       if (!res.ok || !data.ok) {
         setCarregando(false);
         setErroForm(
-          data?.error === "muitas_tentativas"
-            ? "Opa, muita gente jogando. Tenta de novo em alguns minutos."
-            : "Deu ruim aqui. Tenta de novo?",
+          data?.error === "limite_rede"
+            ? "Limite de partidas atingido hoje."
+            : data?.error === "muitas_tentativas"
+              ? "Opa, muita gente jogando. Tenta de novo em alguns minutos."
+              : "Deu ruim aqui. Tenta de novo?",
         );
         return;
       }
@@ -537,8 +575,9 @@ function TelaIntro({ onComecar }: { onComecar: () => void }) {
         Acertou 10 de 10? Ganha entrada grátis em uma noite com Nome na Lista!
       </p>
       <p className="max-w-xs text-sm text-muted">
-        10 perguntas de rock, 10 segundos cada. Mandou bem de verdade? Pode sair
-        com <span className="font-semibold text-fog">entrada grátis</span>.
+        10 perguntas de rock, 15 segundos cada. Mandou bem de verdade? Pode sair
+        com <span className="font-semibold text-fog">entrada grátis</span>. O prêmio
+        é válido somente nas datas específicas que têm Nome na Lista.
       </p>
       <button
         onClick={onComecar}
@@ -680,7 +719,7 @@ function TelaAviso({ onBora }: { onBora: () => void }) {
       <div className="rounded-2xl border-2 border-accent bg-accent-soft/40 p-6">
         <p className="font-display text-2xl text-accent">Atenção!</p>
         <p className="mt-2 text-lg font-semibold text-fog">
-          Você tem <span className="text-accent">10 segundos</span> por pergunta.
+          Você tem <span className="text-accent">15 segundos</span> por pergunta.
         </p>
         <p className="mt-1 text-base text-fog">
           Se sair da tela, <span className="font-bold text-accent">perde a pergunta</span>.
@@ -728,7 +767,7 @@ function TelaPergunta({
         <span className="rounded-full bg-surface-2 px-3 py-1 text-accent">{pontos} pts</span>
       </div>
 
-      {/* Etiqueta de pergunta difícil (perguntas 7 e 10) */}
+      {/* Etiqueta de pergunta difícil (2 por partida, posições sorteadas) */}
       {pergunta.dificil && (
         <div className="clay-pop flex items-center justify-center gap-2 rounded-xl border border-red-500/60 bg-red-500/10 px-3 py-2 text-center text-sm font-extrabold uppercase tracking-wide text-red-300">
           <span aria-hidden>🔥</span>
@@ -878,6 +917,18 @@ function TelaResultado({
   const compartilhar = useCallback(async () => {
     setCompartilhando(true);
     setDica("");
+    // Copia o link do jogo para a pessoa colar no sticker de LINK do story.
+    let linkCopiado = false;
+    try {
+      await navigator.clipboard?.writeText(GAME_URL);
+      linkCopiado = true;
+    } catch {
+      /* clipboard pode estar bloqueado */
+    }
+    const dicaLink = linkCopiado
+      ? "Link copiado! No story, toque no ícone de figurinha, escolha LINK e cole."
+      : "No story, toque no ícone de figurinha, escolha LINK e cole clayhighwaybar.com.br/quiz-do-clay.";
+    const textoShare = `Duvido você acertar 10 de 10! Jogue: ${GAME_URL}`;
     try {
       const blob = await gerarStory(final, pose, fonteDisplayRef.current);
       if (!blob) throw new Error("sem imagem");
@@ -886,11 +937,14 @@ function TelaResultado({
         canShare?: (d: ShareData) => boolean;
       };
       if (nav.canShare && nav.canShare({ files: [file] })) {
-        await nav.share({
-          files: [file],
-          title: "Quiz do Clay",
-          text: `Fiz ${final.acertos}/10 e ${final.pontos} pontos no Quiz do Clay! 🤘`,
-        });
+        try {
+          await nav.share({ files: [file], title: "Quiz do Clay", text: textoShare });
+        } catch (e) {
+          // Cancelar o compartilhamento não é erro.
+          if ((e as Error)?.name === "AbortError") return;
+          throw e;
+        }
+        setDica(dicaLink);
       } else {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -898,7 +952,7 @@ function TelaResultado({
         a.download = "quiz-do-clay.png";
         a.click();
         URL.revokeObjectURL(url);
-        setDica("Imagem salva! Agora é só postar no seu story do Instagram. 🤘");
+        setDica(`Imagem salva! ${dicaLink}`);
       }
     } catch {
       setDica("Não rolou gerar a imagem agora. Tenta de novo?");
@@ -939,13 +993,19 @@ function TelaResultado({
             <p className="font-display text-3xl tracking-widest text-fog">{final.codigo}</p>
           </div>
           <p className="max-w-xs text-sm font-semibold text-fog">
-            Seu prêmio vale só para datas com Nome na Lista. Escolha a sua data abaixo.
+            Seu prêmio é válido somente nas datas específicas que têm Nome na Lista.
+            Escolha a sua data abaixo.
           </p>
           <EscolhaData
             codigo={final.codigo}
             datas={final.datasPremio ?? []}
             validade={final.validadeCodigo}
           />
+          <p className="max-w-xs text-xs text-muted">
+            O prêmio só é liberado na portaria após conferência do nome com documento
+            com foto e do número de telefone no celular do vencedor. Nome ou telefone
+            diferentes do cadastro anulam o prêmio.
+          </p>
         </>
       )}
       {final.jaGanhouCodigo && (
@@ -1095,38 +1155,55 @@ async function gerarStory(
   // Mascote
   try {
     const m = await carregarImagem(POSES[pose]);
-    const maxH = 720;
+    const maxH = 540;
     const mh = Math.min(maxH, m.height);
     const mw = (m.width / m.height) * mh;
-    ctx.drawImage(m, (W - mw) / 2, 430, mw, mh);
+    ctx.drawImage(m, (W - mw) / 2, 410, mw, mh);
   } catch {
     /* sem mascote */
   }
 
   // Placar
   ctx.fillStyle = "#f2ede4";
-  ctx.font = `bold 150px ${familiaCorpo}`;
-  ctx.fillText(`${final.acertos}/10`, W / 2, 1360);
+  ctx.font = `bold 140px ${familiaCorpo}`;
+  ctx.fillText(`${final.acertos}/10`, W / 2, 1120);
 
   ctx.fillStyle = "#e0892b";
-  ctx.font = `bold 72px ${familiaCorpo}`;
-  ctx.fillText(`${final.pontos} pontos`, W / 2, 1470);
+  ctx.font = `bold 66px ${familiaCorpo}`;
+  ctx.fillText(`${final.pontos} pontos`, W / 2, 1210);
 
   // Chamada
   ctx.fillStyle = "#f2ede4";
-  ctx.font = `48px ${familiaCorpo}`;
+  ctx.font = `46px ${familiaCorpo}`;
   const frase =
     final.faixa === "lenda"
       ? "Lenda do rock! 🤘"
       : final.faixa === "quase"
         ? "Quase lenda! 🤘"
         : "Será que você manja? 🤘";
-  ctx.fillText(frase, W / 2, 1580);
+  ctx.fillText(frase, W / 2, 1300);
 
-  // Rodapé
-  ctx.fillStyle = "#9a938a";
-  ctx.font = `40px ${familiaCorpo}`;
-  ctx.fillText(SITE_URL, W / 2, 1770);
+  // Chamada para jogar + QR Code
+  ctx.fillStyle = "#e0892b";
+  ctx.font = `bold 54px ${familiaDisplay}`;
+  ctx.fillText("JOGUE TAMBÉM", W / 2, 1420);
+
+  ctx.fillStyle = "#f2ede4";
+  ctx.font = `42px ${familiaCorpo}`;
+  ctx.fillText(SITE_URL, W / 2, 1485);
+
+  // QR Code sobre um quadrado branco (escaneia bem no fundo escuro).
+  try {
+    const qr = await carregarImagem("/quiz-qr.png");
+    const qs = 300;
+    const qx = (W - qs) / 2;
+    const qy = 1540;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(qx - 16, qy - 16, qs + 32, qs + 32);
+    ctx.drawImage(qr, qx, qy, qs, qs);
+  } catch {
+    /* sem QR */
+  }
 
   return new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
 }

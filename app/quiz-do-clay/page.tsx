@@ -104,13 +104,11 @@ export default async function QuizDoClayPage() {
               para jogar ou para ganhar.
             </p>
             <p>
-              <span className="font-semibold text-fog">A partida.</span> São 10 perguntas de
-              múltipla escolha, com 10 segundos cada. Cada partida tem 2 perguntas de{" "}
-              <span className="font-semibold text-fog">nível difícil</span>, em posições aleatórias a
-              partir da 3ª pergunta (marcadas com a etiqueta “Pergunta difícil”); as demais são de
-              nível médio. Você tem direito a 1 partida por dia por número de WhatsApp. Se sair da
-              tela durante uma pergunta (trocar de aba, minimizar ou abrir outro app), aquela
-              pergunta é perdida.
+              <span className="font-semibold text-fog">A partida.</span> Cada partida tem 10
+              perguntas de diferentes níveis de dificuldade, de múltipla escolha, com 15 segundos
+              cada. Você tem direito a 1 partida por dia por número de WhatsApp. Se sair da tela
+              durante uma pergunta (trocar de aba, minimizar ou abrir outro app), aquela pergunta
+              é perdida.
             </p>
             <p>
               <span className="font-semibold text-fog">Pontuação.</span> Cada acerto vale 10 pontos,
@@ -120,12 +118,18 @@ export default async function QuizDoClayPage() {
             <p>
               <span className="font-semibold text-fog">Entrada grátis (acertou 10 de 10).</span>{" "}
               Quem gabarita ganha 1 entrada grátis, com um código único válido por 30 dias. O prêmio
-              vale <span className="font-semibold text-fog">somente em datas com Nome na Lista
-              aberto</span>: ao gabaritar, você escolhe uma dessas noites e é incluído
+              é <span className="font-semibold text-fog">válido somente nas datas específicas que têm
+              Nome na Lista</span>: ao gabaritar, você escolhe uma dessas noites e é incluído
               automaticamente na lista daquela data. Para usar, basta apresentar seu nome na portaria
               até o horário daquela lista (21h). Se não houver nenhuma data com Nome na Lista no
               momento, o prêmio fica guardado por 30 dias e você recebe um link para escolher a data
               depois. Limite de 1 entrada grátis a cada 30 dias por número de WhatsApp.
+            </p>
+            <p>
+              <span className="font-semibold text-fog">Conferência na portaria.</span> O prêmio só é
+              liberado na portaria após conferência do nome com documento com foto e do número de
+              telefone no celular do vencedor. Nome ou telefone diferentes do cadastro anulam o
+              prêmio.
             </p>
             <p>
               <span className="font-semibold text-fog">Boné do Clay (ranking do mês).</span> A maior

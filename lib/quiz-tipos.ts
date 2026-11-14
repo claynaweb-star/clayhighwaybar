@@ -5,9 +5,10 @@
  * bundle do cliente. A lógica secreta (perguntas, respostas, pontuação) fica em
  * lib/quiz.ts e no banco lib/quiz-perguntas.ts, importados só pelas rotas.
  */
+import { telefoneDigits } from "@/lib/nome-na-lista";
 
 /** Tempo de cada pergunta, em milissegundos. */
-export const TEMPO_MS = 10_000;
+export const TEMPO_MS = 15_000;
 
 /**
  * Folga de rede ao conferir o tempo no servidor. A resposta pode levar um
@@ -17,7 +18,7 @@ export const TEMPO_MS = 10_000;
 export const FOLGA_MS = 1_500;
 
 /** Quantos segundos finais deixam a barra vermelha e chamam o "Corre!". */
-export const SEGUNDOS_VERMELHO = 3;
+export const SEGUNDOS_VERMELHO = 4;
 
 /** Número de perguntas por partida. */
 export const PERGUNTAS_POR_PARTIDA = 10;
@@ -55,7 +56,7 @@ export type PerguntaCliente = {
   enunciado: string;
   /** As 4 alternativas, já embaralhadas pelo servidor. */
   alternativas: string[];
-  /** true nas perguntas 7 e 10 (nível difícil) — mostra a etiqueta vermelha. */
+  /** true nas 2 perguntas difíceis da partida — mostra a etiqueta vermelha. */
   dificil: boolean;
 };
 
@@ -122,4 +123,55 @@ export function faixaPorAcertos(acertos: number): Faixa {
   if (acertos >= 10) return "lenda";
   if (acertos >= 7) return "quase";
   return "treina";
+}
+
+// ---- Validação forte do WhatsApp (contra números inventados) ---------------
+//
+// O Quiz dá prêmio, então exige um celular brasileiro de verdade: 11 dígitos,
+// DDD existente (tabela da Anatel) e o 9 do celular. Recusa dígitos todos iguais
+// e sequências óbvias (ex.: 99999-9999, 91234-5678). É uma checagem a mais que
+// a do Nome na Lista (isValidTelefone), usada só aqui.
+
+/** DDDs em uso no Brasil (Anatel). */
+const DDDS_VALIDOS = new Set<number>([
+  11, 12, 13, 14, 15, 16, 17, 18, 19,
+  21, 22, 24, 27, 28,
+  31, 32, 33, 34, 35, 37, 38,
+  41, 42, 43, 44, 45, 46, 47, 48, 49,
+  51, 53, 54, 55,
+  61, 62, 63, 64, 65, 66, 67, 68, 69,
+  71, 73, 74, 75, 77, 79,
+  81, 82, 83, 84, 85, 86, 87, 88, 89,
+  91, 92, 93, 94, 95, 96, 97, 98, 99,
+]);
+
+/** true se a string de dígitos é toda igual, crescente ou decrescente (passo 1). */
+function ehSequenciaObvia(s: string): boolean {
+  if (s.length < 4) return false;
+  let cresc = true;
+  let decr = true;
+  let igual = true;
+  for (let i = 1; i < s.length; i++) {
+    const a = s.charCodeAt(i - 1);
+    const b = s.charCodeAt(i);
+    if (b !== a + 1) cresc = false;
+    if (b !== a - 1) decr = false;
+    if (b !== a) igual = false;
+  }
+  return cresc || decr || igual;
+}
+
+/**
+ * Valida um WhatsApp para o Quiz: celular brasileiro válido (DDD existente, 11
+ * dígitos, começando com 9) e sem padrões óbvios de número inventado.
+ */
+export function isWhatsappQuizValido(valor: string): boolean {
+  const d = telefoneDigits(valor);
+  if (d.length !== 11) return false; // só celular (11 dígitos)
+  if (!DDDS_VALIDOS.has(Number(d.slice(0, 2)))) return false;
+  if (d[2] !== "9") return false; // celular começa com 9
+  const corpo = d.slice(2); // 9 dígitos do celular
+  if (/^(\d)\1{8}$/.test(corpo)) return false; // todos iguais (ex.: 99999-9999)
+  if (ehSequenciaObvia(d.slice(3))) return false; // sequência nos 8 dígitos após o 9
+  return true;
 }

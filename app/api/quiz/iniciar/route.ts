@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getClientIp } from "@/lib/portaria";
 import {
   isNomeCompleto,
-  isValidTelefone,
   telefoneDigits,
   formatTelefone,
 } from "@/lib/nome-na-lista";
@@ -15,7 +14,11 @@ import {
   chamarQuizWebhook,
   logQuiz,
 } from "@/lib/quiz";
-import { TEMPO_MS, PERGUNTAS_POR_PARTIDA } from "@/lib/quiz-tipos";
+import {
+  TEMPO_MS,
+  PERGUNTAS_POR_PARTIDA,
+  isWhatsappQuizValido,
+} from "@/lib/quiz-tipos";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 26;
@@ -35,6 +38,26 @@ function dentroDoLimite(ip: string): boolean {
   }
   if (balde.count >= MAX_INICIOS) return false;
   balde.count += 1;
+  return true;
+}
+
+// Limite por REDE: no máximo MAX_WA_POR_IP_DIA números de WhatsApp DIFERENTES
+// por IP a cada dia (fuso São Paulo). Em memória, por instância serverless (zera
+// no cold start) — é um freio básico contra criar muitos cadastros no mesmo
+// Wi-Fi. O limite por APARELHO (2 números/dia) é feito no navegador.
+const MAX_WA_POR_IP_DIA = 5;
+type WaDia = { dia: string; nums: Set<string> };
+const waPorIp = new Map<string, WaDia>();
+
+function dentroDoLimiteWaIp(ip: string, wa: string, dia: string): boolean {
+  const atual = waPorIp.get(ip);
+  if (!atual || atual.dia !== dia) {
+    waPorIp.set(ip, { dia, nums: new Set([wa]) });
+    return true;
+  }
+  if (atual.nums.has(wa)) return true;
+  if (atual.nums.size >= MAX_WA_POR_IP_DIA) return false;
+  atual.nums.add(wa);
   return true;
 }
 
@@ -64,7 +87,7 @@ export async function POST(request: NextRequest) {
   if (!isNomeCompleto(nome)) {
     return NextResponse.json({ ok: false, error: "nome" }, { status: 400 });
   }
-  if (!isValidTelefone(whatsapp)) {
+  if (!isWhatsappQuizValido(whatsapp)) {
     return NextResponse.json({ ok: false, error: "whatsapp" }, { status: 400 });
   }
   if (!aceite) {
@@ -73,6 +96,11 @@ export async function POST(request: NextRequest) {
 
   const wa = telefoneDigits(whatsapp);
   const dia = hojeSaoPauloISO();
+
+  // Limite por rede: muitos WhatsApp diferentes no mesmo IP no dia.
+  if (!dentroDoLimiteWaIp(ip, wa, dia)) {
+    return NextResponse.json({ ok: false, error: "limite_rede" }, { status: 429 });
+  }
 
   // Limite de 1 partida por WhatsApp por dia. O "start" reserva o dia na
   // planilha. Em "duplicate", bloqueia. Em falha técnica do webhook, libera

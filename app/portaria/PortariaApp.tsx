@@ -425,6 +425,10 @@ export function PortariaApp() {
                               {item.codigoQuiz}
                             </span>
                           ) : null}
+                          <p className="w-full text-xs font-semibold text-yellow-200/90">
+                            Confira documento com foto e o telefone no celular da pessoa
+                            antes de liberar.
+                          </p>
                         </div>
                       )}
                       <div className="flex items-center justify-between gap-3">
