@@ -26,3 +26,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# backup dos mascotes originais (com fundo) — ficam só no disco, fora do deploy
+/backup-mascotes
+
+# planilha de revisão do banco de perguntas do Quiz — não vai para o GitHub
+/docs/quiz-revisao-perguntas.csv

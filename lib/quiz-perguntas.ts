@@ -1,0 +1,268 @@
+/**
+ * BANCO DE PERGUNTAS do "Quiz do Clay" (rock e flashback).
+ *
+ * IMPORTANTE: este arquivo SÓ pode ser importado por rotas de API / código de
+ * servidor (lib/quiz.ts). Ele contém as respostas certas e NUNCA deve ir para o
+ * navegador. A cada partida o servidor sorteia 10 perguntas daqui, embaralha as
+ * alternativas e envia ao cliente apenas enunciado + alternativas (sem a certa).
+ *
+ * DIFICULDADE POR POSIÇÃO: a partida tem 8 perguntas de nível "medio" e 2 de
+ * nível "dificil". As perguntas 7 e 10 (POSICOES_DIFICEIS em lib/quiz-tipos.ts)
+ * são sempre sorteadas do grupo "dificil"; as demais, do grupo "medio".
+ *
+ * COMO EDITAR: cada pergunta tem um `id` único e estável (não reaproveite ids
+ * de perguntas removidas), um `nivel` ("medio" ou "dificil"), um `enunciado`, 4
+ * `alternativas` e `correta` = o índice (0 a 3) da alternativa certa NESTA ordem
+ * de autoria. A ordem aqui não importa para o jogo: o servidor embaralha as 4 a
+ * cada partida. Nas perguntas de ANO, as 4 alternativas têm pelo menos 2 anos de
+ * diferença entre si, para não gerar dúvida por data de lançamento em países
+ * diferentes. REGRA DE OURO: se houver qualquer dúvida sobre o fato ou a data,
+ * a pergunta não entra.
+ */
+export type NivelPergunta = "medio" | "dificil";
+
+export type Pergunta = {
+  id: number;
+  nivel: NivelPergunta;
+  enunciado: string;
+  alternativas: [string, string, string, string];
+  correta: 0 | 1 | 2 | 3;
+};
+
+export const PERGUNTAS: Pergunta[] = [
+  // ===================== NÍVEL MÉDIO (ids 1–150) =====================
+  { id: 1, nivel: "medio", enunciado: "Qual banda lançou o álbum “The Dark Side of the Moon”?", alternativas: ["Pink Floyd", "Led Zeppelin", "The Who", "Genesis"], correta: 0 },
+  { id: 2, nivel: "medio", enunciado: "Quem é o vocalista do Iron Maiden na fase clássica?", alternativas: ["Bruce Dickinson", "Rob Halford", "Ozzy Osbourne", "Ronnie James Dio"], correta: 0 },
+  { id: 3, nivel: "medio", enunciado: "“Smells Like Teen Spirit” é de qual banda?", alternativas: ["Nirvana", "Pearl Jam", "Soundgarden", "Alice in Chains"], correta: 0 },
+  { id: 4, nivel: "medio", enunciado: "Qual baterista do Nirvana fundou o Foo Fighters?", alternativas: ["Dave Grohl", "Krist Novoselic", "Taylor Hawkins", "Chad Channing"], correta: 0 },
+  { id: 5, nivel: "medio", enunciado: "“Bohemian Rhapsody” é de qual banda?", alternativas: ["Queen", "The Beatles", "Rolling Stones", "Deep Purple"], correta: 0 },
+  { id: 6, nivel: "medio", enunciado: "Quem era o vocalista do Queen?", alternativas: ["Freddie Mercury", "Brian May", "Roger Taylor", "John Deacon"], correta: 0 },
+  { id: 7, nivel: "medio", enunciado: "“Stairway to Heaven” é de qual banda?", alternativas: ["Led Zeppelin", "Black Sabbath", "Rush", "Yes"], correta: 0 },
+  { id: 8, nivel: "medio", enunciado: "Quem é o guitarrista do Led Zeppelin?", alternativas: ["Jimmy Page", "Eric Clapton", "Jeff Beck", "Ritchie Blackmore"], correta: 0 },
+  { id: 9, nivel: "medio", enunciado: "Qual banda brasileira gravou “Pro Dia Nascer Feliz”?", alternativas: ["Barão Vermelho", "Legião Urbana", "Titãs", "Capital Inicial"], correta: 0 },
+  { id: 10, nivel: "medio", enunciado: "Quem era o vocalista da Legião Urbana?", alternativas: ["Renato Russo", "Cazuza", "Herbert Vianna", "Dinho Ouro Preto"], correta: 0 },
+  { id: 11, nivel: "medio", enunciado: "“Comfortably Numb” está em qual álbum do Pink Floyd?", alternativas: ["The Wall", "Animals", "Wish You Were Here", "Meddle"], correta: 0 },
+  { id: 12, nivel: "medio", enunciado: "Quem cantou no álbum “Back in Black”, do AC/DC?", alternativas: ["Brian Johnson", "Bon Scott", "Angus Young", "Axl Rose"], correta: 0 },
+  { id: 13, nivel: "medio", enunciado: "Qual guitarrista do AC/DC usa uniforme de colegial no palco?", alternativas: ["Angus Young", "Malcolm Young", "Phil Rudd", "Cliff Williams"], correta: 0 },
+  { id: 14, nivel: "medio", enunciado: "Ozzy Osbourne ficou famoso nos anos 70 em qual banda?", alternativas: ["Black Sabbath", "Deep Purple", "Judas Priest", "Motörhead"], correta: 0 },
+  { id: 15, nivel: "medio", enunciado: "“Sweet Child O’ Mine” é de qual banda?", alternativas: ["Guns N’ Roses", "Bon Jovi", "Aerosmith", "Mötley Crüe"], correta: 0 },
+  { id: 16, nivel: "medio", enunciado: "Quem é o vocalista do Guns N’ Roses?", alternativas: ["Axl Rose", "Slash", "Duff McKagan", "Izzy Stradlin"], correta: 0 },
+  { id: 17, nivel: "medio", enunciado: "“Enter Sandman” é de qual banda?", alternativas: ["Metallica", "Slayer", "Pantera", "Megadeth"], correta: 0 },
+  { id: 18, nivel: "medio", enunciado: "Qual banda brasileira gravou “Roots Bloody Roots”?", alternativas: ["Sepultura", "Angra", "Krisiun", "Ratos de Porão"], correta: 0 },
+  { id: 19, nivel: "medio", enunciado: "Qual guitarrista imortalizou “Purple Haze”?", alternativas: ["Jimi Hendrix", "Eric Clapton", "B.B. King", "Carlos Santana"], correta: 0 },
+  { id: 20, nivel: "medio", enunciado: "“Hotel California” é de qual banda?", alternativas: ["Eagles", "Fleetwood Mac", "Lynyrd Skynyrd", "The Doors"], correta: 0 },
+  { id: 21, nivel: "medio", enunciado: "Quem era o vocalista do The Doors?", alternativas: ["Jim Morrison", "Robert Plant", "Roger Daltrey", "Ian Gillan"], correta: 0 },
+  { id: 22, nivel: "medio", enunciado: "Qual banda gravou “Creep” e “Paranoid Android”?", alternativas: ["Radiohead", "Blur", "Oasis", "Muse"], correta: 0 },
+  { id: 23, nivel: "medio", enunciado: "“Wonderwall” é de qual banda?", alternativas: ["Oasis", "Blur", "Pulp", "The Verve"], correta: 0 },
+  { id: 24, nivel: "medio", enunciado: "Qual dupla de irmãos brigões liderava o Oasis?", alternativas: ["Os irmãos Gallagher", "Os irmãos Davis", "Os irmãos Reid", "Os irmãos Robinson"], correta: 0 },
+  { id: 25, nivel: "medio", enunciado: "Quem foi o baterista lendário do The Who?", alternativas: ["Keith Moon", "John Bonham", "Ginger Baker", "Neil Peart"], correta: 0 },
+  { id: 26, nivel: "medio", enunciado: "Qual banda tem Mick Jagger e Keith Richards?", alternativas: ["The Rolling Stones", "The Beatles", "The Who", "Cream"], correta: 0 },
+  { id: 27, nivel: "medio", enunciado: "Quem é o baixista dos Beatles?", alternativas: ["Paul McCartney", "John Lennon", "George Harrison", "Ringo Starr"], correta: 0 },
+  { id: 28, nivel: "medio", enunciado: "Quem foi o baterista dos Beatles na fase famosa?", alternativas: ["Ringo Starr", "Pete Best", "George Harrison", "John Lennon"], correta: 0 },
+  { id: 29, nivel: "medio", enunciado: "“Should I Stay or Should I Go” é de qual banda?", alternativas: ["The Clash", "Sex Pistols", "Ramones", "The Damned"], correta: 0 },
+  { id: 30, nivel: "medio", enunciado: "Qual banda punk gravou “Blitzkrieg Bop”?", alternativas: ["Ramones", "Sex Pistols", "Green Day", "Misfits"], correta: 0 },
+  { id: 31, nivel: "medio", enunciado: "“American Idiot” é de qual banda?", alternativas: ["Green Day", "blink-182", "The Offspring", "Sum 41"], correta: 0 },
+  { id: 32, nivel: "medio", enunciado: "Quem é o vocalista do U2?", alternativas: ["Bono", "The Edge", "Adam Clayton", "Larry Mullen Jr."], correta: 0 },
+  { id: 33, nivel: "medio", enunciado: "Em qual álbum do Nirvana está “Smells Like Teen Spirit”?", alternativas: ["Nevermind", "Bleach", "In Utero", "Incesticide"], correta: 0 },
+  { id: 34, nivel: "medio", enunciado: "“Alive” e “Even Flow” são de qual banda?", alternativas: ["Pearl Jam", "Nirvana", "Soundgarden", "Stone Temple Pilots"], correta: 0 },
+  { id: 35, nivel: "medio", enunciado: "Quem é o vocalista do Pearl Jam?", alternativas: ["Eddie Vedder", "Chris Cornell", "Layne Staley", "Scott Weiland"], correta: 0 },
+  { id: 36, nivel: "medio", enunciado: "“Black Hole Sun” é de qual banda?", alternativas: ["Soundgarden", "Nirvana", "Foo Fighters", "Alice in Chains"], correta: 0 },
+  { id: 37, nivel: "medio", enunciado: "Qual banda gravou “Seven Nation Army”?", alternativas: ["The White Stripes", "The Black Keys", "Arctic Monkeys", "Kings of Leon"], correta: 0 },
+  { id: 38, nivel: "medio", enunciado: "“Mr. Brightside” é de qual banda?", alternativas: ["The Killers", "Franz Ferdinand", "The Strokes", "Interpol"], correta: 0 },
+  { id: 39, nivel: "medio", enunciado: "“Do I Wanna Know?” é de qual banda?", alternativas: ["Arctic Monkeys", "The Vaccines", "Kasabian", "The Strokes"], correta: 0 },
+  { id: 40, nivel: "medio", enunciado: "“Numb” e “In the End” são de qual banda?", alternativas: ["Linkin Park", "Limp Bizkit", "Korn", "Papa Roach"], correta: 0 },
+  { id: 41, nivel: "medio", enunciado: "Qual vocalista do Linkin Park faleceu em 2017?", alternativas: ["Chester Bennington", "Mike Shinoda", "Chris Cornell", "Brandon Boyd"], correta: 0 },
+  { id: 42, nivel: "medio", enunciado: "“Chop Suey!” é de qual banda?", alternativas: ["System of a Down", "Slipknot", "Disturbed", "Deftones"], correta: 0 },
+  { id: 43, nivel: "medio", enunciado: "A banda alemã de “Du Hast” é a?", alternativas: ["Rammstein", "Scorpions", "Accept", "Helloween"], correta: 0 },
+  { id: 44, nivel: "medio", enunciado: "“Wind of Change”, com o famoso assovio, é de qual banda?", alternativas: ["Scorpions", "Europe", "Whitesnake", "Def Leppard"], correta: 0 },
+  { id: 45, nivel: "medio", enunciado: "“The Final Countdown” é de qual banda?", alternativas: ["Europe", "Journey", "Toto", "Foreigner"], correta: 0 },
+  { id: 46, nivel: "medio", enunciado: "“Livin’ on a Prayer” é de qual banda?", alternativas: ["Bon Jovi", "Def Leppard", "Poison", "Whitesnake"], correta: 0 },
+  { id: 47, nivel: "medio", enunciado: "Qual banda gravou “Tempo Perdido”?", alternativas: ["Legião Urbana", "Titãs", "Capital Inicial", "Skank"], correta: 0 },
+  { id: 48, nivel: "medio", enunciado: "“Epitáfio” é de qual banda?", alternativas: ["Titãs", "Legião Urbana", "Paralamas do Sucesso", "Engenheiros do Hawaii"], correta: 0 },
+  { id: 49, nivel: "medio", enunciado: "Herbert Vianna é o vocalista de qual banda?", alternativas: ["Os Paralamas do Sucesso", "Barão Vermelho", "Kid Abelha", "RPM"], correta: 0 },
+  { id: 50, nivel: "medio", enunciado: "“Exagerado” e “O Tempo Não Para” são de qual artista?", alternativas: ["Cazuza", "Renato Russo", "Lobão", "Lulu Santos"], correta: 0 },
+  { id: 51, nivel: "medio", enunciado: "“Infinita Highway” é de qual banda?", alternativas: ["Engenheiros do Hawaii", "Legião Urbana", "Titãs", "Paralamas do Sucesso"], correta: 0 },
+  { id: 52, nivel: "medio", enunciado: "Qual o apelido de Raul Seixas?", alternativas: ["Maluco Beleza", "Rei do Rock", "Pai do Heavy Metal", "Mão de Vaca"], correta: 0 },
+  { id: 53, nivel: "medio", enunciado: "“Ovelha Negra” é de qual artista do rock brasileiro?", alternativas: ["Rita Lee", "Gal Costa", "Marina Lima", "Baby do Brasil"], correta: 0 },
+  { id: 54, nivel: "medio", enunciado: "Rita Lee fez parte de qual banda psicodélica dos anos 60/70?", alternativas: ["Os Mutantes", "Novos Baianos", "Secos & Molhados", "Casa das Máquinas"], correta: 0 },
+  { id: 55, nivel: "medio", enunciado: "Ney Matogrosso foi vocalista de qual banda?", alternativas: ["Secos & Molhados", "Mutantes", "Camisa de Vênus", "Blitz"], correta: 0 },
+  { id: 56, nivel: "medio", enunciado: "“Highway to Hell” é de qual banda?", alternativas: ["AC/DC", "Motörhead", "Judas Priest", "Scorpions"], correta: 0 },
+  { id: 57, nivel: "medio", enunciado: "“Ace of Spades” é de qual banda?", alternativas: ["Motörhead", "Metallica", "Venom", "Saxon"], correta: 0 },
+  { id: 58, nivel: "medio", enunciado: "Qual o nome do baixista e vocalista do Motörhead?", alternativas: ["Lemmy", "Ozzy", "Dio", "Bruce Dickinson"], correta: 0 },
+  { id: 59, nivel: "medio", enunciado: "“Breaking the Law” é de qual banda?", alternativas: ["Judas Priest", "Iron Maiden", "Saxon", "Accept"], correta: 0 },
+  { id: 60, nivel: "medio", enunciado: "Qual o nome do mascote do Iron Maiden?", alternativas: ["Eddie", "Vic", "Snaggletooth", "Murray"], correta: 0 },
+  { id: 61, nivel: "medio", enunciado: "Quem é o guitarrista virtuoso do Van Halen?", alternativas: ["Eddie Van Halen", "David Lee Roth", "Sammy Hagar", "Michael Anthony"], correta: 0 },
+  { id: 62, nivel: "medio", enunciado: "“Don’t Stop Believin’” é de qual banda?", alternativas: ["Journey", "Foreigner", "Styx", "REO Speedwagon"], correta: 0 },
+  { id: 63, nivel: "medio", enunciado: "“Smoke on the Water” é de qual banda?", alternativas: ["Deep Purple", "Led Zeppelin", "Rainbow", "Uriah Heep"], correta: 0 },
+  { id: 64, nivel: "medio", enunciado: "Qual banda, além do Deep Purple, foi liderada por Ritchie Blackmore?", alternativas: ["Rainbow", "Whitesnake", "Dio", "Foreigner"], correta: 0 },
+  { id: 65, nivel: "medio", enunciado: "Quem substituiu Ozzy no Black Sabbath no álbum “Heaven and Hell”?", alternativas: ["Ronnie James Dio", "Rob Halford", "Glenn Hughes", "Ian Gillan"], correta: 0 },
+  { id: 66, nivel: "medio", enunciado: "Qual banda de maquiagem gravou “I Was Made for Lovin’ You”?", alternativas: ["Kiss", "Alice Cooper", "Twisted Sister", "Mötley Crüe"], correta: 0 },
+  { id: 67, nivel: "medio", enunciado: "Quem cospe fogo e “sangue” nos shows do Kiss?", alternativas: ["Gene Simmons", "Paul Stanley", "Ace Frehley", "Peter Criss"], correta: 0 },
+  { id: 68, nivel: "medio", enunciado: "“Crazy Train” é do disco solo de qual artista?", alternativas: ["Ozzy Osbourne", "Dio", "Alice Cooper", "Rob Halford"], correta: 0 },
+  { id: 69, nivel: "medio", enunciado: "Qual o apelido de Bruce Springsteen?", alternativas: ["The Boss", "The King", "Slowhand", "The Voice"], correta: 0 },
+  { id: 70, nivel: "medio", enunciado: "“Space Oddity” e “Heroes” são de qual artista?", alternativas: ["David Bowie", "Lou Reed", "Iggy Pop", "Bryan Ferry"], correta: 0 },
+  { id: 71, nivel: "medio", enunciado: "Qual o alter ego de David Bowie nos anos 70?", alternativas: ["Ziggy Stardust", "Major Tom", "The Thin White Duke", "Aladdin"], correta: 0 },
+  { id: 72, nivel: "medio", enunciado: "Qual festival de 1969 virou símbolo do rock?", alternativas: ["Woodstock", "Glastonbury", "Monterey", "Isle of Wight"], correta: 0 },
+  { id: 73, nivel: "medio", enunciado: "“Imagine” é de qual artista?", alternativas: ["John Lennon", "Paul McCartney", "George Harrison", "Bob Dylan"], correta: 0 },
+  { id: 74, nivel: "medio", enunciado: "O guitarrista “Slowhand”, que passou pelo Cream, é o?", alternativas: ["Eric Clapton", "Jeff Beck", "Jimmy Page", "Peter Green"], correta: 0 },
+  { id: 75, nivel: "medio", enunciado: "Qual festival de rock estreou no Brasil em 1985?", alternativas: ["Rock in Rio", "Lollapalooza", "Monsters of Rock", "João Rock"], correta: 0 },
+  { id: 76, nivel: "medio", enunciado: "Dinho Ouro Preto é o vocalista de qual banda?", alternativas: ["Capital Inicial", "Biquíni Cavadão", "Ira!", "Camisa de Vênus"], correta: 0 },
+  { id: 77, nivel: "medio", enunciado: "Humberto Gessinger lidera qual banda gaúcha?", alternativas: ["Engenheiros do Hawaii", "Nenhum de Nós", "Replicantes", "Cachorro Grande"], correta: 0 },
+  { id: 78, nivel: "medio", enunciado: "Angra é uma banda brasileira de qual gênero?", alternativas: ["Heavy/Power Metal", "Pagode", "Forró", "Axé"], correta: 0 },
+  { id: 79, nivel: "medio", enunciado: "O gesto dos “chifrinhos” no metal foi popularizado por?", alternativas: ["Ronnie James Dio", "Ozzy Osbourne", "Lemmy", "Gene Simmons"], correta: 0 },
+  { id: 80, nivel: "medio", enunciado: "“Paint It Black” é de qual banda?", alternativas: ["The Rolling Stones", "The Kinks", "The Animals", "The Yardbirds"], correta: 0 },
+
+  // ---- Flashback e pop (anos 80/90) ----
+  { id: 81, nivel: "medio", enunciado: "“Take On Me” é de qual banda?", alternativas: ["a-ha", "Roxette", "Europe", "Duran Duran"], correta: 0 },
+  { id: 82, nivel: "medio", enunciado: "A banda de “Take On Me” é de qual país?", alternativas: ["Noruega", "Suécia", "Alemanha", "Inglaterra"], correta: 0 },
+  { id: 83, nivel: "medio", enunciado: "“Billie Jean” é de qual artista?", alternativas: ["Michael Jackson", "Prince", "Lionel Richie", "Stevie Wonder"], correta: 0 },
+  { id: 84, nivel: "medio", enunciado: "Michael Jackson é conhecido como o Rei do quê?", alternativas: ["Pop", "Rock", "Soul", "Blues"], correta: 0 },
+  { id: 85, nivel: "medio", enunciado: "“Beat It” e “Thriller” são de qual artista?", alternativas: ["Michael Jackson", "Prince", "James Brown", "Lionel Richie"], correta: 0 },
+  { id: 86, nivel: "medio", enunciado: "“Like a Prayer” e “Material Girl” são de qual artista?", alternativas: ["Madonna", "Cyndi Lauper", "Whitney Houston", "Janet Jackson"], correta: 0 },
+  { id: 87, nivel: "medio", enunciado: "“Vogue” e “Hung Up” são de qual artista?", alternativas: ["Madonna", "Kylie Minogue", "Cher", "Gwen Stefani"], correta: 0 },
+  { id: 88, nivel: "medio", enunciado: "“Girls Just Want to Have Fun” é de qual artista?", alternativas: ["Cyndi Lauper", "Madonna", "Blondie", "Pat Benatar"], correta: 0 },
+  { id: 89, nivel: "medio", enunciado: "“Boys Don’t Cry” e “Friday I’m in Love” são de qual banda?", alternativas: ["The Cure", "Depeche Mode", "Joy Division", "The Smiths"], correta: 0 },
+  { id: 90, nivel: "medio", enunciado: "Quem é o vocalista do The Cure?", alternativas: ["Robert Smith", "Morrissey", "Ian Curtis", "Dave Gahan"], correta: 0 },
+  { id: 91, nivel: "medio", enunciado: "“Personal Jesus” e “Enjoy the Silence” são de qual banda?", alternativas: ["Depeche Mode", "The Cure", "New Order", "Pet Shop Boys"], correta: 0 },
+  { id: 92, nivel: "medio", enunciado: "“The Reflex” e “Hungry Like the Wolf” são de qual banda?", alternativas: ["Duran Duran", "Spandau Ballet", "Wham!", "Culture Club"], correta: 0 },
+  { id: 93, nivel: "medio", enunciado: "“Shout” e “Everybody Wants to Rule the World” são de qual banda?", alternativas: ["Tears for Fears", "Simple Minds", "Talk Talk", "Ultravox"], correta: 0 },
+  { id: 94, nivel: "medio", enunciado: "“The Look” e “Listen to Your Heart” são de qual dupla?", alternativas: ["Roxette", "Eurythmics", "Ace of Base", "Modern Talking"], correta: 0 },
+  { id: 95, nivel: "medio", enunciado: "A dupla Roxette é de qual país?", alternativas: ["Suécia", "Noruega", "Alemanha", "Holanda"], correta: 0 },
+  { id: 96, nivel: "medio", enunciado: "“Dancing Queen” e “Mamma Mia” são de qual grupo?", alternativas: ["ABBA", "Bee Gees", "Boney M.", "Village People"], correta: 0 },
+  { id: 97, nivel: "medio", enunciado: "O grupo ABBA é de qual país?", alternativas: ["Suécia", "Inglaterra", "Estados Unidos", "Austrália"], correta: 0 },
+  { id: 98, nivel: "medio", enunciado: "“Stayin’ Alive” e “How Deep Is Your Love” são de qual grupo?", alternativas: ["Bee Gees", "ABBA", "Earth, Wind & Fire", "Kool & the Gang"], correta: 0 },
+  { id: 99, nivel: "medio", enunciado: "“With or Without You” é de qual banda?", alternativas: ["U2", "Simple Minds", "The Police", "Coldplay"], correta: 0 },
+  { id: 100, nivel: "medio", enunciado: "“Sunday Bloody Sunday” e “One” são de qual banda?", alternativas: ["U2", "R.E.M.", "The Cranberries", "Dire Straits"], correta: 0 },
+  { id: 101, nivel: "medio", enunciado: "“It’s My Life” e “Always” são de qual banda?", alternativas: ["Bon Jovi", "Aerosmith", "Def Leppard", "Journey"], correta: 0 },
+  { id: 102, nivel: "medio", enunciado: "Quem é o vocalista do Bon Jovi?", alternativas: ["Jon Bon Jovi", "Richie Sambora", "Sebastian Bach", "Bret Michaels"], correta: 0 },
+  { id: 103, nivel: "medio", enunciado: "“Just Can’t Get Enough” é de qual banda?", alternativas: ["Depeche Mode", "The Cure", "New Order", "Soft Cell"], correta: 0 },
+
+  // ---- Rock e metal (clássicos) ----
+  { id: 104, nivel: "medio", enunciado: "“Master of Puppets” e “One” são de qual banda?", alternativas: ["Metallica", "Megadeth", "Slayer", "Anthrax"], correta: 0 },
+  { id: 105, nivel: "medio", enunciado: "Quem é o vocalista e guitarrista base do Metallica?", alternativas: ["James Hetfield", "Lars Ulrich", "Kirk Hammett", "Robert Trujillo"], correta: 0 },
+  { id: 106, nivel: "medio", enunciado: "Quem é o baterista do Metallica?", alternativas: ["Lars Ulrich", "Dave Lombardo", "Nicko McBrain", "Vinnie Paul"], correta: 0 },
+  { id: 107, nivel: "medio", enunciado: "A banda de metal que usa máscaras e macacões e gravou “Duality” é a?", alternativas: ["Slipknot", "Mushroomhead", "Mudvayne", "GWAR"], correta: 0 },
+  { id: 108, nivel: "medio", enunciado: "“The Trooper” e “Fear of the Dark” são de qual banda?", alternativas: ["Iron Maiden", "Judas Priest", "Saxon", "Dio"], correta: 0 },
+  { id: 109, nivel: "medio", enunciado: "“Thunderstruck” é de qual banda?", alternativas: ["AC/DC", "Metallica", "Van Halen", "ZZ Top"], correta: 0 },
+  { id: 110, nivel: "medio", enunciado: "“T.N.T.” e “Dirty Deeds Done Dirt Cheap” são de qual banda?", alternativas: ["AC/DC", "Kiss", "Aerosmith", "Guns N’ Roses"], correta: 0 },
+  { id: 111, nivel: "medio", enunciado: "“November Rain” e “Paradise City” são de qual banda?", alternativas: ["Guns N’ Roses", "Aerosmith", "Mötley Crüe", "Bon Jovi"], correta: 0 },
+  { id: 112, nivel: "medio", enunciado: "Quem é o guitarrista de cartola do Guns N’ Roses?", alternativas: ["Slash", "Izzy Stradlin", "Duff McKagan", "Steven Adler"], correta: 0 },
+  { id: 113, nivel: "medio", enunciado: "“Come As You Are” e “Lithium” são de qual banda?", alternativas: ["Nirvana", "Pearl Jam", "Mudhoney", "Hole"], correta: 0 },
+  { id: 114, nivel: "medio", enunciado: "Quem era o vocalista do Nirvana?", alternativas: ["Kurt Cobain", "Dave Grohl", "Krist Novoselic", "Eddie Vedder"], correta: 0 },
+  { id: 115, nivel: "medio", enunciado: "“Jeremy” é de qual banda?", alternativas: ["Pearl Jam", "Soundgarden", "Nirvana", "Temple of the Dog"], correta: 0 },
+  { id: 116, nivel: "medio", enunciado: "“Crawling” e “One Step Closer” são de qual banda?", alternativas: ["Linkin Park", "Papa Roach", "P.O.D.", "Staind"], correta: 0 },
+  { id: 117, nivel: "medio", enunciado: "“Toxicity” e “Aerials” são de qual banda?", alternativas: ["System of a Down", "Rage Against the Machine", "Deftones", "Korn"], correta: 0 },
+  { id: 118, nivel: "medio", enunciado: "Quem é o vocalista do System of a Down?", alternativas: ["Serj Tankian", "Daron Malakian", "Zack de la Rocha", "Jonathan Davis"], correta: 0 },
+  { id: 119, nivel: "medio", enunciado: "“Californication” e “By the Way” são de qual banda?", alternativas: ["Red Hot Chili Peppers", "Jane’s Addiction", "Incubus", "311"], correta: 0 },
+  { id: 120, nivel: "medio", enunciado: "Quem é o vocalista do Red Hot Chili Peppers?", alternativas: ["Anthony Kiedis", "Flea", "John Frusciante", "Chad Smith"], correta: 0 },
+  { id: 121, nivel: "medio", enunciado: "Como é chamado o baixista do Red Hot Chili Peppers?", alternativas: ["Flea", "Sting", "Geddy Lee", "Les Claypool"], correta: 0 },
+  { id: 122, nivel: "medio", enunciado: "“Another Brick in the Wall” é de qual banda?", alternativas: ["Pink Floyd", "Genesis", "Yes", "King Crimson"], correta: 0 },
+  { id: 123, nivel: "medio", enunciado: "“Wish You Were Here” é de qual banda?", alternativas: ["Pink Floyd", "Dire Straits", "Supertramp", "Camel"], correta: 0 },
+  { id: 124, nivel: "medio", enunciado: "“Kashmir” e “Whole Lotta Love” são de qual banda?", alternativas: ["Led Zeppelin", "Deep Purple", "Bad Company", "Free"], correta: 0 },
+  { id: 125, nivel: "medio", enunciado: "Quem era o vocalista do Led Zeppelin?", alternativas: ["Robert Plant", "Roger Daltrey", "Paul Rodgers", "David Coverdale"], correta: 0 },
+  { id: 126, nivel: "medio", enunciado: "“Hey Jude” e “Let It Be” são de qual banda?", alternativas: ["The Beatles", "The Rolling Stones", "The Kinks", "The Hollies"], correta: 0 },
+  { id: 127, nivel: "medio", enunciado: "De qual cidade inglesa são os Beatles?", alternativas: ["Liverpool", "Londres", "Manchester", "Birmingham"], correta: 0 },
+  { id: 128, nivel: "medio", enunciado: "“(I Can’t Get No) Satisfaction” é de qual banda?", alternativas: ["The Rolling Stones", "The Beatles", "The Who", "The Animals"], correta: 0 },
+  { id: 129, nivel: "medio", enunciado: "“Angie” e “Start Me Up” são de qual banda?", alternativas: ["The Rolling Stones", "The Faces", "Bad Company", "Aerosmith"], correta: 0 },
+
+  // ---- Rock nacional ----
+  { id: 130, nivel: "medio", enunciado: "“Eduardo e Mônica” é de qual banda?", alternativas: ["Legião Urbana", "Skank", "Jota Quest", "Biquíni Cavadão"], correta: 0 },
+  { id: 131, nivel: "medio", enunciado: "“Faroeste Caboclo” é de qual banda?", alternativas: ["Legião Urbana", "Titãs", "Engenheiros do Hawaii", "Paralamas do Sucesso"], correta: 0 },
+  { id: 132, nivel: "medio", enunciado: "“Comida” e “Flores” são de qual banda?", alternativas: ["Titãs", "Legião Urbana", "Ultraje a Rigor", "RPM"], correta: 0 },
+  { id: 133, nivel: "medio", enunciado: "“Sonífera Ilha” é de qual banda?", alternativas: ["Titãs", "Barão Vermelho", "Ira!", "Capital Inicial"], correta: 0 },
+  { id: 134, nivel: "medio", enunciado: "“Lanterna dos Afogados” e “Meu Erro” são de qual banda?", alternativas: ["Os Paralamas do Sucesso", "Titãs", "Kid Abelha", "Blitz"], correta: 0 },
+  { id: 135, nivel: "medio", enunciado: "“Bete Balanço” marcou a estreia de qual banda?", alternativas: ["Barão Vermelho", "Legião Urbana", "Capital Inicial", "Ira!"], correta: 0 },
+  { id: 136, nivel: "medio", enunciado: "“Primeiros Erros (Chove)” é de qual banda?", alternativas: ["Capital Inicial", "Kid Abelha", "RPM", "Legião Urbana"], correta: 0 },
+  { id: 137, nivel: "medio", enunciado: "“Metamorfose Ambulante” é de qual artista?", alternativas: ["Raul Seixas", "Rita Lee", "Erasmo Carlos", "Roberto Carlos"], correta: 0 },
+  { id: 138, nivel: "medio", enunciado: "“Sociedade Alternativa” e “Gita” são de qual artista?", alternativas: ["Raul Seixas", "Secos & Molhados", "Mutantes", "Novos Baianos"], correta: 0 },
+  { id: 139, nivel: "medio", enunciado: "“Só os Loucos Sabem” é de qual banda?", alternativas: ["Charlie Brown Jr.", "O Rappa", "Natiruts", "Cidade Negra"], correta: 0 },
+  { id: 140, nivel: "medio", enunciado: "Quem era o vocalista do Charlie Brown Jr.?", alternativas: ["Chorão", "Marcelo D2", "Gabriel o Pensador", "Falcão"], correta: 0 },
+  { id: 141, nivel: "medio", enunciado: "“Mulher de Fases” é de qual banda?", alternativas: ["Raimundos", "Charlie Brown Jr.", "CPM 22", "Matanza"], correta: 0 },
+  { id: 142, nivel: "medio", enunciado: "Os Raimundos misturam punk/hardcore com qual ritmo nordestino?", alternativas: ["Forró/baião", "Samba", "Frevo", "Maracatu"], correta: 0 },
+  { id: 143, nivel: "medio", enunciado: "“Dias de Luta, Dias de Glória” é de qual banda?", alternativas: ["CPM 22", "NX Zero", "Fresno", "Detonautas"], correta: 0 },
+  { id: 144, nivel: "medio", enunciado: "“Admirável Chip Novo” é de qual artista?", alternativas: ["Pitty", "Marina Lima", "Fernanda Abreu", "Cássia Eller"], correta: 0 },
+  { id: 145, nivel: "medio", enunciado: "A cantora Pitty nasceu em qual estado?", alternativas: ["Bahia", "São Paulo", "Rio de Janeiro", "Pernambuco"], correta: 0 },
+  { id: 146, nivel: "medio", enunciado: "“Toda Forma de Poder” é de qual banda gaúcha?", alternativas: ["Engenheiros do Hawaii", "Legião Urbana", "Titãs", "Capital Inicial"], correta: 0 },
+  { id: 147, nivel: "medio", enunciado: "“Será” é de qual banda?", alternativas: ["Legião Urbana", "Titãs", "Capital Inicial", "Barão Vermelho"], correta: 0 },
+  { id: 148, nivel: "medio", enunciado: "“Lourinha Bombril (Parate y Mira)” é de qual banda?", alternativas: ["Os Paralamas do Sucesso", "Skank", "Jota Quest", "Cidade Negra"], correta: 0 },
+  { id: 149, nivel: "medio", enunciado: "“Que País É Este” é de qual banda?", alternativas: ["Legião Urbana", "Titãs", "Ultraje a Rigor", "Engenheiros do Hawaii"], correta: 0 },
+  { id: 150, nivel: "medio", enunciado: "A banda Sepultura surgiu em qual cidade brasileira?", alternativas: ["Belo Horizonte", "São Paulo", "Curitiba", "Porto Alegre"], correta: 0 },
+
+  // ===================== NÍVEL DIFÍCIL (ids 201–260) =====================
+  // -- Ano de lançamento (alternativas com >= 2 anos de diferença entre si) --
+  { id: 201, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “The Dark Side of the Moon”, do Pink Floyd?", alternativas: ["1973", "1969", "1977", "1981"], correta: 0 },
+  { id: 202, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Thriller”, de Michael Jackson?", alternativas: ["1982", "1978", "1986", "1990"], correta: 0 },
+  { id: 203, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Back in Black”, do AC/DC?", alternativas: ["1980", "1976", "1984", "1988"], correta: 0 },
+  { id: 204, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Nevermind”, do Nirvana?", alternativas: ["1991", "1987", "1995", "1999"], correta: 0 },
+  { id: 205, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Master of Puppets”, do Metallica?", alternativas: ["1986", "1982", "1990", "1994"], correta: 0 },
+  { id: 206, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Appetite for Destruction”, do Guns N’ Roses?", alternativas: ["1987", "1983", "1991", "1995"], correta: 0 },
+  { id: 207, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “The Wall”, do Pink Floyd?", alternativas: ["1979", "1975", "1983", "1987"], correta: 0 },
+  { id: 208, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Led Zeppelin IV” (o do “Stairway to Heaven”)?", alternativas: ["1971", "1967", "1975", "1979"], correta: 0 },
+  { id: 209, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Abbey Road”, dos Beatles?", alternativas: ["1969", "1965", "1973", "1977"], correta: 0 },
+  { id: 210, nivel: "dificil", enunciado: "Em que ano os Beatles anunciaram oficialmente o fim da banda?", alternativas: ["1970", "1966", "1974", "1978"], correta: 0 },
+  { id: 211, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Hybrid Theory”, do Linkin Park?", alternativas: ["2000", "1996", "2004", "2008"], correta: 0 },
+  { id: 212, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Toxicity”, do System of a Down?", alternativas: ["2001", "1997", "2005", "2009"], correta: 0 },
+  { id: 213, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Ten”, do Pearl Jam?", alternativas: ["1991", "1987", "1995", "1999"], correta: 0 },
+  { id: 214, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Californication”, do Red Hot Chili Peppers?", alternativas: ["1999", "1995", "2003", "2007"], correta: 0 },
+  { id: 215, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “The Number of the Beast”, do Iron Maiden?", alternativas: ["1982", "1978", "1986", "1990"], correta: 0 },
+  { id: 216, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Dookie”, do Green Day?", alternativas: ["1994", "1990", "1998", "2002"], correta: 0 },
+  { id: 217, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “American Idiot”, do Green Day?", alternativas: ["2004", "2000", "2008", "2012"], correta: 0 },
+  { id: 218, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “OK Computer”, do Radiohead?", alternativas: ["1997", "1993", "2001", "2005"], correta: 0 },
+  { id: 219, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “(What’s the Story) Morning Glory?”, do Oasis?", alternativas: ["1995", "1991", "1999", "2003"], correta: 0 },
+  { id: 220, nivel: "dificil", enunciado: "Em que ano foi lançado o single “Bohemian Rhapsody”, do Queen?", alternativas: ["1975", "1971", "1979", "1983"], correta: 0 },
+  { id: 221, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Hotel California”, dos Eagles?", alternativas: ["1976", "1972", "1980", "1984"], correta: 0 },
+  { id: 222, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum de estreia da Legião Urbana?", alternativas: ["1985", "1981", "1989", "1993"], correta: 0 },
+  { id: 223, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “The Joshua Tree”, do U2?", alternativas: ["1987", "1983", "1991", "1995"], correta: 0 },
+  { id: 224, nivel: "dificil", enunciado: "Em que ano Freddie Mercury faleceu?", alternativas: ["1991", "1987", "1995", "1999"], correta: 0 },
+  { id: 225, nivel: "dificil", enunciado: "Em que ano John Lennon foi assassinado?", alternativas: ["1980", "1976", "1984", "1988"], correta: 0 },
+  { id: 226, nivel: "dificil", enunciado: "Em que ano aconteceu a primeira edição do Rock in Rio?", alternativas: ["1985", "1981", "1989", "1993"], correta: 0 },
+  { id: 227, nivel: "dificil", enunciado: "Em que ano aconteceu o festival de Woodstock?", alternativas: ["1969", "1965", "1973", "1977"], correta: 0 },
+  { id: 228, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum de estreia “Slipknot”, da banda Slipknot?", alternativas: ["1999", "1995", "2003", "2007"], correta: 0 },
+  { id: 229, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Ride the Lightning”, do Metallica?", alternativas: ["1984", "1980", "1988", "1992"], correta: 0 },
+  { id: 230, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “…And Justice for All”, do Metallica?", alternativas: ["1988", "1984", "1992", "1996"], correta: 0 },
+
+  // -- De qual álbum é a música --
+  { id: 231, nivel: "dificil", enunciado: "A música “Hallowed Be Thy Name” está em qual álbum do Iron Maiden?", alternativas: ["The Number of the Beast", "Powerslave", "Killers", "Piece of Mind"], correta: 0 },
+  { id: 232, nivel: "dificil", enunciado: "A música “Fade to Black” está em qual álbum do Metallica?", alternativas: ["Ride the Lightning", "Kill ’Em All", "Master of Puppets", "…And Justice for All"], correta: 0 },
+  { id: 233, nivel: "dificil", enunciado: "A música “Money” está em qual álbum do Pink Floyd?", alternativas: ["The Dark Side of the Moon", "The Wall", "Animals", "Meddle"], correta: 0 },
+  { id: 234, nivel: "dificil", enunciado: "A música “Hey You” está em qual álbum do Pink Floyd?", alternativas: ["The Wall", "The Dark Side of the Moon", "Wish You Were Here", "Animals"], correta: 0 },
+  { id: 235, nivel: "dificil", enunciado: "A música “Welcome to the Jungle” está em qual álbum do Guns N’ Roses?", alternativas: ["Appetite for Destruction", "Use Your Illusion I", "G N’ R Lies", "Use Your Illusion II"], correta: 0 },
+  { id: 236, nivel: "dificil", enunciado: "A música “November Rain” está em qual álbum do Guns N’ Roses?", alternativas: ["Use Your Illusion I", "Appetite for Destruction", "Use Your Illusion II", "G N’ R Lies"], correta: 0 },
+  { id: 237, nivel: "dificil", enunciado: "A música “Stairway to Heaven” está em qual álbum do Led Zeppelin?", alternativas: ["Led Zeppelin IV", "Led Zeppelin II", "Houses of the Holy", "Physical Graffiti"], correta: 0 },
+  { id: 238, nivel: "dificil", enunciado: "A música “War Pigs” está em qual álbum do Black Sabbath?", alternativas: ["Paranoid", "Master of Reality", "Black Sabbath", "Vol. 4"], correta: 0 },
+  { id: 239, nivel: "dificil", enunciado: "A música “Crazy Train” está em qual álbum de Ozzy Osbourne?", alternativas: ["Blizzard of Ozz", "Diary of a Madman", "Bark at the Moon", "No More Tears"], correta: 0 },
+  { id: 240, nivel: "dificil", enunciado: "A música “Enter Sandman” está em qual álbum do Metallica?", alternativas: ["Metallica (Black Album)", "…And Justice for All", "Master of Puppets", "Load"], correta: 0 },
+  { id: 241, nivel: "dificil", enunciado: "A música “Nothing Else Matters” está em qual álbum do Metallica?", alternativas: ["Metallica (Black Album)", "Ride the Lightning", "Reload", "Load"], correta: 0 },
+  { id: 242, nivel: "dificil", enunciado: "A música “Heart-Shaped Box” está em qual álbum do Nirvana?", alternativas: ["In Utero", "Nevermind", "Bleach", "Incesticide"], correta: 0 },
+  { id: 243, nivel: "dificil", enunciado: "A música “Black” está em qual álbum do Pearl Jam?", alternativas: ["Ten", "Vs.", "Vitalogy", "No Code"], correta: 0 },
+  { id: 244, nivel: "dificil", enunciado: "A música “Under the Bridge” está em qual álbum do Red Hot Chili Peppers?", alternativas: ["Blood Sugar Sex Magik", "Californication", "By the Way", "Mother’s Milk"], correta: 0 },
+  { id: 245, nivel: "dificil", enunciado: "A música “Numb” está em qual álbum do Linkin Park?", alternativas: ["Meteora", "Hybrid Theory", "Minutes to Midnight", "A Thousand Suns"], correta: 0 },
+  { id: 246, nivel: "dificil", enunciado: "A música “Chop Suey!” está em qual álbum do System of a Down?", alternativas: ["Toxicity", "System of a Down", "Mezmerize", "Hypnotize"], correta: 0 },
+  { id: 247, nivel: "dificil", enunciado: "A música “Paranoid Android” está em qual álbum do Radiohead?", alternativas: ["OK Computer", "The Bends", "Kid A", "Pablo Honey"], correta: 0 },
+  { id: 248, nivel: "dificil", enunciado: "A música “Creep” está em qual álbum do Radiohead?", alternativas: ["Pablo Honey", "The Bends", "OK Computer", "Kid A"], correta: 0 },
+  { id: 249, nivel: "dificil", enunciado: "A música “Wish You Were Here” é a faixa-título de qual álbum do Pink Floyd?", alternativas: ["Wish You Were Here", "Animals", "The Wall", "Meddle"], correta: 0 },
+
+  // -- Álbum de estreia --
+  { id: 250, nivel: "dificil", enunciado: "Qual foi o álbum de estreia do Iron Maiden?", alternativas: ["Iron Maiden", "Killers", "The Number of the Beast", "Piece of Mind"], correta: 0 },
+  { id: 251, nivel: "dificil", enunciado: "Qual foi o álbum de estreia do Metallica?", alternativas: ["Kill ’Em All", "Ride the Lightning", "Master of Puppets", "Garage Inc."], correta: 0 },
+  { id: 252, nivel: "dificil", enunciado: "Qual foi o álbum de estreia dos Beatles?", alternativas: ["Please Please Me", "With the Beatles", "A Hard Day’s Night", "Help!"], correta: 0 },
+  { id: 253, nivel: "dificil", enunciado: "Qual foi o álbum de estreia do Pink Floyd?", alternativas: ["The Piper at the Gates of Dawn", "A Saucerful of Secrets", "Meddle", "Atom Heart Mother"], correta: 0 },
+  { id: 254, nivel: "dificil", enunciado: "Qual foi o álbum de estreia do Black Sabbath?", alternativas: ["Black Sabbath", "Paranoid", "Master of Reality", "Vol. 4"], correta: 0 },
+  { id: 255, nivel: "dificil", enunciado: "Qual foi o álbum de estúdio de estreia do Guns N’ Roses?", alternativas: ["Appetite for Destruction", "G N’ R Lies", "Use Your Illusion I", "Chinese Democracy"], correta: 0 },
+
+  // -- Vocalista original / formação --
+  { id: 256, nivel: "dificil", enunciado: "Quem foi o vocalista do Iron Maiden nos dois primeiros álbuns, antes de Bruce Dickinson?", alternativas: ["Paul Di’Anno", "Blaze Bayley", "Rob Halford", "Ronnie James Dio"], correta: 0 },
+  { id: 257, nivel: "dificil", enunciado: "Quem cantava no AC/DC antes de Brian Johnson?", alternativas: ["Bon Scott", "Angus Young", "Axl Rose", "Lemmy"], correta: 0 },
+  { id: 258, nivel: "dificil", enunciado: "Quem foi o vocalista original do Black Sabbath?", alternativas: ["Ozzy Osbourne", "Ronnie James Dio", "Ian Gillan", "Tony Martin"], correta: 0 },
+  { id: 259, nivel: "dificil", enunciado: "Quem foi o primeiro vocalista do Genesis, antes de Phil Collins assumir os vocais?", alternativas: ["Peter Gabriel", "Phil Collins", "Ray Wilson", "Steve Hackett"], correta: 0 },
+  { id: 260, nivel: "dificil", enunciado: "Quem foi o vocalista original do Van Halen, nos anos 70 e começo dos 80?", alternativas: ["David Lee Roth", "Sammy Hagar", "Gary Cherone", "Eddie Van Halen"], correta: 0 },
+];
+
+/** Quantas perguntas o banco tem no total. */
+export const TOTAL_PERGUNTAS = PERGUNTAS.length;
+
+/** Quantas perguntas de nível médio. */
+export const TOTAL_MEDIAS = PERGUNTAS.filter((p) => p.nivel === "medio").length;
+
+/** Quantas perguntas de nível difícil. */
+export const TOTAL_DIFICEIS = PERGUNTAS.filter((p) => p.nivel === "dificil").length;

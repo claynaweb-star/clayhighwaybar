@@ -26,6 +26,7 @@ import { SocialLinks } from "@/components/SocialLinks";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { ChromeGate } from "@/components/ChromeGate";
 import { WhatsAppGroupButton } from "@/components/WhatsAppGroupButton";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -72,69 +73,6 @@ export const metadata: Metadata = {
     follow: true,
   },
 };
-
-function Navbar() {
-  return (
-    <header className="sticky top-0 z-50 border-b border-border/70 bg-ink/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-        <Link href="/" className="flex shrink-0 items-center" aria-label="Clay Highway Bar, página inicial">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo-clay-highway.webp"
-            alt="Clay Highway Bar"
-            width={64}
-            height={64}
-            className="aspect-square h-16 w-16 max-w-none shrink-0 rounded-full object-cover transition-transform hover:scale-105"
-          />
-        </Link>
-        <nav className="ml-4 flex items-center gap-4 overflow-x-auto whitespace-nowrap text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <Link
-            href="/"
-            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
-          >
-            Home
-          </Link>
-          <Link
-            href="/agenda"
-            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
-          >
-            Agenda
-          </Link>
-          <Link
-            href="/cardapio"
-            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
-          >
-            Cardápio
-          </Link>
-          <Link
-            href="/galeria"
-            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
-          >
-            Galeria
-          </Link>
-          <Link
-            href="/promocoes"
-            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
-          >
-            Promoções
-          </Link>
-          <Link
-            href="/bar-de-rock-curitiba"
-            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
-          >
-            Sobre
-          </Link>
-          <a
-            href="#contato"
-            className="inline-flex min-h-[48px] items-center text-fog transition-colors hover:text-accent"
-          >
-            Contato
-          </a>
-        </nav>
-      </div>
-    </header>
-  );
-}
 
 /** Faixa de selos de confiança no rodapé (SVGs inline, sem dependências). */
 function TrustBadges() {
@@ -361,7 +299,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={`${anton.variable} ${inter.variable}`}>
       <body className="min-h-screen bg-ink text-fog antialiased">
         <ChromeGate>
-          <Navbar />
+          <SiteHeader />
         </ChromeGate>
         <main>{children}</main>
         <ChromeGate>

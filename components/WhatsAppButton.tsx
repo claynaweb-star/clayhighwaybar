@@ -1,7 +1,15 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { whatsappLink } from "@/lib/site";
 
 /** Botão flutuante fixo de WhatsApp (canto inferior direito). */
 export function WhatsAppButton() {
+  // No Quiz do Clay o botão flutuante cobriria a caixa de pontos/alternativas
+  // (experiência de "app" em tela cheia), então ele não aparece nessa página.
+  const pathname = usePathname();
+  if (pathname?.startsWith("/quiz-do-clay")) return null;
+
   return (
     <a
       href={whatsappLink}
