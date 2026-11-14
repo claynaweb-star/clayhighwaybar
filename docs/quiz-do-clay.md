@@ -6,13 +6,14 @@ do Nome na Lista** — não há planilha separada. O que depende do backend:
 
 - **1 partida por WhatsApp por dia** (limite diário);
 - **ranking mensal** (Top 10 na página);
-- **prêmio de entrada grátis** do 10/10, que vale **só em datas com Nome na Lista
-  aberto**: o vencedor escolhe a noite e entra **automaticamente na mesma lista**
-  que a portaria usa, com um selo 🏆.
+- **prêmio de entrada grátis** do 10/10: o vencedor entra **automaticamente em
+  todas as listas** com Nome na Lista dentro dos 30 dias de validade (inclusive em
+  novas datas que abrirem), na **mesma lista** que a portaria usa, com um selo 🏆.
+  Vale **uma única vez**: ao liberar numa noite, deixa de valer nas demais.
 
 Sem o backend, o jogo roda em "modo degradado": joga normalmente e o 10/10 até
-vê um código, mas **sem** limite diário, **sem** ranking e **sem** conseguir
-resgatar o prêmio numa data (precisa da planilha).
+vê um código, mas **sem** limite diário, **sem** ranking e **sem** entrar nas
+listas do Nome na Lista (precisa da planilha).
 
 ## 1. Atualizar o Apps Script do Nome na Lista
 
@@ -34,7 +35,7 @@ resgatar o prêmio numa data (precisa da planilha).
 
 A aba **"Quiz"** é criada sozinha na primeira partida. Nas abas de lista diária
 ("Lista AAAA-MM-DD") surgem duas colunas novas, **Prêmio Quiz** e **Código Quiz**,
-preenchidas só para vencedores (linha pintada de amarelo e em negrito).
+preenchidas só para vencedores (linha pintada de **verde** e em negrito).
 
 ## 2. Variáveis de ambiente no Netlify
 
@@ -53,14 +54,18 @@ registra um aviso no log. **Não existem mais** `QUIZ_WEBHOOK_URL` nem
 
 ## 3. Como o prêmio chega na portaria
 
-1. A pessoa gabarita (10/10) e escolhe uma **noite com Nome na Lista** na tela de
-   vitória (ou guarda um link para escolher depois, se não houver data aberta).
-2. O Apps Script inclui o nome dela na **lista daquela data** com o selo
-   `🏆 VENCEDOR DO QUIZ: ENTRADA GRÁTIS (código QUIZ-XXXX)` e pinta a linha de
-   amarelo.
-3. Na portaria (`/portaria`), o vencedor aparece com selo dourado **🏆 VENCEDOR DO
-   QUIZ**, o prêmio **ENTRADA GRÁTIS** e o botão **Liberar GRÁTIS (Quiz)** no
-   lugar do valor. Ao liberar, o código é marcado como **usado**.
+1. A pessoa gabarita (10/10) e ganha um código. O nome dela passa a entrar
+   **automaticamente em todas as listas** com Nome na Lista (a inclusão acontece
+   quando a portaria abre a lista de cada data), com o selo
+   `🏆 VENCEDOR DO QUIZ: ENTRADA GRÁTIS (código QUIZ-XXXX)` e a linha pintada de
+   **verde**.
+2. Na portaria (`/portaria`), o vencedor aparece com o selo **🏆 GANHADOR QUIZ** e
+   um botão **verde "GANHADOR QUIZ"** no lugar do valor. Ao tocar, aparece o
+   lembrete para **conferir documento com foto e o telefone no celular** e o botão
+   **Liberar entrada grátis**.
+3. O prêmio vale **uma vez só**: ao liberar numa noite, o código fica **usado** e,
+   nas outras listas, o vencedor aparece em cinza com **"PRÊMIO JÁ USADO EM DD/MM"**
+   (sem liberar de novo). Desfazer a liberação devolve o prêmio às demais listas.
 
 ## Mascotes
 
@@ -79,6 +84,7 @@ grátis a cada 30 dias por WhatsApp** e pela **conferência do código na portar
 
 ## Arquivo de revisão das perguntas
 
-`docs/quiz-revisao-perguntas.csv` (coluna `nivel` incluída) é gerado a partir do
-banco e **fica fora do Git** (está no `.gitignore`). Para regerá-lo, rode o script
-de geração sobre `lib/quiz-perguntas.ts`.
+`docs/quiz-revisao-perguntas.csv` (colunas `nivel` e `tema`: curiosidade,
+nacional, ano, álbum, banda) é gerado a partir do banco e **fica fora do Git**
+(está no `.gitignore`). Para regerá-lo, rode o script de geração sobre
+`lib/quiz-perguntas.ts`.

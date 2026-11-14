@@ -42,9 +42,11 @@
  *  ping           -> "pong"
  *  signup         -> "ok" (sempre que processado; repetir nao duplica) | "invalid"
  *  checkin        -> "ok" | "notfound"
- *  list           -> JSON de [{ id, nome, telefone, entrou, hora, premioQuiz, codigoQuiz }]
+ *  list           -> JSON de [{ id, nome, telefone, entrou, hora, premioQuiz, codigoQuiz, premioUsado, premioUsadoData }]
+ *                    (inclui automaticamente os vencedores do Quiz pendentes nesta data)
  *  quiz_start     -> "ok" | "duplicate" (ja jogou hoje) | "invalid"
- *  quiz_finish    -> JSON { codigo, jaGanhou, validade }   (codigo so no 10/10 elegivel)
+ *  quiz_finish    -> JSON { codigo, jaGanhou, validade }   (10/10: emite o codigo; o
+ *                    vencedor entra em TODAS as listas abertas, via list, enquanto nao usar)
  *  quiz_ranking   -> JSON de [{ nome, pontos, tempoMs }] (melhor por WhatsApp no mes)
  *  quiz_claim     -> "ok" | "notfound" | "expirado" | "usado" | "indisponivel" | "invalid"
  *  token invalido -> "forbidden"
@@ -57,10 +59,10 @@ var MAX_DATAS = 7;
 // As duas ultimas colunas (I, J) guardam o premio do Quiz quando a pessoa e vencedora.
 var COLS_DIA = ['ID', 'Cadastro em', 'Nome', 'E-mail', 'Telefone', 'Aceita novidades', 'Entrou', 'Hora da entrada', 'Prêmio Quiz', 'Código Quiz'];
 var COLS_CLIENTES = ['Telefone', 'Nome', 'E-mail', 'Aceita novidades', 'Primeiro cadastro', 'Último cadastro', 'Dias na lista'];
-var COLS_QUIZ = ['Dia', 'WhatsApp', 'Nome', 'Telefone', 'Pontos', 'Acertos', 'TempoMs', 'Código', 'Validade', 'Data escolhida', 'Status', 'Criado em', 'Finalizado em', 'Resgatado em', 'Usado em'];
+var COLS_QUIZ = ['Dia', 'WhatsApp', 'Nome', 'Telefone', 'Pontos', 'Acertos', 'TempoMs', 'Código', 'Validade', 'Data escolhida', 'Status', 'Criado em', 'Finalizado em', 'Resgatado em', 'Usado em', 'Usado dia'];
 
 var QUIZ_VALIDADE_DIAS = 30;
-var COR_VENCEDOR = '#FFF2CC'; // amarelo claro da linha do vencedor
+var COR_VENCEDOR = '#D9EAD3'; // verde claro da linha do vencedor do Quiz
 var ALFABETO_CODIGO = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sem I, O, 0, 1
 
 function text_(s) {
@@ -216,12 +218,19 @@ function upsertCliente_(ss, d, adicionados) {
 function list_(d) {
   if (!dataValida_(d.data)) return [];
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+  // Inclui automaticamente os vencedores do Quiz ainda pendentes nesta lista
+  // (cobre as listas abertas no momento do premio E as datas criadas depois).
+  quizGarantirVencedores_(ss, d.data);
   var sh = sheetDoDia_(ss, d.data, false);
   if (!sh) return [];
+  var estados = quizEstadoPorCodigo_(ss);
   var rows = sh.getDataRange().getValues();
   var out = [];
   for (var i = 1; i < rows.length; i++) {
     var r = rows[i];
+    var codigoUp = String(r[9] || '').toUpperCase();
+    var est = codigoUp ? estados[codigoUp] : null;
+    var usado = !!(est && est.status === 'usado');
     out.push({
       id: String(r[0]),
       nome: String(r[2]),
@@ -229,7 +238,9 @@ function list_(d) {
       entrou: String(r[6]) === 'sim',
       hora: String(r[7] || ''),
       premioQuiz: String(r[8] || ''),
-      codigoQuiz: String(r[9] || '')
+      codigoQuiz: String(r[9] || ''),
+      premioUsado: usado,
+      premioUsadoData: usado && est.usadoDia ? shortBR_(est.usadoDia) : ''
     });
   }
   out.sort(function (a, b) {
@@ -254,9 +265,9 @@ function checkin_(d) {
         sh.getRange(linha, 7).setValue('');
         sh.getRange(linha, 8).setValue('');
       }
-      // Vencedor do Quiz: ao liberar, marca o codigo como usado (e desfaz volta a resgatado).
+      // Vencedor do Quiz: ao liberar, marca o codigo como usado nesta noite (desfazer volta a pendente).
       var codigo = String(rows[i][9] || '');
-      if (codigo) quizMarcarUso_(ss, codigo, d.entrou === true);
+      if (codigo) quizMarcarUso_(ss, codigo, d.entrou === true, d.data);
       return 'ok';
     }
   }
@@ -277,6 +288,7 @@ function sheetQuiz_(ss) {
     sh.getRange('H:H').setNumberFormat('@'); // Código
     sh.getRange('I:I').setNumberFormat('@'); // Validade (ISO)
     sh.getRange('J:J').setNumberFormat('@'); // Data escolhida
+    sh.getRange('P:P').setNumberFormat('@'); // Usado dia (ISO)
   }
   return sh;
 }
@@ -353,11 +365,85 @@ function quizTemCodigoValido_(sh, wa, hojeISO) {
   return false;
 }
 
-/** Pinta a linha inteira do vencedor de amarelo e em negrito. */
+/** Pinta a linha inteira do vencedor de verde e em negrito. */
 function destaqueVencedor_(sh, linha) {
   var rng = sh.getRange(linha, 1, 1, COLS_DIA.length);
   rng.setBackground(COR_VENCEDOR);
   rng.setFontWeight('bold');
+}
+
+/** ISO AAAA-MM-DD -> DD/MM (curto, para a portaria). */
+function shortBR_(iso) {
+  var p = String(iso).split('-');
+  if (p.length < 3) return '';
+  return p[2] + '/' + p[1];
+}
+
+/**
+ * Vencedores do Quiz ainda PENDENTES (código emitido, prêmio não usado e dentro
+ * da validade). Cada um deve aparecer em todas as listas com Nome na Lista.
+ */
+function quizVencedoresPendentes_(ss) {
+  var sh = sheetQuiz_(ss);
+  var rows = sh.getDataRange().getValues();
+  var hoje = todayISO_();
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {
+    var codigo = String(rows[i][7] || '');
+    var status = String(rows[i][10] || '');
+    if (!codigo || status !== 'pendente') continue;
+    var val = diaISO_(rows[i][8]);
+    if (val && val < hoje) continue; // prêmio expirado
+    out.push({
+      codigo: codigo,
+      nome: String(rows[i][2] || ''),
+      telefone: String(rows[i][3] || ''),
+      validade: val
+    });
+  }
+  return out;
+}
+
+/**
+ * Garante que todos os vencedores pendentes estejam na lista da `data` (até a
+ * validade de cada um). Cria a aba do dia se ainda não existir. Idempotente:
+ * não duplica quem já está na lista.
+ */
+function quizGarantirVencedores_(ss, data) {
+  var pend = quizVencedoresPendentes_(ss);
+  if (pend.length === 0) return;
+  var sh = null;
+  for (var k = 0; k < pend.length; k++) {
+    if (pend[k].validade && data > pend[k].validade) continue; // depois da validade, não inclui
+    if (!sh) sh = sheetDoDia_(ss, data, true);
+    var linhaDia = acharLinhaPorTelefone_(sh, digits_(pend[k].telefone));
+    var premioText = '🏆 VENCEDOR DO QUIZ: ENTRADA GRÁTIS (código ' + pend[k].codigo + ')';
+    if (linhaDia === -1) {
+      sh.appendRow([
+        Utilities.getUuid(), new Date(), protegeFormula_(pend[k].nome), '',
+        protegeFormula_(pend[k].telefone), 'nao', '', '', premioText, pend[k].codigo
+      ]);
+      destaqueVencedor_(sh, sh.getLastRow());
+    } else if (String(sh.getRange(linhaDia, 10).getValue() || '') === '') {
+      // Já estava na lista (cadastro normal): carimba o prêmio e o destaque.
+      sh.getRange(linhaDia, 9).setValue(premioText);
+      sh.getRange(linhaDia, 10).setValue(pend[k].codigo);
+      destaqueVencedor_(sh, linhaDia);
+    }
+  }
+}
+
+/** Mapa Código (maiúsculo) -> { status, usadoDia } lido da aba "Quiz". */
+function quizEstadoPorCodigo_(ss) {
+  var sh = sheetQuiz_(ss);
+  var rows = sh.getDataRange().getValues();
+  var map = {};
+  for (var i = 1; i < rows.length; i++) {
+    var c = String(rows[i][7] || '').toUpperCase();
+    if (!c) continue;
+    map[c] = { status: String(rows[i][10] || ''), usadoDia: diaISO_(rows[i][15]) };
+  }
+  return map;
 }
 
 /** Inicio de partida: aplica o limite de 1 por dia por WhatsApp. */
@@ -506,8 +592,12 @@ function quizClaim_(d) {
   return 'ok';
 }
 
-/** Marca o codigo como usado (ou volta para resgatado ao desfazer na portaria). */
-function quizMarcarUso_(ss, codigo, usar) {
+/**
+ * Marca o codigo como USADO numa noite (status 'usado', carimba data/hora e a
+ * noite em que foi usado). Ao desfazer na portaria, volta para 'pendente' e o
+ * vencedor volta a aparecer nas demais listas.
+ */
+function quizMarcarUso_(ss, codigo, usar, diaUso) {
   var sh = sheetQuiz_(ss);
   var rows = sh.getDataRange().getValues();
   for (var i = 1; i < rows.length; i++) {
@@ -516,9 +606,11 @@ function quizMarcarUso_(ss, codigo, usar) {
       if (usar) {
         sh.getRange(linha, 11).setValue('usado');
         sh.getRange(linha, 15).setValue(new Date());
+        sh.getRange(linha, 16).setValue(diaUso || '');
       } else {
-        sh.getRange(linha, 11).setValue('resgatado');
+        sh.getRange(linha, 11).setValue('pendente');
         sh.getRange(linha, 15).setValue('');
+        sh.getRange(linha, 16).setValue('');
       }
       return;
     }
@@ -680,11 +772,13 @@ function removeLinhasPorTelefone_(sh, colTelefone, telDigitos) {
 
 // =====================  TESTES DO QUIZ  =====================
 var QUIZ_DATA_TESTE = '2000-01-03';
+var QUIZ_DATA_TESTE_2 = '2000-01-04';
 
 /**
- * Fluxo completo do Quiz: 1 partida por dia, 10/10 gera codigo, resgate inclui
- * o vencedor na lista do dia de teste e a portaria marca o codigo como usado.
- * No fim, Logger mostra cada etapa. Rode apagarTesteQuiz() depois.
+ * Fluxo completo do Quiz no modelo novo: 1 partida por dia; 10/10 gera codigo;
+ * o vencedor aparece AUTOMATICAMENTE em TODAS as listas (aqui, duas datas de
+ * teste); ao liberar numa noite, o codigo fica usado e nas outras listas mostra
+ * premioUsado com a data. No fim, Logger mostra cada etapa. Rode apagarTesteQuiz() depois.
  */
 function testeQuizFluxo() {
   apagarTesteQuiz();
@@ -695,35 +789,49 @@ function testeQuizFluxo() {
   var start2 = doPost(reqTeste_({ action: 'quiz_start', wa: wa, nome: 'Teste Quiz', telefone: TEL_TESTE, dia: hoje })).getContent();
   var fim = doPost(reqTeste_({ action: 'quiz_finish', wa: wa, nome: 'Teste Quiz', telefone: TEL_TESTE, dia: hoje, pontos: 150, acertos: 10, tempoMs: 42000, acertouTudo: true })).getContent();
   var j = JSON.parse(fim);
-  var claim = doPost(reqTeste_({ action: 'quiz_claim', codigo: j.codigo, data: QUIZ_DATA_TESTE })).getContent();
-  var listaJson = doPost(reqTeste_({ action: 'list', data: QUIZ_DATA_TESTE })).getContent();
-  var lista = JSON.parse(listaJson);
-  var vencedor = null;
-  for (var i = 0; i < lista.length; i++) { if (lista[i].codigoQuiz === j.codigo) vencedor = lista[i]; }
+
+  // O vencedor deve aparecer sozinho em QUALQUER lista aberta (via list_).
+  var lista1 = JSON.parse(doPost(reqTeste_({ action: 'list', data: QUIZ_DATA_TESTE })).getContent());
+  var lista2 = JSON.parse(doPost(reqTeste_({ action: 'list', data: QUIZ_DATA_TESTE_2 })).getContent());
+  var v1 = null, v2 = null;
+  for (var i = 0; i < lista1.length; i++) { if (lista1[i].codigoQuiz === j.codigo) v1 = lista1[i]; }
+  for (var i = 0; i < lista2.length; i++) { if (lista2[i].codigoQuiz === j.codigo) v2 = lista2[i]; }
   var rank = doPost(reqTeste_({ action: 'quiz_ranking', mes: hoje.slice(0, 7) })).getContent();
 
   Logger.log(
     'start1: ' + start1 + ' (ok) | start2: ' + start2 + ' (duplicate) | finish: ' + fim +
-    ' | claim: ' + claim + ' (ok) | vencedor na lista: ' + (vencedor ? ('sim, premio=' + vencedor.premioQuiz) : 'NAO') +
+    ' | vencedor na lista 1: ' + (v1 ? 'sim' : 'NAO') +
+    ' | vencedor na lista 2: ' + (v2 ? 'sim' : 'NAO') +
     ' | ranking contem teste: ' + (rank.indexOf('Teste Quiz') >= 0)
   );
-  if (vencedor) {
-    var usado = doPost(reqTeste_({ action: 'checkin', id: vencedor.id, entrou: true, data: QUIZ_DATA_TESTE })).getContent();
-    Logger.log('checkin vencedor: ' + usado + ' (deve marcar o codigo como usado na aba Quiz)');
+
+  if (v1) {
+    var usado = doPost(reqTeste_({ action: 'checkin', id: v1.id, entrou: true, data: QUIZ_DATA_TESTE })).getContent();
+    var lista2b = JSON.parse(doPost(reqTeste_({ action: 'list', data: QUIZ_DATA_TESTE_2 })).getContent());
+    var v2b = null;
+    for (var i = 0; i < lista2b.length; i++) { if (lista2b[i].codigoQuiz === j.codigo) v2b = lista2b[i]; }
+    Logger.log(
+      'checkin vencedor: ' + usado +
+      ' | lista 2 apos usar: premioUsado=' + (v2b ? v2b.premioUsado : '?') +
+      ' em ' + (v2b ? v2b.premioUsadoData : '?') + ' (deve bater com ' + shortBR_(QUIZ_DATA_TESTE) + ')'
+    );
   }
 }
 
-/** Remove os dados de teste do Quiz (aba "Quiz" e a aba de dia de teste). */
+/** Remove os dados de teste do Quiz (aba "Quiz" e as abas de dia de teste). */
 function apagarTesteQuiz() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var tel = digits_(TEL_TESTE);
   var removidas = 0;
   var quiz = ss.getSheetByName('Quiz');
   if (quiz) removidas += removeLinhasPorTelefone_(quiz, 2, tel); // col B = WhatsApp
-  var sh = ss.getSheetByName(nomeAbaDia_(QUIZ_DATA_TESTE));
-  if (sh) {
-    removidas += removeLinhasPorTelefone_(sh, 5, tel); // col E = Telefone
-    if (sh.getLastRow() <= 1) ss.deleteSheet(sh);
+  var datas = [QUIZ_DATA_TESTE, QUIZ_DATA_TESTE_2];
+  for (var k = 0; k < datas.length; k++) {
+    var sh = ss.getSheetByName(nomeAbaDia_(datas[k]));
+    if (sh) {
+      removidas += removeLinhasPorTelefone_(sh, 5, tel); // col E = Telefone
+      if (sh.getLastRow() <= 1) ss.deleteSheet(sh);
+    }
   }
   Logger.log('Linhas de teste do Quiz removidas: ' + removidas);
 }

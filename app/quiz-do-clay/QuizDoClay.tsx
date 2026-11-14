@@ -16,7 +16,6 @@ import {
   type ResultadoPergunta,
   type ResultadoFinal,
   type RespostaCliente,
-  type DataPremio,
 } from "@/lib/quiz-tipos";
 import { TextoCanvas } from "./TextoCanvas";
 
@@ -53,6 +52,32 @@ function registrarWaDispositivo(wa: string): boolean {
   }
 }
 
+/** Ícone do WhatsApp (inline, herda a cor via currentColor). */
+function IconeWhatsApp({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={className} fill="currentColor">
+      <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.82 9.82 0 001.516 5.26l-.999 3.648 3.472-.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+    </svg>
+  );
+}
+
+/**
+ * "Desafiar um amigo": abre o compartilhamento do celular (Web Share) com o
+ * texto. Sem Web Share, abre o WhatsApp direto (wa.me). O texto já traz o link.
+ */
+async function desafiarAmigo(texto: string): Promise<void> {
+  try {
+    const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+    if (nav.share) {
+      await nav.share({ title: "Quiz do Clay", text: texto });
+      return;
+    }
+  } catch (e) {
+    if ((e as Error)?.name === "AbortError") return; // cancelou, tudo bem
+  }
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
+}
+
 const POSES = {
   rock: "/claytinho_v3_rock.webp",
   duvida: "/claytinho_v3_duvida.webp",
@@ -70,10 +95,7 @@ type Tela =
   | "pergunta"
   | "feedback"
   | "resultado"
-  | "jaJogou"
-  | "resgate";
-
-const RE_CODIGO = /^QUIZ-[A-Z0-9]{4}$/;
+  | "jaJogou";
 
 /** Mascote Claytinho numa pose, com animação opcional. */
 function Claytinho({
@@ -109,22 +131,8 @@ function Balao({ children, className = "" }: { children: React.ReactNode; classN
   );
 }
 
-export function QuizDoClay({ datasAbertas }: { datasAbertas: DataPremio[] }) {
+export function QuizDoClay() {
   const [tela, setTela] = useState<Tela>("intro");
-  const [premioCodigo, setPremioCodigo] = useState("");
-
-  // Link "resgatar depois": /quiz-do-clay?premio=QUIZ-XXXX abre a escolha de data.
-  useEffect(() => {
-    try {
-      const p = new URLSearchParams(window.location.search).get("premio");
-      if (p && RE_CODIGO.test(p.toUpperCase())) {
-        setPremioCodigo(p.toUpperCase());
-        setTela("resgate");
-      }
-    } catch {
-      /* sem query string */
-    }
-  }, []);
 
   // Dados da partida em curso (refs: usados em callbacks assíncronos).
   const gameTokenRef = useRef("");
@@ -384,176 +392,6 @@ export function QuizDoClay({ datasAbertas }: { datasAbertas: DataPremio[] }) {
       )}
 
       {tela === "jaJogou" && <TelaJaJogou onVoltar={reiniciar} />}
-
-      {tela === "resgate" && (
-        <TelaResgate
-          codigo={premioCodigo}
-          datas={datasAbertas}
-          onVoltar={reiniciar}
-        />
-      )}
-    </div>
-  );
-}
-
-/** Mensagem amigável a partir do motivo de erro do resgate. */
-function mensagemErroResgate(erro: unknown): string {
-  switch (erro) {
-    case "invalido":
-      return "Código não encontrado. Confere se digitou certinho.";
-    case "expirado":
-      return "Este prêmio passou da validade de 30 dias.";
-    case "usado":
-      return "Este prêmio já foi usado na portaria.";
-    case "data":
-      return "Essa data não está mais aberta. Escolhe outra.";
-    case "sem_backend":
-      return "O sistema de listas está fora do ar agora. Tenta mais tarde.";
-    default:
-      return "Não rolou agora. Tenta de novo em instantes.";
-  }
-}
-
-/**
- * Escolha da data para usar o prêmio: lista as noites de Nome na Lista abertas e,
- * ao tocar numa, inclui a pessoa na lista daquela data. Sem datas abertas, mostra
- * o aviso de "guardado por 30 dias" e um link com o código para escolher depois.
- */
-function EscolhaData({
-  codigo,
-  datas,
-  validade,
-}: {
-  codigo: string;
-  datas: DataPremio[];
-  validade?: string | null;
-}) {
-  const [estado, setEstado] = useState<"idle" | "enviando" | "ok">("idle");
-  const [enviandoData, setEnviandoData] = useState<string | null>(null);
-  const [escolhida, setEscolhida] = useState<{
-    label: string;
-    preco: number;
-  } | null>(null);
-  const [erro, setErro] = useState("");
-
-  async function resgatar(d: DataPremio) {
-    setEstado("enviando");
-    setEnviandoData(d.data);
-    setErro("");
-    try {
-      const res = await fetch("/api/quiz/resgatar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codigo, data: d.data }),
-      });
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        setEscolhida({ label: data.label, preco: data.preco });
-        setEstado("ok");
-      } else {
-        setEstado("idle");
-        setErro(mensagemErroResgate(data?.erro));
-      }
-    } catch {
-      setEstado("idle");
-      setErro("Sem conexão. Tenta de novo?");
-    } finally {
-      setEnviandoData(null);
-    }
-  }
-
-  if (estado === "ok" && escolhida) {
-    return (
-      <div className="w-full max-w-xs rounded-2xl border-2 border-green-600 bg-green-950/40 p-4 text-center">
-        <p className="font-display text-xl text-green-300">Prêmio garantido! 🏆</p>
-        <p className="mt-1 text-sm text-fog">
-          Você está na lista de{" "}
-          <span className="font-semibold text-accent">{escolhida.label}</span>.
-        </p>
-        <p className="mt-2 text-xs text-muted">
-          É só chegar e falar seu nome na portaria até as 21h. Sua entrada é grátis
-          (código {codigo}).
-        </p>
-      </div>
-    );
-  }
-
-  if (datas.length === 0) {
-    const link = `https://${SITE_URL}?premio=${codigo}`;
-    return (
-      <div className="w-full max-w-xs rounded-2xl border border-border bg-surface p-4 text-center">
-        <p className="text-sm text-fog">
-          No momento não há datas com Nome na Lista. Seu prêmio fica guardado por 30
-          dias.
-        </p>
-        <p className="mt-2 text-xs text-muted">
-          Guarde este link para escolher a data quando abrir uma noite:
-        </p>
-        <a
-          href={link}
-          className="mt-1 block break-all rounded-lg border border-accent/50 bg-accent-soft/30 px-3 py-2 text-xs font-semibold text-accent"
-        >
-          {link}
-        </a>
-        {validade ? (
-          <p className="mt-2 text-xs text-muted">Vale até {validade}.</p>
-        ) : null}
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full max-w-xs">
-      <div className="grid gap-2">
-        {datas.map((d) => (
-          <button
-            key={d.data}
-            disabled={estado === "enviando"}
-            onClick={() => resgatar(d)}
-            className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface px-4 py-3 text-left font-semibold text-fog transition-colors hover:border-accent disabled:opacity-60"
-          >
-            <span>{d.label}</span>
-            <span className="text-sm text-accent">
-              {enviandoData === d.data ? "Reservando…" : `R$ ${d.preco}`}
-            </span>
-          </button>
-        ))}
-      </div>
-      {erro ? <p className="mt-2 text-sm font-semibold text-red-400">{erro}</p> : null}
-      {validade ? (
-        <p className="mt-2 text-center text-xs text-muted">Prêmio válido até {validade}.</p>
-      ) : null}
-    </div>
-  );
-}
-
-/** Tela de resgate pelo link (quando a pessoa volta depois para escolher a data). */
-function TelaResgate({
-  codigo,
-  datas,
-  onVoltar,
-}: {
-  codigo: string;
-  datas: DataPremio[];
-  onVoltar: () => void;
-}) {
-  return (
-    <div className="clay-in flex w-full flex-1 flex-col items-center justify-center gap-5 text-center">
-      <Claytinho pose="comemorando" anim="clay-bob" className="h-40 w-auto" />
-      <h2 className="font-display text-3xl text-fog">Seu prêmio do Quiz</h2>
-      <div className="rounded-xl border-2 border-accent bg-accent-soft/40 px-5 py-2">
-        <p className="font-display text-2xl tracking-widest text-fog">{codigo}</p>
-      </div>
-      <p className="max-w-xs text-sm text-muted">
-        Entrada grátis em uma noite com Nome na Lista. Escolha a sua data:
-      </p>
-      <EscolhaData codigo={codigo} datas={datas} />
-      <button
-        onClick={onVoltar}
-        className="rounded-2xl border border-border px-6 py-3 font-semibold text-muted hover:text-fog"
-      >
-        Voltar ao início
-      </button>
     </div>
   );
 }
@@ -993,18 +831,17 @@ function TelaResultado({
             <p className="font-display text-3xl tracking-widest text-fog">{final.codigo}</p>
           </div>
           <p className="max-w-xs text-sm font-semibold text-fog">
-            Seu prêmio é válido somente nas datas específicas que têm Nome na Lista.
-            Escolha a sua data abaixo.
+            {(final.datasPremio?.length ?? 0) > 0
+              ? "Seu nome já está em todas as listas com Nome na Lista! Vale 1 entrada grátis, em uma noite à sua escolha."
+              : "Seu nome vai entrar automaticamente nas próximas listas com Nome na Lista. Prêmio válido por 30 dias."}
           </p>
-          <EscolhaData
-            codigo={final.codigo}
-            datas={final.datasPremio ?? []}
-            validade={final.validadeCodigo}
-          />
+          {final.validadeCodigo ? (
+            <p className="max-w-xs text-xs text-muted">Vale até {final.validadeCodigo}.</p>
+          ) : null}
           <p className="max-w-xs text-xs text-muted">
-            O prêmio só é liberado na portaria após conferência do nome com documento
-            com foto e do número de telefone no celular do vencedor. Nome ou telefone
-            diferentes do cadastro anulam o prêmio.
+            O prêmio vale 1 entrada grátis, usada uma única vez. Só é liberado na portaria
+            após conferência do nome com documento com foto e do número de telefone no
+            celular do vencedor. Nome ou telefone diferentes do cadastro anulam o prêmio.
           </p>
         </>
       )}
@@ -1036,10 +873,21 @@ function TelaResultado({
           Conhecer o Clay
         </Link>
         <button
-          onClick={onJogarDeNovo}
-          className="rounded-2xl border border-border px-6 py-3 font-semibold text-muted hover:text-fog"
+          onClick={() =>
+            desafiarAmigo(
+              `Fiz ${final.pontos} pontos no Quiz do Clay! 🤘 Duvido você acertar 10 de 10 e ganhar entrada grátis: ${GAME_URL}`,
+            )
+          }
+          className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-6 py-3 text-lg font-bold text-black transition-transform hover:scale-[1.02] active:scale-95"
         >
-          Jogar de novo
+          <IconeWhatsApp className="h-5 w-5" />
+          Desafiar um amigo
+        </button>
+        <button
+          onClick={onJogarDeNovo}
+          className="text-xs text-muted underline hover:text-fog"
+        >
+          Volte amanhã para jogar de novo
         </button>
       </div>
       {dica && <p className="max-w-xs text-sm text-accent">{dica}</p>}
@@ -1056,10 +904,21 @@ function TelaJaJogou({ onVoltar }: { onVoltar: () => void }) {
         É 1 partida por dia por WhatsApp. Volta amanhã pra tentar de novo e subir no ranking. 🤘
       </p>
       <button
-        onClick={onVoltar}
-        className="rounded-2xl border border-border px-6 py-3 font-semibold text-muted hover:text-fog"
+        onClick={() =>
+          desafiarAmigo(
+            `Jogue o Quiz do Clay e tente acertar 10 de 10 para ganhar entrada grátis! 🤘 ${GAME_URL}`,
+          )
+        }
+        className="flex w-full max-w-xs items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-6 py-4 text-lg font-bold text-black transition-transform hover:scale-[1.02] active:scale-95"
       >
-        Voltar ao início
+        <IconeWhatsApp className="h-5 w-5" />
+        Desafiar um amigo
+      </button>
+      <button
+        onClick={onVoltar}
+        className="text-xs text-muted underline hover:text-fog"
+      >
+        Volte amanhã para jogar de novo
       </button>
     </div>
   );

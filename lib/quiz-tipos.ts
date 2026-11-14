@@ -96,11 +96,6 @@ export type ResultadoFinal = {
   datasPremio?: DataPremio[];
 };
 
-/** Resposta ao resgatar o prêmio numa data (escolher a noite do Nome na Lista). */
-export type ResultadoResgate =
-  | { ok: true; data: string; preco: number; label: string }
-  | { ok: false; erro: "invalido" | "expirado" | "usado" | "indisponivel" | "sem_backend" | "data" };
-
 /** Uma linha do ranking mensal (nome já reduzido para privacidade). */
 export type RankingItem = {
   nome: string;

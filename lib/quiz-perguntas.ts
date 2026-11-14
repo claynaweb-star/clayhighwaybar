@@ -28,15 +28,17 @@ export type Pergunta = {
   enunciado: string;
   alternativas: [string, string, string, string];
   correta: 0 | 1 | 2 | 3;
+  /** Tema para o CSV de revisão: "curiosidade", "nacional", "ano", "álbum"... */
+  tema?: string;
 };
 
 export const PERGUNTAS: Pergunta[] = [
-  // ===================== NÍVEL MÉDIO (ids 1–150) =====================
+  // ===================== NÍVEL MÉDIO (ids 1–190) =====================
   { id: 1, nivel: "medio", enunciado: "Qual banda lançou o álbum “The Dark Side of the Moon”?", alternativas: ["Pink Floyd", "Led Zeppelin", "The Who", "Genesis"], correta: 0 },
-  { id: 2, nivel: "medio", enunciado: "Quem é o vocalista do Iron Maiden na fase clássica?", alternativas: ["Bruce Dickinson", "Rob Halford", "Ozzy Osbourne", "Ronnie James Dio"], correta: 0 },
+  { id: 2, nivel: "medio", enunciado: "Em qual álbum Bruce Dickinson estreou como vocalista do Iron Maiden?", alternativas: ["The Number of the Beast", "Killers", "Iron Maiden", "Powerslave"], correta: 0 },
   { id: 3, nivel: "medio", enunciado: "“Smells Like Teen Spirit” é de qual banda?", alternativas: ["Nirvana", "Pearl Jam", "Soundgarden", "Alice in Chains"], correta: 0 },
-  { id: 4, nivel: "medio", enunciado: "Qual baterista do Nirvana fundou o Foo Fighters?", alternativas: ["Dave Grohl", "Krist Novoselic", "Taylor Hawkins", "Chad Channing"], correta: 0 },
-  { id: 5, nivel: "medio", enunciado: "“Bohemian Rhapsody” é de qual banda?", alternativas: ["Queen", "The Beatles", "Rolling Stones", "Deep Purple"], correta: 0 },
+  { id: 4, nivel: "medio", enunciado: "Antes do Nirvana, Dave Grohl foi baterista de qual banda hardcore de Washington?", alternativas: ["Scream", "Minor Threat", "Black Flag", "Bad Brains"], correta: 0 },
+  { id: 5, nivel: "medio", enunciado: "Em qual álbum do Queen está “Bohemian Rhapsody”?", alternativas: ["A Night at the Opera", "A Day at the Races", "Sheer Heart Attack", "News of the World"], correta: 0 },
   { id: 6, nivel: "medio", enunciado: "Como é apelidada a guitarra artesanal que Brian May, do Queen, construiu com o pai?", alternativas: ["Red Special", "Frankenstrat", "Blackie", "Lucille"], correta: 0 },
   { id: 7, nivel: "medio", enunciado: "“Stairway to Heaven” é de qual banda?", alternativas: ["Led Zeppelin", "Black Sabbath", "Rush", "Yes"], correta: 0 },
   { id: 8, nivel: "medio", enunciado: "Quem foi o baterista do Led Zeppelin?", alternativas: ["John Bonham", "Keith Moon", "Ginger Baker", "Cozy Powell"], correta: 0 },
@@ -55,7 +57,7 @@ export const PERGUNTAS: Pergunta[] = [
   { id: 21, nivel: "medio", enunciado: "Qual integrante do The Doors compôs a maior parte de “Light My Fire”?", alternativas: ["Robby Krieger", "Jim Morrison", "Ray Manzarek", "John Densmore"], correta: 0 },
   { id: 22, nivel: "medio", enunciado: "Qual banda gravou “Creep” e “Paranoid Android”?", alternativas: ["Radiohead", "Blur", "Oasis", "Muse"], correta: 0 },
   { id: 23, nivel: "medio", enunciado: "“Wonderwall” é de qual banda?", alternativas: ["Oasis", "Blur", "Pulp", "The Verve"], correta: 0 },
-  { id: 24, nivel: "medio", enunciado: "Qual dupla de irmãos brigões liderava o Oasis?", alternativas: ["Os irmãos Gallagher", "Os irmãos Davis", "Os irmãos Reid", "Os irmãos Robinson"], correta: 0 },
+  { id: 24, nivel: "medio", enunciado: "Qual dos irmãos Gallagher era o principal compositor do Oasis?", alternativas: ["Noel Gallagher", "Liam Gallagher", "Paul Gallagher", "Bonehead"], correta: 0 },
   { id: 25, nivel: "medio", enunciado: "Quem foi o baterista lendário do The Who?", alternativas: ["Keith Moon", "John Bonham", "Ginger Baker", "Neil Peart"], correta: 0 },
   { id: 26, nivel: "medio", enunciado: "Qual banda tem Mick Jagger e Keith Richards?", alternativas: ["The Rolling Stones", "The Beatles", "The Who", "Cream"], correta: 0 },
   { id: 27, nivel: "medio", enunciado: "Qual Beatle compôs “Here Comes the Sun” e “Something”?", alternativas: ["George Harrison", "John Lennon", "Paul McCartney", "Ringo Starr"], correta: 0 },
@@ -85,7 +87,7 @@ export const PERGUNTAS: Pergunta[] = [
   { id: 51, nivel: "medio", enunciado: "“Infinita Highway” é de qual banda?", alternativas: ["Engenheiros do Hawaii", "Legião Urbana", "Titãs", "Paralamas do Sucesso"], correta: 0 },
   { id: 52, nivel: "medio", enunciado: "Em qual cidade nasceu Raul Seixas?", alternativas: ["Salvador", "Rio de Janeiro", "São Paulo", "Recife"], correta: 0 },
   { id: 53, nivel: "medio", enunciado: "“Ovelha Negra” é de qual artista do rock brasileiro?", alternativas: ["Rita Lee", "Gal Costa", "Marina Lima", "Baby do Brasil"], correta: 0 },
-  { id: 54, nivel: "medio", enunciado: "Rita Lee fez parte de qual banda psicodélica dos anos 60/70?", alternativas: ["Os Mutantes", "Novos Baianos", "Secos & Molhados", "Casa das Máquinas"], correta: 0 },
+  { id: 54, nivel: "medio", enunciado: "Em qual cidade nasceu Rita Lee?", alternativas: ["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Porto Alegre"], correta: 0 },
   { id: 55, nivel: "medio", enunciado: "Ney Matogrosso foi vocalista de qual banda?", alternativas: ["Secos & Molhados", "Mutantes", "Camisa de Vênus", "Blitz"], correta: 0 },
   { id: 56, nivel: "medio", enunciado: "“Highway to Hell” é de qual banda?", alternativas: ["AC/DC", "Motörhead", "Judas Priest", "Scorpions"], correta: 0 },
   { id: 57, nivel: "medio", enunciado: "“Ace of Spades” é de qual banda?", alternativas: ["Motörhead", "Metallica", "Venom", "Saxon"], correta: 0 },
@@ -103,7 +105,7 @@ export const PERGUNTAS: Pergunta[] = [
   { id: 69, nivel: "medio", enunciado: "Como se chama a banda que acompanha Bruce Springsteen?", alternativas: ["E Street Band", "The Heartbreakers", "The Silver Bullet Band", "The Wailers"], correta: 0 },
   { id: 70, nivel: "medio", enunciado: "“Space Oddity” e “Heroes” são de qual artista?", alternativas: ["David Bowie", "Lou Reed", "Iggy Pop", "Bryan Ferry"], correta: 0 },
   { id: 71, nivel: "medio", enunciado: "Qual o alter ego de David Bowie nos anos 70?", alternativas: ["Ziggy Stardust", "Major Tom", "The Thin White Duke", "Aladdin"], correta: 0 },
-  { id: 72, nivel: "medio", enunciado: "Qual festival de 1969 virou símbolo do rock?", alternativas: ["Woodstock", "Glastonbury", "Monterey", "Isle of Wight"], correta: 0 },
+  { id: 72, nivel: "medio", enunciado: "Em qual estado dos EUA aconteceu o festival de Woodstock de 1969?", alternativas: ["Nova York", "Califórnia", "Flórida", "Texas"], correta: 0 },
   { id: 73, nivel: "medio", enunciado: "“Imagine” é de qual artista?", alternativas: ["John Lennon", "Paul McCartney", "George Harrison", "Bob Dylan"], correta: 0 },
   { id: 74, nivel: "medio", enunciado: "O guitarrista “Slowhand”, que passou pelo Cream, é o?", alternativas: ["Eric Clapton", "Jeff Beck", "Jimmy Page", "Peter Green"], correta: 0 },
   { id: 75, nivel: "medio", enunciado: "Qual festival de rock estreou no Brasil em 1985?", alternativas: ["Rock in Rio", "Lollapalooza", "Monsters of Rock", "João Rock"], correta: 0 },
@@ -116,7 +118,7 @@ export const PERGUNTAS: Pergunta[] = [
   // ---- Flashback e pop (anos 80/90) ----
   { id: 81, nivel: "medio", enunciado: "“Take On Me” é de qual banda?", alternativas: ["a-ha", "Roxette", "Europe", "Duran Duran"], correta: 0 },
   { id: 82, nivel: "medio", enunciado: "A banda de “Take On Me” é de qual país?", alternativas: ["Noruega", "Suécia", "Alemanha", "Inglaterra"], correta: 0 },
-  { id: 83, nivel: "medio", enunciado: "“Billie Jean” é de qual artista?", alternativas: ["Michael Jackson", "Prince", "Lionel Richie", "Stevie Wonder"], correta: 0 },
+  { id: 83, nivel: "medio", enunciado: "Qual passo de dança Michael Jackson popularizou ao apresentar “Billie Jean” em 1983?", alternativas: ["Moonwalk", "Robô", "Vogue", "Breakdance"], correta: 0 },
   { id: 84, nivel: "medio", enunciado: "Qual álbum de Michael Jackson é o mais vendido da história?", alternativas: ["Thriller", "Bad", "Off the Wall", "Dangerous"], correta: 0 },
   { id: 85, nivel: "medio", enunciado: "Quem produziu o álbum “Thriller”, de Michael Jackson?", alternativas: ["Quincy Jones", "Rick Rubin", "Phil Spector", "George Martin"], correta: 0 },
   { id: 86, nivel: "medio", enunciado: "“Like a Prayer” e “Material Girl” são de qual artista?", alternativas: ["Madonna", "Cyndi Lauper", "Whitney Houston", "Janet Jackson"], correta: 0 },
@@ -129,7 +131,7 @@ export const PERGUNTAS: Pergunta[] = [
   { id: 93, nivel: "medio", enunciado: "“Shout” e “Everybody Wants to Rule the World” são de qual banda?", alternativas: ["Tears for Fears", "Simple Minds", "Talk Talk", "Ultravox"], correta: 0 },
   { id: 94, nivel: "medio", enunciado: "“The Look” e “Listen to Your Heart” são de qual dupla?", alternativas: ["Roxette", "Eurythmics", "Ace of Base", "Modern Talking"], correta: 0 },
   { id: 95, nivel: "medio", enunciado: "Quem forma a dupla Roxette com Marie Fredriksson?", alternativas: ["Per Gessle", "Björn Ulvaeus", "Benny Andersson", "Thomas Ledin"], correta: 0 },
-  { id: 96, nivel: "medio", enunciado: "“Dancing Queen” e “Mamma Mia” são de qual grupo?", alternativas: ["ABBA", "Bee Gees", "Boney M.", "Village People"], correta: 0 },
+  { id: 96, nivel: "medio", enunciado: "Em qual cidade o grupo ABBA se formou?", alternativas: ["Estocolmo", "Oslo", "Copenhague", "Helsinque"], correta: 0 },
   { id: 97, nivel: "medio", enunciado: "Qual festival a ABBA venceu em 1974 com “Waterloo”?", alternativas: ["Eurovision", "Festival de Sanremo", "Glastonbury", "Festival de Woodstock"], correta: 0 },
   { id: 98, nivel: "medio", enunciado: "A trilha de qual filme de 1977 impulsionou os Bee Gees com “Stayin’ Alive”?", alternativas: ["Os Embalos de Sábado à Noite", "Grease", "Flashdance", "Footloose"], correta: 0 },
   { id: 99, nivel: "medio", enunciado: "“With or Without You” é de qual banda?", alternativas: ["U2", "Simple Minds", "The Police", "Coldplay"], correta: 0 },
@@ -189,7 +191,49 @@ export const PERGUNTAS: Pergunta[] = [
   { id: 149, nivel: "medio", enunciado: "“Que País É Este” é de qual banda?", alternativas: ["Legião Urbana", "Titãs", "Ultraje a Rigor", "Engenheiros do Hawaii"], correta: 0 },
   { id: 150, nivel: "medio", enunciado: "A banda Sepultura surgiu em qual cidade brasileira?", alternativas: ["Belo Horizonte", "São Paulo", "Curitiba", "Porto Alegre"], correta: 0 },
 
-  // ===================== NÍVEL DIFÍCIL (ids 201–260) =====================
+  // ---- Curiosidades e casos inusitados do rock (nível médio, ids 151–190) ----
+  { id: 151, nivel: "medio", tema: "curiosidade", enunciado: "No show de Ozzy Osbourne em 1982, o que ele mordeu no palco pensando ser de borracha?", alternativas: ["Um morcego", "Uma cobra", "Um rato", "Um sapo"], correta: 0 },
+  { id: 152, nivel: "medio", tema: "curiosidade", enunciado: "O contrato de shows do Van Halen exigia uma tigela de M&M's sem as unidades de qual cor, como teste de atenção às regras?", alternativas: ["Marrom", "Verde", "Azul", "Vermelha"], correta: 0 },
+  { id: 153, nivel: "medio", tema: "curiosidade", enunciado: "Em 2013, o Metallica completou shows em todos os continentes ao tocar em qual lugar gelado?", alternativas: ["Antártida", "Groenlândia", "Alasca", "Sibéria"], correta: 0 },
+  { id: 154, nivel: "medio", tema: "curiosidade", enunciado: "No Live Aid de 1985, Phil Collins tocou em Londres e nos EUA no mesmo dia cruzando o Atlântico em qual avião supersônico?", alternativas: ["Concorde", "Boeing 747", "Tupolev", "Spitfire"], correta: 0 },
+  { id: 155, nivel: "medio", tema: "curiosidade", enunciado: "O guitarrista Brian May, do Queen, é doutor em qual ciência?", alternativas: ["Astrofísica", "Medicina", "Geologia", "Economia"], correta: 0 },
+  { id: 156, nivel: "medio", tema: "curiosidade", enunciado: "Além de cantar no Iron Maiden, Bruce Dickinson também atuou profissionalmente como?", alternativas: ["Piloto de avião", "Cirurgião", "Advogado", "Arquiteto"], correta: 0 },
+  { id: 157, nivel: "medio", tema: "curiosidade", enunciado: "O nome “Pink Floyd” foi criado a partir do nome de dois músicos de qual gênero?", alternativas: ["Blues", "Jazz", "Country", "Ópera"], correta: 0 },
+  { id: 158, nivel: "medio", tema: "curiosidade", enunciado: "“Smoke on the Water”, do Deep Purple, foi inspirada em um incêndio real em um cassino em qual país?", alternativas: ["Suíça", "França", "Áustria", "Itália"], correta: 0 },
+  { id: 159, nivel: "medio", tema: "curiosidade", enunciado: "Qual banda fez no Live Aid de 1985 uma apresentação frequentemente eleita a melhor da história do rock ao vivo?", alternativas: ["Queen", "U2", "The Who", "Led Zeppelin"], correta: 0 },
+  { id: 160, nivel: "medio", tema: "curiosidade", enunciado: "O último show dos Beatles, em 1969, foi uma apresentação surpresa onde?", alternativas: ["No telhado da gravadora", "Em um estádio", "Em uma praia", "Em um teatro"], correta: 0 },
+  { id: 161, nivel: "medio", tema: "curiosidade", enunciado: "Estima-se que o festival de Woodstock de 1969 reuniu cerca de quantas pessoas?", alternativas: ["400 mil", "40 mil", "4 mil", "4 milhões"], correta: 0 },
+  { id: 162, nivel: "medio", tema: "curiosidade", enunciado: "O guitarrista Angus Young, do AC/DC, é famoso por se apresentar vestido de?", alternativas: ["Uniforme de colegial", "Terno de gala", "Super-herói", "Astronauta"], correta: 0 },
+  { id: 163, nivel: "medio", tema: "curiosidade", enunciado: "Antes da fama no Iron Maiden, Bruce Dickinson competiu em alto nível no Reino Unido em qual esporte?", alternativas: ["Esgrima", "Boxe", "Remo", "Tênis"], correta: 0 },
+  { id: 164, nivel: "medio", tema: "curiosidade", enunciado: "O vocalista do The Offspring, Dexter Holland, conquistou um doutorado em qual área?", alternativas: ["Biologia molecular", "Astronomia", "Filosofia", "Engenharia"], correta: 0 },
+  { id: 165, nivel: "medio", tema: "curiosidade", enunciado: "A banda Black Sabbath tirou o nome de um filme de qual gênero?", alternativas: ["Terror", "Comédia", "Faroeste", "Musical"], correta: 0 },
+  { id: 166, nivel: "medio", tema: "curiosidade", enunciado: "O nome “Led Zeppelin” nasceu de uma piada: a banda cairia como o quê?", alternativas: ["Um balão de chumbo", "Um avião de papel", "Uma folha seca", "Uma bolha de sabão"], correta: 0 },
+  { id: 167, nivel: "medio", tema: "curiosidade", enunciado: "O nome “Radiohead” veio de uma música de qual banda?", alternativas: ["Talking Heads", "The Smiths", "Pixies", "Joy Division"], correta: 0 },
+  { id: 168, nivel: "medio", tema: "curiosidade", enunciado: "O nome “Beatles” é um trocadilho com “beat” e com qual inseto em inglês?", alternativas: ["Besouro", "Abelha", "Grilo", "Formiga"], correta: 0 },
+  { id: 169, nivel: "medio", tema: "curiosidade", enunciado: "O nome “Duran Duran” veio de um personagem de qual filme de ficção científica?", alternativas: ["Barbarella", "Blade Runner", "Metrópolis", "Alien"], correta: 0 },
+  { id: 170, nivel: "medio", tema: "curiosidade", enunciado: "Na capa de “Abbey Road”, os Beatles aparecem fazendo o quê?", alternativas: ["Atravessando uma faixa de pedestres", "Tocando num palco", "Sentados num bar", "Dentro de um estúdio"], correta: 0 },
+  { id: 171, nivel: "medio", tema: "curiosidade", enunciado: "A capa do álbum “Nevermind”, do Nirvana, mostra um bebê nadando atrás de quê?", alternativas: ["Uma nota de dinheiro", "Um peixe", "Uma bola", "Um brinquedo"], correta: 0 },
+  { id: 172, nivel: "medio", tema: "curiosidade", enunciado: "A capa de “The Dark Side of the Moon”, do Pink Floyd, mostra a luz atravessando o quê?", alternativas: ["Um prisma", "Uma janela", "Uma lua", "Uma nuvem"], correta: 0 },
+  { id: 173, nivel: "medio", tema: "curiosidade", enunciado: "A capa com uma banana, criada por Andy Warhol, é de qual banda?", alternativas: ["The Velvet Underground", "The Doors", "The Byrds", "Cream"], correta: 0 },
+  { id: 174, nivel: "medio", tema: "curiosidade", enunciado: "A música “Yesterday”, dos Beatles, teve qual título provisório antes da letra final?", alternativas: ["Scrambled Eggs", "Hello Goodbye", "Let It Be", "Blackbird"], correta: 0 },
+  { id: 175, nivel: "medio", tema: "curiosidade", enunciado: "Paul McCartney escreveu “Hey Jude” para confortar o filho de qual Beatle?", alternativas: ["John Lennon", "Ringo Starr", "George Harrison", "Pete Best"], correta: 0 },
+  { id: 176, nivel: "medio", tema: "curiosidade", enunciado: "A primeira música exibida na MTV, em 1981, “Video Killed the Radio Star”, é de qual banda?", alternativas: ["The Buggles", "The Police", "Blondie", "Talking Heads"], correta: 0 },
+  { id: 177, nivel: "medio", tema: "curiosidade", enunciado: "Qual banda é considerada a de maior venda de discos na história?", alternativas: ["The Beatles", "Rolling Stones", "Queen", "Led Zeppelin"], correta: 0 },
+  { id: 178, nivel: "medio", tema: "nacional", enunciado: "A Legião Urbana surgiu em qual cidade brasileira?", alternativas: ["Brasília", "Rio de Janeiro", "São Paulo", "Belo Horizonte"], correta: 0 },
+  { id: 179, nivel: "medio", tema: "nacional", enunciado: "Raul Seixas compôs muitos sucessos em parceria com qual escritor, autor de “O Alquimista”?", alternativas: ["Paulo Coelho", "Jorge Amado", "Ariano Suassuna", "Rubem Fonseca"], correta: 0 },
+  { id: 180, nivel: "medio", tema: "nacional", enunciado: "No álbum “Roots” (1996), o Sepultura gravou com músicos de qual povo indígena brasileiro?", alternativas: ["Xavante", "Guarani", "Yanomami", "Pataxó"], correta: 0 },
+  { id: 181, nivel: "medio", tema: "nacional", enunciado: "A primeira edição do Rock in Rio, em 1985, foi realizada em qual cidade?", alternativas: ["Rio de Janeiro", "São Paulo", "Brasília", "Belo Horizonte"], correta: 0 },
+  { id: 182, nivel: "medio", tema: "nacional", enunciado: "Cazuza iniciou a carreira como vocalista de qual banda brasileira?", alternativas: ["Barão Vermelho", "Legião Urbana", "Titãs", "Kid Abelha"], correta: 0 },
+  { id: 183, nivel: "medio", tema: "nacional", enunciado: "O nome da banda Charlie Brown Jr. faz referência a um personagem de quais quadrinhos?", alternativas: ["Peanuts (Minduim)", "Calvin e Haroldo", "Garfield", "Recruta Zero"], correta: 0 },
+  { id: 184, nivel: "medio", tema: "curiosidade", enunciado: "Os integrantes dos Ramones adotaram no palco qual sobrenome artístico em comum?", alternativas: ["Ramone", "Sex", "Jones", "Clash"], correta: 0 },
+  { id: 185, nivel: "medio", tema: "curiosidade", enunciado: "A banda Kiss é reconhecida por se apresentar com personagens e o rosto coberto de?", alternativas: ["Maquiagem", "Máscaras de ferro", "Capacetes", "Tatuagens"], correta: 0 },
+  { id: 186, nivel: "medio", tema: "curiosidade", enunciado: "O guitarrista Slash, do Guns N’ Roses, é facilmente reconhecido por qual acessório?", alternativas: ["Uma cartola", "Um quepe", "Uma coroa", "Um turbante"], correta: 0 },
+  { id: 187, nivel: "medio", tema: "curiosidade", enunciado: "A banda Scorpions, de “Wind of Change”, é de qual país?", alternativas: ["Alemanha", "Áustria", "Holanda", "Suíça"], correta: 0 },
+  { id: 188, nivel: "medio", tema: "curiosidade", enunciado: "A capa do álbum “Sgt. Pepper’s”, dos Beatles, é famosa por uma montagem cheia de?", alternativas: ["Pessoas e celebridades", "Flores apenas", "Instrumentos", "Animais"], correta: 0 },
+  { id: 189, nivel: "medio", tema: "curiosidade", enunciado: "Em um festival de 1967, Jimi Hendrix encerrou a apresentação ateando fogo a qual instrumento?", alternativas: ["A guitarra", "A bateria", "O amplificador", "O teclado"], correta: 0 },
+  { id: 190, nivel: "medio", tema: "nacional", enunciado: "A banda Titãs se formou em qual cidade brasileira?", alternativas: ["São Paulo", "Rio de Janeiro", "Salvador", "Curitiba"], correta: 0 },
+
+  // ===================== NÍVEL DIFÍCIL (ids 201–280) =====================
   // -- Ano de lançamento (alternativas com >= 2 anos de diferença entre si) --
   { id: 201, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “The Dark Side of the Moon”, do Pink Floyd?", alternativas: ["1973", "1969", "1977", "1981"], correta: 0 },
   { id: 202, nivel: "dificil", enunciado: "Em que ano foi lançado o álbum “Thriller”, de Michael Jackson?", alternativas: ["1982", "1978", "1986", "1990"], correta: 0 },
@@ -257,6 +301,28 @@ export const PERGUNTAS: Pergunta[] = [
   { id: 258, nivel: "dificil", enunciado: "Quem foi o vocalista original do Black Sabbath?", alternativas: ["Ozzy Osbourne", "Ronnie James Dio", "Ian Gillan", "Tony Martin"], correta: 0 },
   { id: 259, nivel: "dificil", enunciado: "Quem foi o primeiro vocalista do Genesis, antes de Phil Collins assumir os vocais?", alternativas: ["Peter Gabriel", "Phil Collins", "Ray Wilson", "Steve Hackett"], correta: 0 },
   { id: 260, nivel: "dificil", enunciado: "Quem foi o vocalista original do Van Halen, nos anos 70 e começo dos 80?", alternativas: ["David Lee Roth", "Sammy Hagar", "Gary Cherone", "Eddie Van Halen"], correta: 0 },
+
+  // ---- Curiosidades e casos inusitados do rock (nível difícil, ids 261–280) ----
+  { id: 261, nivel: "dificil", tema: "curiosidade", enunciado: "No show do Metallica na Antártida, em 2013, como o público ouviu a banda para preservar o ambiente?", alternativas: ["Por fones de ouvido", "Sem som nenhum", "Por rádio AM", "Apenas à distância"], correta: 0 },
+  { id: 262, nivel: "dificil", tema: "curiosidade", enunciado: "A exigência dos M&M's marrons no contrato do Van Halen servia, na prática, para?", alternativas: ["Verificar se leram as exigências técnicas de segurança", "Dar sorte antes do show", "Testar o bufê do local", "Irritar a imprensa"], correta: 0 },
+  { id: 263, nivel: "dificil", tema: "curiosidade", enunciado: "Na capa do álbum “Animals”, do Pink Floyd, um porco inflável flutua sobre qual usina de Londres?", alternativas: ["Battersea", "Bankside", "Lots Road", "Greenwich"], correta: 0 },
+  { id: 264, nivel: "dificil", tema: "curiosidade", enunciado: "Em 1973, David Bowie surpreendeu o público ao anunciar no palco a “aposentadoria” de qual de seus personagens?", alternativas: ["Ziggy Stardust", "Major Tom", "Thin White Duke", "Aladdin Sane"], correta: 0 },
+  { id: 265, nivel: "dificil", tema: "curiosidade", enunciado: "O Iron Maiden viaja em turnês em um avião apelidado “Ed Force One”, pilotado por qual integrante?", alternativas: ["Bruce Dickinson", "Steve Harris", "Nicko McBrain", "Adrian Smith"], correta: 0 },
+  { id: 266, nivel: "dificil", tema: "curiosidade", enunciado: "O guitarrista Tony Iommi, do Black Sabbath, criou seu estilo pesado após um acidente que afetou o quê?", alternativas: ["As pontas de dois dedos", "A audição", "O ombro", "A voz"], correta: 0 },
+  { id: 267, nivel: "dificil", tema: "curiosidade", enunciado: "“Bohemian Rhapsody”, do Queen, ficou famosa por incluir no meio uma seção em estilo de?", alternativas: ["Ópera", "Reggae", "Jazz", "Samba"], correta: 0 },
+  { id: 268, nivel: "dificil", tema: "curiosidade", enunciado: "A capa de “London Calling”, do The Clash, imita o layout do disco de estreia de qual artista?", alternativas: ["Elvis Presley", "Chuck Berry", "Johnny Cash", "Buddy Holly"], correta: 0 },
+  { id: 269, nivel: "dificil", tema: "curiosidade", enunciado: "No encerramento do festival de Woodstock (1969), Jimi Hendrix tocou uma versão marcante de qual música?", alternativas: ["O hino dos Estados Unidos", "God Save the Queen", "Imagine", "Hey Joe"], correta: 0 },
+  { id: 270, nivel: "dificil", tema: "curiosidade", enunciado: "O vocalista do Judas Priest, Rob Halford, costuma entrar no palco montado em?", alternativas: ["Uma motocicleta", "Um cavalo", "Um trono", "Um carro antigo"], correta: 0 },
+  { id: 271, nivel: "dificil", tema: "curiosidade", enunciado: "Freddie Mercury, do Queen, nasceu em qual arquipélago africano?", alternativas: ["Zanzibar", "Cabo Verde", "Comores", "Seychelles"], correta: 0 },
+  { id: 272, nivel: "dificil", tema: "curiosidade", enunciado: "O apelido “Sting” surgiu por causa de um suéter listrado que o fazia parecer qual inseto?", alternativas: ["Uma abelha", "Uma joaninha", "Uma borboleta", "Um besouro"], correta: 0 },
+  { id: 273, nivel: "dificil", tema: "nacional", enunciado: "Considerado um dos maiores discos brasileiros, “Acabou Chorare” é de qual grupo?", alternativas: ["Novos Baianos", "Os Mutantes", "Secos & Molhados", "Casa das Máquinas"], correta: 0 },
+  { id: 274, nivel: "dificil", tema: "nacional", enunciado: "Em 1968, Os Mutantes acompanharam Caetano Veloso em uma apresentação ligada a qual movimento musical?", alternativas: ["Tropicália", "Jovem Guarda", "Bossa Nova", "Clube da Esquina"], correta: 0 },
+  { id: 275, nivel: "dificil", tema: "curiosidade", enunciado: "O coral que marca “Another Brick in the Wall, Part 2”, do Pink Floyd, foi cantado por?", alternativas: ["Alunos de uma escola", "Um coral de igreja", "A própria banda", "Um coro profissional"], correta: 0 },
+  { id: 276, nivel: "dificil", tema: "curiosidade", enunciado: "Em 1990, Roger Waters apresentou o show “The Wall” nas ruínas de qual muro?", alternativas: ["Muro de Berlim", "Muralha da China", "Muro de Adriano", "Muro das Lamentações"], correta: 0 },
+  { id: 277, nivel: "dificil", tema: "curiosidade", enunciado: "A banda de rock progressivo Rush, de “Tom Sawyer”, é natural de qual país?", alternativas: ["Canadá", "Estados Unidos", "Inglaterra", "Austrália"], correta: 0 },
+  { id: 278, nivel: "dificil", tema: "curiosidade", enunciado: "“Stairway to Heaven”, do Led Zeppelin, é conhecida por nunca ter sido lançada originalmente como?", alternativas: ["Single (compacto)", "Faixa de álbum", "Música de abertura de show", "Lado B"], correta: 0 },
+  { id: 279, nivel: "dificil", tema: "curiosidade", enunciado: "O nome Black Sabbath veio de um filme de terror estrelado por qual ator clássico?", alternativas: ["Boris Karloff", "Bela Lugosi", "Vincent Price", "Christopher Lee"], correta: 0 },
+  { id: 280, nivel: "dificil", tema: "curiosidade", enunciado: "Os amplificadores empilhados e o som altíssimo no palco são marca registrada de qual banda, liderada por Lemmy?", alternativas: ["Motörhead", "Deep Purple", "Manowar", "Saxon"], correta: 0 },
 ];
 
 /** Quantas perguntas o banco tem no total. */

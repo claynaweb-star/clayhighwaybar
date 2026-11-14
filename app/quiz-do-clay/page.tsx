@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE } from "@/lib/site";
 import { buscarRanking, hojeSaoPauloISO, mesDaData } from "@/lib/quiz";
-import { diasAbertos, formatDiaLabel } from "@/lib/nome-na-lista";
-import type { DataPremio } from "@/lib/quiz-tipos";
 import { QuizDoClay } from "./QuizDoClay";
 
 export const metadata: Metadata = {
@@ -36,17 +34,12 @@ function formataTempo(ms: number): string {
 export default async function QuizDoClayPage() {
   const mes = mesDaData(hojeSaoPauloISO());
   const ranking = await buscarRanking(mes);
-  const datasAbertas: DataPremio[] = diasAbertos().map((d) => ({
-    data: d.data,
-    preco: d.preco,
-    label: formatDiaLabel(d.data),
-  }));
 
   return (
     <>
       {/* O JOGO (ocupa a tela no celular). */}
       <section className="bg-ink">
-        <QuizDoClay datasAbertas={datasAbertas} />
+        <QuizDoClay />
       </section>
 
       {/* RANKING DO MÊS */}
@@ -117,13 +110,14 @@ export default async function QuizDoClayPage() {
             </p>
             <p>
               <span className="font-semibold text-fog">Entrada grátis (acertou 10 de 10).</span>{" "}
-              Quem gabarita ganha 1 entrada grátis, com um código único válido por 30 dias. O prêmio
-              é <span className="font-semibold text-fog">válido somente nas datas específicas que têm
-              Nome na Lista</span>: ao gabaritar, você escolhe uma dessas noites e é incluído
-              automaticamente na lista daquela data. Para usar, basta apresentar seu nome na portaria
-              até o horário daquela lista (21h). Se não houver nenhuma data com Nome na Lista no
-              momento, o prêmio fica guardado por 30 dias e você recebe um link para escolher a data
-              depois. Limite de 1 entrada grátis a cada 30 dias por número de WhatsApp.
+              Quem gabarita ganha 1 entrada grátis, com um código único. O prêmio é{" "}
+              <span className="font-semibold text-fog">válido somente nas datas específicas que têm
+              Nome na Lista</span>. Ao gabaritar, seu nome é incluído automaticamente em todas as
+              listas com Nome na Lista dentro dos 30 dias de validade, inclusive em novas datas que
+              abrirem nesse período. Para usar, basta apresentar seu nome na portaria até o horário
+              daquela lista (21h). Vale 1 entrada grátis, usada uma única vez, em até 30 dias: ao
+              entrar em uma noite, o prêmio deixa de valer nas demais. Limite de 1 entrada grátis a
+              cada 30 dias por número de WhatsApp.
             </p>
             <p>
               <span className="font-semibold text-fog">Conferência na portaria.</span> O prêmio só é

@@ -41,6 +41,8 @@ type ListItem = {
   hora: string | null;
   premioQuiz: string;
   codigoQuiz: string;
+  premioUsado: boolean;
+  premioUsadoData: string;
 };
 
 /** Remove acentos e caixa para busca tolerante. */
@@ -62,6 +64,8 @@ export function PortariaApp() {
   const [agora, setAgora] = useState<Date>(() => new Date());
   const [diag, setDiag] = useState<string[] | null>(null);
   const [diagLoading, setDiagLoading] = useState(false);
+  // Vencedor do Quiz cujo painel de "Liberar entrada grátis" está aberto.
+  const [confirmandoId, setConfirmandoId] = useState<string | null>(null);
 
   const buscaRef = useRef<HTMLInputElement>(null);
 
@@ -401,34 +405,45 @@ export function PortariaApp() {
               <ul className="mt-4 space-y-3">
                 {filtrada.map((item) => {
                   const vencedor = item.premioQuiz.trim() !== "";
+                  // Prêmio já usado em OUTRA noite: aparece, mas não libera de novo.
+                  const usadoEmOutra = vencedor && item.premioUsado && !item.entrou;
+                  const confirmando = confirmandoId === item.id;
                   return (
                     <li
                       key={item.id}
                       className={`rounded-xl border p-3 ${
                         item.entrou
                           ? "border-green-700 bg-green-950"
-                          : vencedor
-                            ? "border-yellow-500 bg-yellow-950/60"
-                            : "border-border bg-surface"
+                          : usadoEmOutra
+                            ? "border-zinc-700 bg-zinc-900/60"
+                            : vencedor
+                              ? "border-green-500 bg-green-950/60"
+                              : "border-border bg-surface"
                       }`}
                     >
                       {vencedor && (
                         <div className="mb-2 flex flex-wrap items-center gap-2">
-                          <span className="rounded-md bg-yellow-400 px-2 py-0.5 text-sm font-extrabold text-black">
-                            🏆 VENCEDOR DO QUIZ
+                          <span
+                            className={`rounded-md px-2 py-0.5 text-sm font-extrabold ${
+                              usadoEmOutra
+                                ? "bg-zinc-600 text-zinc-100"
+                                : "bg-green-400 text-black"
+                            }`}
+                          >
+                            🏆 GANHADOR QUIZ
                           </span>
-                          <span className="text-sm font-bold text-yellow-300">
+                          <span
+                            className={`text-sm font-bold ${
+                              usadoEmOutra ? "text-zinc-400 line-through" : "text-green-300"
+                            }`}
+                          >
                             ENTRADA GRÁTIS
                           </span>
                           {item.codigoQuiz ? (
-                            <span className="text-xs tabular-nums text-yellow-200/80">
+                            <span className="text-xs tabular-nums text-green-200/70">
                               {item.codigoQuiz}
                             </span>
                           ) : null}
-                          <p className="w-full text-xs font-semibold text-yellow-200/90">
-                            Confira documento com foto e o telefone no celular da pessoa
-                            antes de liberar.
-                          </p>
                         </div>
                       )}
                       <div className="flex items-center justify-between gap-3">
@@ -446,24 +461,70 @@ export function PortariaApp() {
                             ) : null}
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => alternarEntrada(item)}
-                          className={`min-h-[48px] shrink-0 rounded-xl px-4 text-base font-bold ${
-                            item.entrou
-                              ? "border border-green-600 bg-transparent text-green-300"
-                              : vencedor
-                                ? "bg-yellow-400 text-black"
-                                : "bg-accent text-ink"
-                          }`}
-                        >
-                          {item.entrou
-                            ? "Desfazer"
-                            : vencedor
-                              ? "Liberar GRÁTIS (Quiz)"
-                              : rotuloLiberar}
-                        </button>
+                        {item.entrou ? (
+                          <button
+                            type="button"
+                            onClick={() => alternarEntrada(item)}
+                            className="min-h-[48px] shrink-0 rounded-xl border border-green-600 bg-transparent px-4 text-base font-bold text-green-300"
+                          >
+                            Desfazer
+                          </button>
+                        ) : usadoEmOutra ? (
+                          <button
+                            type="button"
+                            disabled
+                            className="min-h-[48px] shrink-0 rounded-xl bg-zinc-700 px-4 text-sm font-bold text-zinc-300"
+                          >
+                            PRÊMIO JÁ USADO{item.premioUsadoData ? ` EM ${item.premioUsadoData}` : ""}
+                          </button>
+                        ) : vencedor ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setConfirmandoId(confirmando ? null : item.id)
+                            }
+                            className="min-h-[48px] shrink-0 rounded-xl bg-green-500 px-4 text-base font-extrabold text-black"
+                          >
+                            GANHADOR QUIZ
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => alternarEntrada(item)}
+                            className="min-h-[48px] shrink-0 rounded-xl bg-accent px-4 text-base font-bold text-ink"
+                          >
+                            {rotuloLiberar}
+                          </button>
+                        )}
                       </div>
+
+                      {/* Painel de liberação do prêmio (só ao tocar em GANHADOR QUIZ) */}
+                      {vencedor && !item.entrou && !usadoEmOutra && confirmando && (
+                        <div className="mt-3 rounded-xl border border-green-600 bg-green-950/70 p-3">
+                          <p className="text-sm font-semibold text-green-200">
+                            Confira documento com foto e o telefone no celular da pessoa.
+                          </p>
+                          <div className="mt-3 flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setConfirmandoId(null);
+                                alternarEntrada(item);
+                              }}
+                              className="min-h-[48px] flex-1 rounded-xl bg-green-500 px-4 text-base font-extrabold text-black"
+                            >
+                              Liberar entrada grátis
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmandoId(null)}
+                              className="min-h-[48px] shrink-0 rounded-xl border border-border px-4 text-base font-bold text-muted"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </li>
                   );
                 })}
