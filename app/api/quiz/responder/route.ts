@@ -14,10 +14,21 @@ import {
   faixaPorAcertos,
   type RespostaCliente,
   type ResultadoFinal,
+  type DataPremio,
 } from "@/lib/quiz-tipos";
+import { diasAbertos, formatDiaLabel, formatTelefone } from "@/lib/nome-na-lista";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 26;
+
+/** Datas de Nome na Lista abertas para usar o prêmio (só importa no 10/10). */
+function datasDePremio(): DataPremio[] {
+  return diasAbertos().map((d) => ({
+    data: d.data,
+    preco: d.preco,
+    label: formatDiaLabel(d.data),
+  }));
+}
 
 /** Normaliza a resposta recebida do cliente. */
 function lerResposta(v: unknown): RespostaCliente | undefined {
@@ -78,7 +89,17 @@ export async function POST(request: NextRequest) {
 
   if (quizWebhookConfigurado()) {
     const r = await chamarQuizWebhook(
-      { action: "finish", wa, nome, dia, pontos, acertos, tempoMs, acertouTudo },
+      {
+        action: "quiz_finish",
+        wa,
+        nome,
+        dia,
+        telefone: formatTelefone(wa),
+        pontos,
+        acertos,
+        tempoMs,
+        acertouTudo,
+      },
       { timeoutMs: 9000 },
     );
     if (r.ok) {
@@ -115,6 +136,8 @@ export async function POST(request: NextRequest) {
     codigo,
     jaGanhouCodigo,
     validadeCodigo,
+    // Só o 10/10 escolhe data; mesmo assim mandamos sempre (o cliente só usa no prêmio).
+    datasPremio: codigo ? datasDePremio() : [],
   };
 
   return NextResponse.json({

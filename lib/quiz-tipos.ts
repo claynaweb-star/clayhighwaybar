@@ -88,13 +88,33 @@ export type ResultadoFinal = {
   jaGanhouCodigo?: boolean;
   /** Validade do código, "DD/MM/AAAA". */
   validadeCodigo?: string | null;
+  /**
+   * Datas de Nome na Lista abertas para usar o prêmio (só no 10/10). Vazio
+   * quando não há nenhuma data aberta no momento — aí o prêmio fica guardado.
+   */
+  datasPremio?: DataPremio[];
 };
+
+/** Resposta ao resgatar o prêmio numa data (escolher a noite do Nome na Lista). */
+export type ResultadoResgate =
+  | { ok: true; data: string; preco: number; label: string }
+  | { ok: false; erro: "invalido" | "expirado" | "usado" | "indisponivel" | "sem_backend" | "data" };
 
 /** Uma linha do ranking mensal (nome já reduzido para privacidade). */
 export type RankingItem = {
   nome: string;
   pontos: number;
   tempoMs: number;
+};
+
+/** Uma data de Nome na Lista onde o prêmio do Quiz pode ser usado. */
+export type DataPremio = {
+  /** AAAA-MM-DD. */
+  data: string;
+  /** Valor promocional do dia (R$). */
+  preco: number;
+  /** Rótulo amigável, ex.: "Sexta, 14/11". */
+  label: string;
 };
 
 /** Faixa a partir do número de acertos (0..10). */

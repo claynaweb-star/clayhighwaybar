@@ -15,6 +15,7 @@ import {
   type ResultadoPergunta,
   type ResultadoFinal,
   type RespostaCliente,
+  type DataPremio,
 } from "@/lib/quiz-tipos";
 import { TextoCanvas } from "./TextoCanvas";
 
@@ -37,7 +38,10 @@ type Tela =
   | "pergunta"
   | "feedback"
   | "resultado"
-  | "jaJogou";
+  | "jaJogou"
+  | "resgate";
+
+const RE_CODIGO = /^QUIZ-[A-Z0-9]{4}$/;
 
 /** Mascote Claytinho numa pose, com animação opcional. */
 function Claytinho({
@@ -73,8 +77,22 @@ function Balao({ children, className = "" }: { children: React.ReactNode; classN
   );
 }
 
-export function QuizDoClay() {
+export function QuizDoClay({ datasAbertas }: { datasAbertas: DataPremio[] }) {
   const [tela, setTela] = useState<Tela>("intro");
+  const [premioCodigo, setPremioCodigo] = useState("");
+
+  // Link "resgatar depois": /quiz-do-clay?premio=QUIZ-XXXX abre a escolha de data.
+  useEffect(() => {
+    try {
+      const p = new URLSearchParams(window.location.search).get("premio");
+      if (p && RE_CODIGO.test(p.toUpperCase())) {
+        setPremioCodigo(p.toUpperCase());
+        setTela("resgate");
+      }
+    } catch {
+      /* sem query string */
+    }
+  }, []);
 
   // Dados da partida em curso (refs: usados em callbacks assíncronos).
   const gameTokenRef = useRef("");
@@ -328,6 +346,176 @@ export function QuizDoClay() {
       )}
 
       {tela === "jaJogou" && <TelaJaJogou onVoltar={reiniciar} />}
+
+      {tela === "resgate" && (
+        <TelaResgate
+          codigo={premioCodigo}
+          datas={datasAbertas}
+          onVoltar={reiniciar}
+        />
+      )}
+    </div>
+  );
+}
+
+/** Mensagem amigável a partir do motivo de erro do resgate. */
+function mensagemErroResgate(erro: unknown): string {
+  switch (erro) {
+    case "invalido":
+      return "Código não encontrado. Confere se digitou certinho.";
+    case "expirado":
+      return "Este prêmio passou da validade de 30 dias.";
+    case "usado":
+      return "Este prêmio já foi usado na portaria.";
+    case "data":
+      return "Essa data não está mais aberta. Escolhe outra.";
+    case "sem_backend":
+      return "O sistema de listas está fora do ar agora. Tenta mais tarde.";
+    default:
+      return "Não rolou agora. Tenta de novo em instantes.";
+  }
+}
+
+/**
+ * Escolha da data para usar o prêmio: lista as noites de Nome na Lista abertas e,
+ * ao tocar numa, inclui a pessoa na lista daquela data. Sem datas abertas, mostra
+ * o aviso de "guardado por 30 dias" e um link com o código para escolher depois.
+ */
+function EscolhaData({
+  codigo,
+  datas,
+  validade,
+}: {
+  codigo: string;
+  datas: DataPremio[];
+  validade?: string | null;
+}) {
+  const [estado, setEstado] = useState<"idle" | "enviando" | "ok">("idle");
+  const [enviandoData, setEnviandoData] = useState<string | null>(null);
+  const [escolhida, setEscolhida] = useState<{
+    label: string;
+    preco: number;
+  } | null>(null);
+  const [erro, setErro] = useState("");
+
+  async function resgatar(d: DataPremio) {
+    setEstado("enviando");
+    setEnviandoData(d.data);
+    setErro("");
+    try {
+      const res = await fetch("/api/quiz/resgatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codigo, data: d.data }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setEscolhida({ label: data.label, preco: data.preco });
+        setEstado("ok");
+      } else {
+        setEstado("idle");
+        setErro(mensagemErroResgate(data?.erro));
+      }
+    } catch {
+      setEstado("idle");
+      setErro("Sem conexão. Tenta de novo?");
+    } finally {
+      setEnviandoData(null);
+    }
+  }
+
+  if (estado === "ok" && escolhida) {
+    return (
+      <div className="w-full max-w-xs rounded-2xl border-2 border-green-600 bg-green-950/40 p-4 text-center">
+        <p className="font-display text-xl text-green-300">Prêmio garantido! 🏆</p>
+        <p className="mt-1 text-sm text-fog">
+          Você está na lista de{" "}
+          <span className="font-semibold text-accent">{escolhida.label}</span>.
+        </p>
+        <p className="mt-2 text-xs text-muted">
+          É só chegar e falar seu nome na portaria até as 21h. Sua entrada é grátis
+          (código {codigo}).
+        </p>
+      </div>
+    );
+  }
+
+  if (datas.length === 0) {
+    const link = `https://${SITE_URL}?premio=${codigo}`;
+    return (
+      <div className="w-full max-w-xs rounded-2xl border border-border bg-surface p-4 text-center">
+        <p className="text-sm text-fog">
+          No momento não há datas com Nome na Lista. Seu prêmio fica guardado por 30
+          dias.
+        </p>
+        <p className="mt-2 text-xs text-muted">
+          Guarde este link para escolher a data quando abrir uma noite:
+        </p>
+        <a
+          href={link}
+          className="mt-1 block break-all rounded-lg border border-accent/50 bg-accent-soft/30 px-3 py-2 text-xs font-semibold text-accent"
+        >
+          {link}
+        </a>
+        {validade ? (
+          <p className="mt-2 text-xs text-muted">Vale até {validade}.</p>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-xs">
+      <div className="grid gap-2">
+        {datas.map((d) => (
+          <button
+            key={d.data}
+            disabled={estado === "enviando"}
+            onClick={() => resgatar(d)}
+            className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface px-4 py-3 text-left font-semibold text-fog transition-colors hover:border-accent disabled:opacity-60"
+          >
+            <span>{d.label}</span>
+            <span className="text-sm text-accent">
+              {enviandoData === d.data ? "Reservando…" : `R$ ${d.preco}`}
+            </span>
+          </button>
+        ))}
+      </div>
+      {erro ? <p className="mt-2 text-sm font-semibold text-red-400">{erro}</p> : null}
+      {validade ? (
+        <p className="mt-2 text-center text-xs text-muted">Prêmio válido até {validade}.</p>
+      ) : null}
+    </div>
+  );
+}
+
+/** Tela de resgate pelo link (quando a pessoa volta depois para escolher a data). */
+function TelaResgate({
+  codigo,
+  datas,
+  onVoltar,
+}: {
+  codigo: string;
+  datas: DataPremio[];
+  onVoltar: () => void;
+}) {
+  return (
+    <div className="clay-in flex w-full flex-1 flex-col items-center justify-center gap-5 text-center">
+      <Claytinho pose="comemorando" anim="clay-bob" className="h-40 w-auto" />
+      <h2 className="font-display text-3xl text-fog">Seu prêmio do Quiz</h2>
+      <div className="rounded-xl border-2 border-accent bg-accent-soft/40 px-5 py-2">
+        <p className="font-display text-2xl tracking-widest text-fog">{codigo}</p>
+      </div>
+      <p className="max-w-xs text-sm text-muted">
+        Entrada grátis em uma noite com Nome na Lista. Escolha a sua data:
+      </p>
+      <EscolhaData codigo={codigo} datas={datas} />
+      <button
+        onClick={onVoltar}
+        className="rounded-2xl border border-border px-6 py-3 font-semibold text-muted hover:text-fog"
+      >
+        Voltar ao início
+      </button>
     </div>
   );
 }
@@ -345,6 +533,9 @@ function TelaIntro({ onComecar }: { onComecar: () => void }) {
       <h1 className="font-display text-5xl leading-none text-fog sm:text-6xl">
         Quiz do <span className="text-accent">Clay</span>
       </h1>
+      <p className="max-w-xs text-sm font-semibold text-accent">
+        Acertou 10 de 10? Ganha entrada grátis em uma noite com Nome na Lista!
+      </p>
       <p className="max-w-xs text-sm text-muted">
         10 perguntas de rock, 10 segundos cada. Mandou bem de verdade? Pode sair
         com <span className="font-semibold text-fog">entrada grátis</span>.
@@ -740,16 +931,22 @@ function TelaResultado({
       </div>
 
       {final.codigo && (
-        <div className="w-full max-w-xs rounded-2xl border-2 border-accent bg-accent-soft/40 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-accent">
-            Entrada grátis
+        <>
+          <div className="w-full max-w-xs rounded-2xl border-2 border-accent bg-accent-soft/40 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+              Entrada grátis
+            </p>
+            <p className="font-display text-3xl tracking-widest text-fog">{final.codigo}</p>
+          </div>
+          <p className="max-w-xs text-sm font-semibold text-fog">
+            Seu prêmio vale só para datas com Nome na Lista. Escolha a sua data abaixo.
           </p>
-          <p className="font-display text-3xl tracking-widest text-fog">{final.codigo}</p>
-          <p className="mt-1 text-xs text-muted">
-            Mostre na portaria numa sexta ou sábado.
-            {final.validadeCodigo ? ` Vale até ${final.validadeCodigo}.` : ""}
-          </p>
-        </div>
+          <EscolhaData
+            codigo={final.codigo}
+            datas={final.datasPremio ?? []}
+            validade={final.validadeCodigo}
+          />
+        </>
       )}
       {final.jaGanhouCodigo && (
         <p className="max-w-xs text-sm text-muted">

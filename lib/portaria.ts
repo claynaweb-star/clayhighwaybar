@@ -215,6 +215,10 @@ export type PortariaListItem = {
   entrou: boolean;
   /** Hora da liberação, se já entrou (ex.: "21:04"). */
   hora: string | null;
+  /** Texto do prêmio do Quiz quando a pessoa é vencedora (senão, vazio). */
+  premioQuiz: string;
+  /** Código do prêmio do Quiz (ex.: "QUIZ-7K3P"), quando houver. */
+  codigoQuiz: string;
 };
 
 function str(v: unknown): string {
@@ -233,6 +237,8 @@ type RawItem = {
   telefone?: unknown;
   entrou?: unknown;
   hora?: unknown;
+  premioQuiz?: unknown;
+  codigoQuiz?: unknown;
 };
 
 function extractArray(raw: unknown): RawItem[] {
@@ -257,6 +263,8 @@ export function normalizeLista(raw: unknown): PortariaListItem[] {
     telefone: str(r.telefone),
     entrou: toBool(r.entrou),
     hora: r.hora ? str(r.hora) : null,
+    premioQuiz: str(r.premioQuiz),
+    codigoQuiz: str(r.codigoQuiz),
   }));
   itens.sort((a, b) =>
     a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }),

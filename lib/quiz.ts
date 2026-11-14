@@ -34,6 +34,7 @@ import {
   type RankingItem,
 } from "@/lib/quiz-tipos";
 import { hojeSaoPauloISO } from "@/lib/nome-na-lista";
+import { callListaWebhook } from "@/lib/portaria";
 
 // ---- Chave e cifra ---------------------------------------------------------
 
@@ -326,56 +327,33 @@ export function nomeParaRanking(nomeCompleto: string): string {
   return inicial ? `${primeiro} ${inicial.toUpperCase()}.` : primeiro;
 }
 
-// ---- Webhook do quiz (Google Apps Script / Planilha) -----------------------
+// ---- Webhook do quiz (MESMA planilha e MESMO Apps Script do Nome na Lista) --
+//
+// O Quiz usa o webhook do Nome na Lista (LISTA_WEBHOOK_URL / LISTA_WEBHOOK_TOKEN)
+// e ações com prefixo "quiz_". Assim partidas, limite diário, ranking e o
+// vencedor na lista ficam todos na mesma planilha, e a portaria lê uma lista só.
 
 export type WebhookQuiz =
   | { ok: true; text: string }
   | { ok: false; cause: string };
 
-/** Há webhook configurado? Sem ele o quiz roda, mas sem limite/ranking/código. */
+/** Há webhook configurado? Sem ele o quiz roda, mas sem limite/ranking/prêmio na lista. */
 export function quizWebhookConfigurado(): boolean {
-  return Boolean(process.env.QUIZ_WEBHOOK_URL && process.env.QUIZ_WEBHOOK_TOKEN);
+  return Boolean(process.env.LISTA_WEBHOOK_URL && process.env.LISTA_WEBHOOK_TOKEN);
 }
 
 /**
- * Chama o webhook do quiz (QUIZ_WEBHOOK_URL) com o token e a ação. Mesmo padrão
- * do webhook da lista: sempre sem cache, segue o redirect do Apps Script e corta
- * por tempo para não prender a função serverless.
+ * Chama o webhook do Nome na Lista com uma ação do quiz. Delega para
+ * callListaWebhook (mesmo token, mesmo tratamento de rede/redirect/timeout). O
+ * texto devolvido já vem "trimado".
  */
 export async function chamarQuizWebhook(
   payload: Record<string, unknown>,
   opts: { timeoutMs?: number } = {},
 ): Promise<WebhookQuiz> {
-  const url = process.env.QUIZ_WEBHOOK_URL;
-  const token = process.env.QUIZ_WEBHOOK_TOKEN;
-  if (!url || !token) return { ok: false, cause: "webhook nao configurado" };
-  if (!url.trim().endsWith("/exec")) {
-    return { ok: false, cause: "QUIZ_WEBHOOK_URL nao termina em /exec" };
-  }
-  const timeoutMs = opts.timeoutMs ?? 8000;
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, ...payload }),
-      cache: "no-store",
-      redirect: "follow",
-      signal: ctrl.signal,
-    });
-    if (res.status !== 200) {
-      return { ok: false, cause: `HTTP ${res.status}` };
-    }
-    return { ok: true, text: (await res.text()).trim() };
-  } catch {
-    return {
-      ok: false,
-      cause: ctrl.signal.aborted ? `timeout ${timeoutMs}ms` : "sem resposta",
-    };
-  } finally {
-    clearTimeout(timer);
-  }
+  const r = await callListaWebhook(payload, opts);
+  if (!r.ok) return r;
+  return { ok: true, text: r.text.trim() };
 }
 
 /** Log técnico (sem nome/telefone). */
@@ -386,7 +364,7 @@ export function logQuiz(acao: string, causa: string): void {
 /** Busca o Top 10 do mês no webhook. Em falha, devolve lista vazia. */
 export async function buscarRanking(mes: string): Promise<RankingItem[]> {
   if (!quizWebhookConfigurado()) return [];
-  const r = await chamarQuizWebhook({ action: "ranking", mes }, { timeoutMs: 6000 });
+  const r = await chamarQuizWebhook({ action: "quiz_ranking", mes }, { timeoutMs: 6000 });
   if (!r.ok) {
     logQuiz("ranking", r.cause);
     return [];

@@ -39,6 +39,8 @@ type ListItem = {
   telefone: string;
   entrou: boolean;
   hora: string | null;
+  premioQuiz: string;
+  codigoQuiz: string;
 };
 
 /** Remove acentos e caixa para busca tolerante. */
@@ -397,43 +399,70 @@ export function PortariaApp() {
 
               {/* Lista */}
               <ul className="mt-4 space-y-3">
-                {filtrada.map((item) => (
-                  <li
-                    key={item.id}
-                    className={`rounded-xl border p-3 ${
-                      item.entrou
-                        ? "border-green-700 bg-green-950"
-                        : "border-border bg-surface"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-lg font-semibold text-fog">
-                          {item.nome}
-                        </p>
-                        <p className="text-sm tabular-nums text-muted">
-                          {item.telefone}
-                          {item.entrou && item.hora ? (
-                            <span className="ml-2 font-semibold text-green-400">
-                              entrou {item.hora}
+                {filtrada.map((item) => {
+                  const vencedor = item.premioQuiz.trim() !== "";
+                  return (
+                    <li
+                      key={item.id}
+                      className={`rounded-xl border p-3 ${
+                        item.entrou
+                          ? "border-green-700 bg-green-950"
+                          : vencedor
+                            ? "border-yellow-500 bg-yellow-950/60"
+                            : "border-border bg-surface"
+                      }`}
+                    >
+                      {vencedor && (
+                        <div className="mb-2 flex flex-wrap items-center gap-2">
+                          <span className="rounded-md bg-yellow-400 px-2 py-0.5 text-sm font-extrabold text-black">
+                            🏆 VENCEDOR DO QUIZ
+                          </span>
+                          <span className="text-sm font-bold text-yellow-300">
+                            ENTRADA GRÁTIS
+                          </span>
+                          {item.codigoQuiz ? (
+                            <span className="text-xs tabular-nums text-yellow-200/80">
+                              {item.codigoQuiz}
                             </span>
                           ) : null}
-                        </p>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-lg font-semibold text-fog">
+                            {vencedor ? "🏆 " : ""}
+                            {item.nome}
+                          </p>
+                          <p className="text-sm tabular-nums text-muted">
+                            {item.telefone}
+                            {item.entrou && item.hora ? (
+                              <span className="ml-2 font-semibold text-green-400">
+                                entrou {item.hora}
+                              </span>
+                            ) : null}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => alternarEntrada(item)}
+                          className={`min-h-[48px] shrink-0 rounded-xl px-4 text-base font-bold ${
+                            item.entrou
+                              ? "border border-green-600 bg-transparent text-green-300"
+                              : vencedor
+                                ? "bg-yellow-400 text-black"
+                                : "bg-accent text-ink"
+                          }`}
+                        >
+                          {item.entrou
+                            ? "Desfazer"
+                            : vencedor
+                              ? "Liberar GRÁTIS (Quiz)"
+                              : rotuloLiberar}
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => alternarEntrada(item)}
-                        className={`min-h-[48px] shrink-0 rounded-xl px-4 text-base font-bold ${
-                          item.entrou
-                            ? "border border-green-600 bg-transparent text-green-300"
-                            : "bg-accent text-ink"
-                        }`}
-                      >
-                        {item.entrou ? "Desfazer" : rotuloLiberar}
-                      </button>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
 
               {filtrada.length === 0 ? (

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE } from "@/lib/site";
 import { buscarRanking, hojeSaoPauloISO, mesDaData } from "@/lib/quiz";
+import { diasAbertos, formatDiaLabel } from "@/lib/nome-na-lista";
+import type { DataPremio } from "@/lib/quiz-tipos";
 import { QuizDoClay } from "./QuizDoClay";
 
 export const metadata: Metadata = {
@@ -34,12 +36,17 @@ function formataTempo(ms: number): string {
 export default async function QuizDoClayPage() {
   const mes = mesDaData(hojeSaoPauloISO());
   const ranking = await buscarRanking(mes);
+  const datasAbertas: DataPremio[] = diasAbertos().map((d) => ({
+    data: d.data,
+    preco: d.preco,
+    label: formatDiaLabel(d.data),
+  }));
 
   return (
     <>
       {/* O JOGO (ocupa a tela no celular). */}
       <section className="bg-ink">
-        <QuizDoClay />
+        <QuizDoClay datasAbertas={datasAbertas} />
       </section>
 
       {/* RANKING DO MÊS */}
@@ -112,9 +119,13 @@ export default async function QuizDoClayPage() {
             </p>
             <p>
               <span className="font-semibold text-fog">Entrada grátis (acertou 10 de 10).</span>{" "}
-              Quem gabarita ganha 1 entrada grátis, com um código único válido por 30 dias, para
-              usar numa sexta ou sábado, apresentado na portaria. Limite de 1 entrada grátis a cada
-              30 dias por número de WhatsApp.
+              Quem gabarita ganha 1 entrada grátis, com um código único válido por 30 dias. O prêmio
+              vale <span className="font-semibold text-fog">somente em datas com Nome na Lista
+              aberto</span>: ao gabaritar, você escolhe uma dessas noites e é incluído
+              automaticamente na lista daquela data. Para usar, basta apresentar seu nome na portaria
+              até o horário daquela lista (21h). Se não houver nenhuma data com Nome na Lista no
+              momento, o prêmio fica guardado por 30 dias e você recebe um link para escolher a data
+              depois. Limite de 1 entrada grátis a cada 30 dias por número de WhatsApp.
             </p>
             <p>
               <span className="font-semibold text-fog">Boné do Clay (ranking do mês).</span> A maior

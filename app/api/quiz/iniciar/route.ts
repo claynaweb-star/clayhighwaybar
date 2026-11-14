@@ -1,6 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getClientIp } from "@/lib/portaria";
-import { isNomeCompleto, isValidTelefone, telefoneDigits } from "@/lib/nome-na-lista";
+import {
+  isNomeCompleto,
+  isValidTelefone,
+  telefoneDigits,
+  formatTelefone,
+} from "@/lib/nome-na-lista";
 import {
   novaPartida,
   montarPerguntaAtual,
@@ -73,7 +78,10 @@ export async function POST(request: NextRequest) {
   // planilha. Em "duplicate", bloqueia. Em falha técnica do webhook, libera
   // (fail-open) para o jogo não travar por causa de rede.
   if (quizWebhookConfigurado()) {
-    const r = await chamarQuizWebhook({ action: "start", wa, nome, dia }, { timeoutMs: 8000 });
+    const r = await chamarQuizWebhook(
+      { action: "quiz_start", wa, nome, dia, telefone: formatTelefone(whatsapp) },
+      { timeoutMs: 8000 },
+    );
     if (r.ok && r.text === "duplicate") {
       return NextResponse.json({ ok: false, error: "ja_jogou" }, { status: 409 });
     }
