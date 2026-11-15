@@ -465,6 +465,31 @@ export const events: ClayEvent[] = [
     ],
   },
   {
+    id: "nu-metal-generation-22-11",
+    title: "Nu Metal Generation",
+    tituloSeo:
+      "Nu Metal Generation, Domingo de Nu Metal em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "Nu Metal Generation no Clay Highway Bar, Curitiba, em 22/11/2026. Domingo com os hinos de Korn, Limp Bizkit, Linkin Park, System of a Down e Deftones.",
+    date: "2026-11-22",
+    time: "19:00",
+    ocultarHorario: true,
+    genre: "Nu Metal",
+    banner: "/nu-metal-generation-clay-highway-bar-22-11.jfif",
+    bannerAlt:
+      "Banner do Nu Metal Generation no Clay Highway Bar em Curitiba, domingo de tributos a Korn, Limp Bizkit, Linkin Park, System of a Down e Deftones",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/free-copia",
+    lineup: [],
+    venue: CLAY_HIGHWAY,
+    description:
+      "O domingo é do Nu Metal! O Nu Metal Generation volta ao Clay com os maiores hinos de Korn, Limp Bizkit, Linkin Park, System of a Down, Deftones e muito mais. Uma noite para quem cresceu com os riffs pesados e os refrões que marcaram os anos 2000. Não é só show. É Clay!",
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
     id: "roupa-nova-cover-varal-do-wando",
     title: "Roupa Nova Cover + Varal do Wando",
     date: "2026-09-04",
