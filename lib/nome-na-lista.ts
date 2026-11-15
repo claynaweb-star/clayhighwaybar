@@ -46,8 +46,8 @@ export const DATAS_NOME_NA_LISTA: DiaNomeNaLista[] = [
   { data: "2026-12-04", preco: 20 }, // Festa American Pie
   { data: "2026-12-05", preco: 25 }, // DJ André Werneck
   { data: "2026-12-11", preco: 20 }, // Fever Night (ABBA + Bee Gees)
-  { data: "2026-12-18", preco: 20, titulo: "Roupa Nova + Banda RW" },
-  { data: "2026-12-19", preco: 25, titulo: "Rádio Vinil + Club Soda + Flash In Back" },
+  { data: "2026-12-18", preco: 20 }, // Roupa Nova Cover + RW
+  { data: "2026-12-19", preco: 25 }, // Rádio Vinil + Club Soda + Flash In Back
   { data: "2026-12-26", preco: 25, titulo: "Boogie Night + Gold Times" },
 ];
 

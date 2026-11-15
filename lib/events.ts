@@ -438,6 +438,107 @@ export const events: ClayEvent[] = [
     ],
   },
   {
+    id: "roupa-nova-cover-rw-18-12",
+    title: "Roupa Nova Cover + RW",
+    tituloSeo: "Roupa Nova Cover + RW, Tributo em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "Roupa Nova Cover e Banda RW no Clay Highway Bar, Curitiba, em 18/12/2026. Os maiores sucessos do Roupa Nova ao vivo.",
+    date: "2026-12-18",
+    time: "20:00",
+    ocultarHorario: true,
+    genre: "Tributo / Pop rock nacional",
+    nomeNaLista: { preco: 20 },
+    banner: "/roupa-nova-cover-rw-clay-highway-bar-18-12.jfif",
+    bannerAlt:
+      "Banner do Roupa Nova Cover + RW no Clay Highway Bar em Curitiba, tributo ao Roupa Nova com a Banda RW",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/roupanovarw",
+    lineup: [{ name: "Roupa Nova Cover" }, { name: "Banda RW" }],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Uma sexta para cantar junto do começo ao fim! O Roupa Nova Cover traz os maiores sucessos de uma das bandas mais queridas do Brasil, e a Banda RW completa a noite. Não é só show. É Clay!",
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
+    id: "radio-vinil-club-soda-flash-in-back-19-12",
+    title: "Rádio Vinil + Club Soda + Flash In Back",
+    tituloSeo:
+      "Rádio Vinil, Club Soda e Flash In Back, Flashback em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "Rádio Vinil, Club Soda e Flash In Back no Clay Highway Bar, Curitiba, em 19/12/2026. Uma noite inteira de flashbacks ao vivo.",
+    date: "2026-12-19",
+    time: "20:00",
+    ocultarHorario: true,
+    genre: "Flashback",
+    nomeNaLista: { preco: 25 },
+    banner: "/radio-vinil-club-soda-flash-in-back-clay-highway-bar-19-12.jfif",
+    bannerAlt:
+      "Banner do Rádio Vinil, Club Soda e Flash In Back no Clay Highway Bar em Curitiba, noite de flashbacks",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/clubsoda",
+    lineup: [
+      { name: "Rádio Vinil" },
+      { name: "Club Soda" },
+      { name: "Flash In Back" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Três bandas e uma noite inteira de flashbacks! Rádio Vinil, Club Soda e Flash In Back trazem os hits que marcaram gerações, para cantar e dançar até o fim. Não é só festa. É Clay!",
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
+    id: "freework-tributo-nazareth-20-12",
+    title: "Freework, Tributo Nazareth, Entrada Free",
+    tituloSeo:
+      "Freework, Tributo Nazareth com Entrada Free em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "Freework faz tributo ao Nazareth no Clay Highway Bar, Curitiba, em 20/12/2026. Domingo de hard rock com entrada free.",
+    date: "2026-12-20",
+    time: "19:00",
+    ocultarHorario: true,
+    genre: "Tributo / Hard rock",
+    banner: "/freework-tributo-nazareth-clay-highway-bar-20-12.jfif",
+    bannerAlt:
+      "Banner do Freework no Clay Highway Bar em Curitiba, tributo ao Nazareth com entrada free",
+    plataforma: "Gratuito",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/nazarethfree",
+    freeBadge: "ENTRADA FREE",
+    freeCta: "Garantir entrada free",
+    lineup: [{ name: "Freework" }],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Domingo de hard rock com entrada free! A Freework sobe ao palco do Clay com um tributo ao Nazareth e clássicos como Love Hurts e Hair of the Dog. Garanta sua entrada gratuita pelo link. Não é só show. É Clay!",
+  },
+  {
+    id: "geracao-coca-cola-27-12",
+    title: "Geração Coca-Cola, Entrada Free",
+    tituloSeo:
+      "Geração Coca-Cola, Rock Nacional Anos 80 com Entrada Free | Clay Highway Bar",
+    seoDescription:
+      "Geração Coca-Cola no Clay Highway Bar, Curitiba, em 27/12/2026. A maior festa de rock nacional dos anos 80, com entrada free.",
+    date: "2026-12-27",
+    time: "19:00",
+    ocultarHorario: true,
+    genre: "Rock nacional anos 80",
+    banner: "/geracao-coca-cola-clay-highway-bar-27-12.jfif",
+    bannerAlt:
+      "Banner da Geração Coca-Cola no Clay Highway Bar em Curitiba, festa de rock nacional dos anos 80 com entrada free",
+    plataforma: "Gratuito",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/geracaofree",
+    freeBadge: "ENTRADA FREE",
+    freeCta: "Garantir entrada free",
+    lineup: [{ name: "Geração Coca-Cola" }],
+    venue: CLAY_HIGHWAY,
+    description:
+      "A maior festa de rock nacional dos anos 80 fecha o ano no Clay, com entrada free! A Geração Coca-Cola revive os hinos de Legião Urbana, Cazuza, Barão Vermelho, Titãs, Paralamas e muito mais. Não é só festa. É Clay!",
+  },
+  {
     id: "curitiba-autoral-lab-3",
     title: "Curitiba Autoral Lab",
     tituloSeo:
