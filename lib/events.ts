@@ -52,6 +52,16 @@ export type ClayEvent = {
   /** Observação extra sobre o ingresso (ex.: pré-venda, produção externa). */
   ticketNote?: string;
   /**
+   * Texto do selo de entrada gratuita na página do evento, quando o padrão
+   * "Entrada gratuita" não serve (ex.: "ENTRADA FREE"). Só afeta este evento.
+   */
+  freeBadge?: string;
+  /**
+   * Texto do botão de entrada gratuita na página do evento, quando o padrão
+   * "Garantir entrada gratuita" não serve (ex.: "Garantir entrada free").
+   */
+  freeCta?: string;
+  /**
    * Arte/banner do evento (arquivo em /public). Ausente quando ainda não há arte.
    * O alt-text é gerado automaticamente a partir do `title` do show
    * (ex.: "Arte do evento {title} no Clay Highway Bar") nos componentes que
@@ -219,6 +229,29 @@ export const events: ClayEvent[] = [
       "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
       "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
     ],
+  },
+  {
+    id: "youngs-acdc-cover-13-12",
+    title: "Youngs AC/DC Cover, Entrada Free",
+    tituloSeo:
+      "Youngs AC/DC Cover, Tributo AC/DC com Entrada Free em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "Youngs AC/DC Cover no Clay Highway Bar, Curitiba, em 13/12/2026. Domingo de tributo ao AC/DC com entrada free.",
+    date: "2026-12-13",
+    time: "19:00",
+    ocultarHorario: true,
+    genre: "Tributo AC/DC",
+    banner: "/youngs-acdc-cover-clay-highway-bar-13-12.jfif",
+    bannerAlt:
+      "Banner do Youngs AC/DC Cover no Clay Highway Bar em Curitiba, domingo com entrada free",
+    plataforma: "Gratuito",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/youngsfree",
+    freeBadge: "ENTRADA FREE",
+    freeCta: "Garantir entrada free",
+    lineup: [{ name: "Youngs AC/DC Cover" }],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Domingo de rock pesado e entrada free no Clay! A Youngs AC/DC Cover sobe ao palco com os maiores clássicos do AC/DC, de Highway to Hell a Back in Black e Thunderstruck. Garanta sua entrada gratuita pelo link e venha cantar junto. Não é só show. É Clay!",
   },
   {
     id: "baile-do-hawaii",

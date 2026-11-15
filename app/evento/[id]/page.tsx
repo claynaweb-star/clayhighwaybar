@@ -132,7 +132,7 @@ export default async function EventPage({
             )}
             {free && (
               <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-400">
-                Entrada gratuita
+                {event.freeBadge ?? "Entrada gratuita"}
               </span>
             )}
             {event.soldOut && (
@@ -453,7 +453,7 @@ export default async function EventPage({
                   rel="noopener noreferrer"
                   className="mt-6 block w-full rounded-lg border border-emerald-500/50 bg-emerald-500/15 px-6 py-3 text-center font-semibold text-emerald-400 transition-colors hover:bg-emerald-500/25"
                 >
-                  Garantir entrada gratuita
+                  {event.freeCta ?? "Garantir entrada gratuita"}
                 </a>
               ) : (
                 <div className="mt-6 w-full rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-6 py-3 text-center font-semibold text-emerald-400">
