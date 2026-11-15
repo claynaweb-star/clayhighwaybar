@@ -297,7 +297,7 @@ export const events: ClayEvent[] = [
     bannerAlt: "Banner da festa American Pie no Clay Highway Bar em Curitiba",
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/festa-american-pie",
-    nomeNaLista: { preco: 25 },
+    nomeNaLista: { preco: 20 },
     lineup: [],
     venue: CLAY_HIGHWAY,
     description:
@@ -353,7 +353,7 @@ export const events: ClayEvent[] = [
     plataforma: "Meaple/Sympla",
     linkIngresso:
       "https://meaple.com.br/festivalcadaumnasua/festival-cada-um-na-sua-em-curitiba19112026",
-    nomeNaLista: { preco: 25 },
+    nomeNaLista: { preco: 20 },
     lineup: [
       { name: "Palinha" },
       { name: "Anderson Correia" },
@@ -388,7 +388,6 @@ export const events: ClayEvent[] = [
       "Banner do Sábado Revival no Clay Highway Bar em Curitiba, noite de flashbacks com Varal do Wando, Club Soda e Boogie Night",
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/sabadorevivel",
-    nomeNaLista: { preco: 25 },
     lineup: [
       { name: "Varal do Wando" },
       { name: "Club Soda" },
@@ -476,7 +475,6 @@ export const events: ClayEvent[] = [
       "NU METAL GENERATION no Clay Highway Bar, sábado 14 de novembro, Curitiba",
     plataforma: "Meaple/Sympla",
     linkIngresso: "https://meaple.com.br/clayhighwaybar/nugeneration",
-    nomeNaLista: { preco: 30 },
     lineup: [
       { name: "Nameless", role: "20h30" },
       { name: "Fuck the System", role: "22h30 · System of a Down" },

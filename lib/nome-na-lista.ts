@@ -19,8 +19,12 @@ export const PROMO_VIRADA = "06:00";
 
 const FUSO = "America/Sao_Paulo";
 
-/** Um dia com lista aberta ou na portaria. */
-export type DiaNomeNaLista = { data: string; preco: number };
+/**
+ * Um dia com lista aberta ou na portaria. `titulo` é opcional e serve só para
+ * as datas SEM evento cadastrado em lib/events.ts: é o nome das bandas/atração
+ * mostrado no card do Nome na Lista (datas com evento usam o título do evento).
+ */
+export type DiaNomeNaLista = { data: string; preco: number; titulo?: string };
 
 /** Quanto o valor normal fica acima do valor com Nome na Lista. */
 export const VALOR_NORMAL_ADICIONAL = 5;
@@ -34,19 +38,17 @@ export const VALOR_NORMAL_ADICIONAL = 5;
  * evento. Datas sem evento aparecem só em /nome-na-lista e na portaria.
  */
 export const DATAS_NOME_NA_LISTA: DiaNomeNaLista[] = [
-  { data: "2026-11-07", preco: 25 },
-  { data: "2026-11-14", preco: 30 },
-  { data: "2026-11-19", preco: 25 },
-  { data: "2026-11-20", preco: 20 },
-  { data: "2026-11-21", preco: 25 },
-  { data: "2026-11-27", preco: 20 },
-  { data: "2026-11-28", preco: 25 },
-  { data: "2026-12-04", preco: 25 },
-  { data: "2026-12-05", preco: 25 },
-  { data: "2026-12-11", preco: 20 },
-  { data: "2026-12-18", preco: 20 },
-  { data: "2026-12-19", preco: 25 },
-  { data: "2026-12-26", preco: 25 },
+  { data: "2026-11-19", preco: 20 }, // Festival Cada Um Na Sua
+  { data: "2026-11-20", preco: 20 }, // Festival Brasil Hits (Kid Abelha + Geração Coca-Cola)
+  { data: "2026-11-21", preco: 25 }, // Sábado Revival (Mega Drive + Candyman + Queen)
+  { data: "2026-11-27", preco: 20, titulo: "Banda Baile 80" },
+  { data: "2026-11-28", preco: 25 }, // Baile do Hawaii (Gold Times + Delorean + Silvermoon)
+  { data: "2026-12-04", preco: 20 }, // Festa American Pie
+  { data: "2026-12-05", preco: 25 }, // DJ André Werneck
+  { data: "2026-12-11", preco: 20 }, // Fever Night (ABBA + Bee Gees)
+  { data: "2026-12-18", preco: 20, titulo: "Roupa Nova + Banda RW" },
+  { data: "2026-12-19", preco: 25, titulo: "Rádio Vinil + Club Soda + Flash In Back" },
+  { data: "2026-12-26", preco: 25, titulo: "Boogie Night + Gold Times" },
 ];
 
 /** Valor normal (cheio) a partir do valor com Nome na Lista. */

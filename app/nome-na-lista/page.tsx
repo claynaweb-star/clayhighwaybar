@@ -47,7 +47,7 @@ export default function NomeNaListaPage() {
       preco: d.preco,
       valorNormal: valorNormal(d.preco),
       banner: ev?.banner ? ogImageForBanner(ev.banner) : IMAGEM_SEM_EVENTO,
-      titulo: ev?.title,
+      titulo: ev?.title ?? d.titulo,
     };
   });
 
