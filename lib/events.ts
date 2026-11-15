@@ -203,7 +203,7 @@ export const events: ClayEvent[] = [
     ocultarHorario: true,
     genre: "Flashback / Disco",
     nomeNaLista: { preco: 20 },
-    banner: "/fever-night-abba-bee-gees-clay-highway-bar-11-12.png",
+    banner: "/fever-night-abba-bee-gees-clay-highway-bar-11-12.jfif",
     bannerAlt:
       "Banner da Fever Night no Clay Highway Bar em Curitiba, tributo ao ABBA e aos Bee Gees",
     plataforma: "Meaple/Sympla",
@@ -370,6 +370,36 @@ export const events: ClayEvent[] = [
         text: "18 anos. Permitida a entrada de menores de 18 anos acompanhados por um dos pais, com documentos de ambos, ou com autorização por escrito de um dos pais assinada no gov.br.",
       },
     ],
+    ticketFooter: [
+      "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
+      "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
+    ],
+  },
+  {
+    id: "sabado-revival-21-11",
+    title: "Sábado Revival, Candyman Club + Queen Tributo + Mega Drive",
+    tituloSeo:
+      "Sábado Revival, Queen Tributo e Flashbacks em Curitiba | Clay Highway Bar",
+    seoDescription:
+      "Sábado Revival no Clay Highway Bar, Curitiba, em 21/11/2026. Noite de flashbacks com Candyman Club, Queen Tributo e Mega Drive.",
+    date: "2026-11-21",
+    time: "20:00",
+    ocultarHorario: true,
+    genre: "Flashback",
+    nomeNaLista: { preco: 25 },
+    banner: "/sabado-revival-candyman-queen-clay-highway-bar-21-11.webp",
+    bannerAlt:
+      "Banner do Sábado Revival no Clay Highway Bar em Curitiba, com Candyman Club, Queen Tributo e Mega Drive Flashbacks",
+    plataforma: "Meaple/Sympla",
+    linkIngresso: "https://meaple.com.br/clayhighwaybar/sabadorevivel2",
+    lineup: [
+      { name: "Candyman Club" },
+      { name: "Queen Tributo" },
+      { name: "Mega Drive Flashbacks" },
+    ],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Mais uma noite de Sábado Revival no Clay! Uma viagem pelos maiores hits que marcaram gerações, com Candyman Club, o tributo ao Queen e os flashbacks da Mega Drive. Para cantar e dançar do começo ao fim. Não é só festa. É Clay!",
     ticketFooter: [
       "Os ingressos são vendidos exclusivamente pela plataforma Meaple, contratada pelo Clay apenas como intermediadora. Toda a gestão de cancelamentos, reembolsos, parcelamentos e cobrança de taxas é feita diretamente pela Meaple, conforme as políticas da própria plataforma. As taxas de serviço são aplicadas automaticamente pela Meaple, podendo variar de acordo com o tipo de ingresso, forma de pagamento e parcelamento escolhido. Em caso de dúvidas sobre pagamentos, reembolsos ou taxas, entrar em contato com o suporte da Meaple.",
       "Dúvidas sobre ingressos ou evento? Entre em contato com nosso SAC pelo WhatsApp: (41) 99677-5930",
