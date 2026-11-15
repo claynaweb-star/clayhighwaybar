@@ -878,9 +878,9 @@ function TelaResultado({
               `Fiz ${final.pontos} pontos no Quiz do Clay! 🤘 Duvido você acertar 10 de 10 e ganhar entrada grátis: ${GAME_URL}`,
             )
           }
-          className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-6 py-3 text-lg font-bold text-black transition-transform hover:scale-[1.02] active:scale-95"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-accent px-6 py-3 text-center font-semibold text-accent"
         >
-          <IconeWhatsApp className="h-5 w-5" />
+          <IconeWhatsApp className="h-4 w-4 shrink-0 text-[#25D366]" />
           Desafiar um amigo
         </button>
         <button
@@ -909,9 +909,9 @@ function TelaJaJogou({ onVoltar }: { onVoltar: () => void }) {
             `Jogue o Quiz do Clay e tente acertar 10 de 10 para ganhar entrada grátis! 🤘 ${GAME_URL}`,
           )
         }
-        className="flex w-full max-w-xs items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-6 py-4 text-lg font-bold text-black transition-transform hover:scale-[1.02] active:scale-95"
+        className="flex w-full max-w-xs items-center justify-center gap-2 rounded-2xl border border-accent px-6 py-3 text-center font-semibold text-accent"
       >
-        <IconeWhatsApp className="h-5 w-5" />
+        <IconeWhatsApp className="h-4 w-4 shrink-0 text-[#25D366]" />
         Desafiar um amigo
       </button>
       <button

@@ -137,7 +137,7 @@ function embaralhar<T>(arr: readonly T[]): T[] {
 }
 
 /**
- * Cria uma partida nova. Cada partida tem QTD_DIFICEIS (2) perguntas do grupo
+ * Cria uma partida nova. Cada partida tem QTD_DIFICEIS (3) perguntas do grupo
  * DIFÍCIL e as demais do grupo MÉDIO. As posições das difíceis são sorteadas
  * entre a 3ª e a 10ª pergunta (índices PRIMEIRA_POSICAO_DIFICIL..9) — nunca na 1ª
  * nem na 2ª. Nenhuma pergunta repete dentro da partida.

@@ -24,11 +24,11 @@ export const SEGUNDOS_VERMELHO = 4;
 export const PERGUNTAS_POR_PARTIDA = 10;
 
 /** Quantas perguntas difíceis por partida. */
-export const QTD_DIFICEIS = 2;
+export const QTD_DIFICEIS = 3;
 
 /**
  * Menor posição (base 0) que pode receber uma pergunta difícil: índice 2 = 3ª
- * pergunta. As 2 difíceis caem em posições sorteadas entre a 3ª e a 10ª (nunca
+ * pergunta. As difíceis caem em posições sorteadas entre a 3ª e a 10ª (nunca
  * na 1ª nem na 2ª). Quais posições foram sorteadas fica guardado na própria
  * partida (EstadoPartida.dificeisIdx), e a tela usa isso para a etiqueta
  * "PERGUNTA DIFÍCIL".
@@ -56,7 +56,7 @@ export type PerguntaCliente = {
   enunciado: string;
   /** As 4 alternativas, já embaralhadas pelo servidor. */
   alternativas: string[];
-  /** true nas 2 perguntas difíceis da partida — mostra a etiqueta vermelha. */
+  /** true nas perguntas difíceis da partida — mostra a etiqueta vermelha. */
   dificil: boolean;
 };
 
