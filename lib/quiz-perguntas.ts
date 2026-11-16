@@ -28,8 +28,14 @@ export type Pergunta = {
   enunciado: string;
   alternativas: [string, string, string, string];
   correta: 0 | 1 | 2 | 3;
-  /** Tema para o CSV de revisão: "curiosidade", "nacional", "ano", "álbum"... */
+  /** Tema para o CSV de revisão: "curiosidade", "nacional", "ano", "pegadinha"... */
   tema?: string;
+  /**
+   * Quando true, a 4ª alternativa (índice 3) é mantida FIXA na última posição ao
+   * embaralhar — usado nas pegadinhas com "Nenhuma das alternativas", que só faz
+   * sentido aparecer por último. As 3 primeiras continuam embaralhadas.
+   */
+  ultimaFixa?: boolean;
 };
 
 export const PERGUNTAS: Pergunta[] = [
@@ -323,6 +329,45 @@ export const PERGUNTAS: Pergunta[] = [
   { id: 278, nivel: "dificil", tema: "curiosidade", enunciado: "“Stairway to Heaven”, do Led Zeppelin, é conhecida por nunca ter sido lançada originalmente como?", alternativas: ["Single (compacto)", "Faixa de álbum", "Música de abertura de show", "Lado B"], correta: 0 },
   { id: 279, nivel: "dificil", tema: "curiosidade", enunciado: "O nome Black Sabbath veio de um filme de terror estrelado por qual ator clássico?", alternativas: ["Boris Karloff", "Bela Lugosi", "Vincent Price", "Christopher Lee"], correta: 0 },
   { id: 280, nivel: "dificil", tema: "curiosidade", enunciado: "Os amplificadores empilhados e o som altíssimo no palco são marca registrada de qual banda, liderada por Lemmy?", alternativas: ["Motörhead", "Deep Purple", "Manowar", "Saxon"], correta: 0 },
+
+  // ===================== PEGADINHAS (ids 301–330) =====================
+  // Humor leve: mistura artistas de fora do rock com bandas de rock/metal. Onde
+  // há "Nenhuma das alternativas", ela fica SEMPRE por último (ultimaFixa) e é a
+  // resposta certa em cerca de metade das vezes. Só fatos verificáveis.
+  //
+  // -- "Nenhuma das alternativas" é a CERTA (artista não é de nenhuma das bandas) --
+  { id: 301, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "O guitarrista Chimbinha ficou famoso em qual destas bandas?", alternativas: ["Metallica", "Sepultura", "Iron Maiden", "Nenhuma das alternativas"], correta: 3 },
+  { id: 302, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "O sertanejo Zezé Di Camargo ficou famoso em qual destas bandas de metal?", alternativas: ["Angra", "Megadeth", "Slayer", "Nenhuma das alternativas"], correta: 3 },
+  { id: 303, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "O cantor Wesley Safadão ficou famoso em qual destas bandas?", alternativas: ["Korn", "Slipknot", "Pantera", "Nenhuma das alternativas"], correta: 3 },
+  { id: 304, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "O cantor Latino ficou famoso em qual destas bandas de rock?", alternativas: ["Rammstein", "Helloween", "Whitesnake", "Nenhuma das alternativas"], correta: 3 },
+  { id: 305, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "O sertanejo Michel Teló, do “Ai Se Eu Te Pego”, ficou famoso em qual destas bandas?", alternativas: ["Linkin Park", "Limp Bizkit", "Deftones", "Nenhuma das alternativas"], correta: 3 },
+  { id: 306, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "O sertanejo Gusttavo Lima ficou famoso em qual destas bandas de metal?", alternativas: ["Motörhead", "Saxon", "Accept", "Nenhuma das alternativas"], correta: 3 },
+  { id: 307, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "O Padre Marcelo Rossi ficou famoso em qual destas bandas de rock?", alternativas: ["Black Sabbath", "Judas Priest", "Kiss", "Nenhuma das alternativas"], correta: 3 },
+  { id: 308, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "A apresentadora Xuxa ficou famosa em qual destas bandas?", alternativas: ["Iron Maiden", "Guns N’ Roses", "AC/DC", "Nenhuma das alternativas"], correta: 3 },
+  { id: 309, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "O apresentador Faustão ficou famoso em qual destas bandas?", alternativas: ["Queen", "The Who", "Nirvana", "Nenhuma das alternativas"], correta: 3 },
+  { id: 310, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "O sambista Zeca Pagodinho ficou famoso em qual destas bandas de metal?", alternativas: ["Slayer", "Testament", "Exodus", "Nenhuma das alternativas"], correta: 3 },
+  // -- Uma banda real é a CERTA; "Nenhuma das alternativas" entra só como pegadinha --
+  { id: 311, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "O vocalista Max Cavalera ficou famoso à frente de qual banda?", alternativas: ["Sepultura", "Angra", "Krisiun", "Nenhuma das alternativas"], correta: 0 },
+  { id: 312, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "Andre Matos foi o vocalista de estreia de qual banda brasileira de metal?", alternativas: ["Angra", "Sepultura", "Ratos de Porão", "Nenhuma das alternativas"], correta: 0 },
+  { id: 313, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "Rob Halford é o vocalista histórico de qual banda?", alternativas: ["Judas Priest", "Iron Maiden", "Saxon", "Nenhuma das alternativas"], correta: 0 },
+  { id: 314, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "James Hetfield é vocalista e guitarrista de qual banda?", alternativas: ["Metallica", "Megadeth", "Anthrax", "Nenhuma das alternativas"], correta: 0 },
+  { id: 315, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "Phil Anselmo ficou famoso como vocalista de qual banda?", alternativas: ["Pantera", "Slipknot", "Sepultura", "Nenhuma das alternativas"], correta: 0 },
+  { id: 316, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "Dave Mustaine fundou e lidera qual banda, depois de sair do Metallica?", alternativas: ["Megadeth", "Slayer", "Testament", "Nenhuma das alternativas"], correta: 0 },
+  { id: 317, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "Além do Slipknot, Corey Taylor é vocalista de qual outra banda?", alternativas: ["Stone Sour", "Korn", "Deftones", "Nenhuma das alternativas"], correta: 0 },
+  { id: 318, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "Lemmy Kilmister ficou famoso à frente de qual banda?", alternativas: ["Motörhead", "Metallica", "Venom", "Nenhuma das alternativas"], correta: 0 },
+  { id: 319, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "Bruce Dickinson é o vocalista histórico de qual banda?", alternativas: ["Iron Maiden", "Judas Priest", "Saxon", "Nenhuma das alternativas"], correta: 0 },
+  { id: 320, nivel: "medio", tema: "pegadinha", ultimaFixa: true, enunciado: "Angus Young, com seu uniforme de colegial, toca guitarra em qual banda?", alternativas: ["AC/DC", "Led Zeppelin", "Deep Purple", "Nenhuma das alternativas"], correta: 0 },
+  // -- Sem "Nenhuma": a banda real do artista aparece no meio de bandas de metal --
+  { id: 321, nivel: "medio", tema: "pegadinha", enunciado: "A cantora Ivete Sangalo começou a carreira em qual banda?", alternativas: ["Banda Eva", "Sepultura", "Angra", "Metallica"], correta: 0 },
+  { id: 322, nivel: "medio", tema: "pegadinha", enunciado: "Alexandre Pires ficou famoso em qual grupo?", alternativas: ["Só Pra Contrariar", "Iron Maiden", "Slayer", "Pantera"], correta: 0 },
+  { id: 323, nivel: "medio", tema: "pegadinha", enunciado: "O cantor Thiaguinho ficou famoso em qual grupo de pagode?", alternativas: ["Exaltasamba", "Korn", "Slipknot", "Sepultura"], correta: 0 },
+  { id: 324, nivel: "medio", tema: "pegadinha", enunciado: "O cantor Netinho fez sucesso nos anos 90 em qual banda de axé?", alternativas: ["Banda Beijo", "Megadeth", "Anthrax", "Helloween"], correta: 0 },
+  { id: 325, nivel: "medio", tema: "pegadinha", enunciado: "Carlinhos Brown comanda qual grupo de percussão da Bahia?", alternativas: ["Timbalada", "Soulfly", "Motörhead", "Pantera"], correta: 0 },
+  { id: 326, nivel: "medio", tema: "pegadinha", enunciado: "Rita Lee ficou famosa em qual banda antes da carreira solo?", alternativas: ["Os Mutantes", "Legião Urbana", "Titãs", "Kiss"], correta: 0 },
+  { id: 327, nivel: "medio", tema: "pegadinha", enunciado: "Cazuza foi vocalista de qual banda antes de seguir carreira solo?", alternativas: ["Barão Vermelho", "Legião Urbana", "Titãs", "Ira!"], correta: 0 },
+  { id: 328, nivel: "medio", tema: "pegadinha", enunciado: "Paulo Ricardo, de “Rádio Pirata”, foi vocalista de qual banda?", alternativas: ["RPM", "Capital Inicial", "Legião Urbana", "Metallica"], correta: 0 },
+  { id: 329, nivel: "medio", tema: "pegadinha", enunciado: "O pagodeiro Belo ficou famoso em qual grupo de pagode?", alternativas: ["Soweto", "Slayer", "Angra", "Sepultura"], correta: 0 },
+  { id: 330, nivel: "medio", tema: "pegadinha", enunciado: "Xanddy é o vocalista de qual banda de axé?", alternativas: ["Harmonia do Samba", "Iron Maiden", "Megadeth", "Korn"], correta: 0 },
 ];
 
 /** Quantas perguntas o banco tem no total. */

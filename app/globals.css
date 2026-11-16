@@ -104,6 +104,13 @@ body {
 }
 .clay-pulse { animation: clay-pulse 0.8s ease-in-out infinite; }
 
+/* Piscar leve do reloginho da pergunta nos últimos segundos. */
+@keyframes clay-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.clay-blink { animation: clay-blink 0.7s ease-in-out infinite; }
+
 /* Confete do 10/10 (cada peça recebe --x/--delay/--bg inline). */
 @keyframes clay-confete {
   0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
@@ -123,10 +130,16 @@ body {
 /* Respeita quem pediu menos movimento. */
 @media (prefers-reduced-motion: reduce) {
   .clay-bob, .clay-jump, .clay-shake, .clay-in, .clay-pop, .clay-pulse,
-  .clay-confete-peca {
+  .clay-blink, .clay-confete-peca {
     animation: none !important;
   }
 }
+
+/* Quiz em tela cheia: durante a partida esconde o menu/rodapé do site e trava a
+   rolagem, para a pergunta e o reloginho caberem sem rolar a página. */
+body.quiz-jogando { overflow: hidden; }
+body.quiz-jogando > header,
+body.quiz-jogando > footer { display: none !important; }
 
 /* Impede seleção/realce em perguntas e respostas (anti-cola). */
 .clay-nosel {

@@ -22,6 +22,10 @@ import { TextoCanvas } from "./TextoCanvas";
 const SITE_URL = "clayhighwaybar.com.br/quiz-do-clay";
 const GAME_URL = "https://clayhighwaybar.com.br/quiz-do-clay";
 
+// Reloginho circular da pergunta: raio e circunferência do anel de progresso.
+const RELOGIO_R = 18;
+const RELOGIO_C = 2 * Math.PI * RELOGIO_R;
+
 // Limite por APARELHO: no máximo 2 números de WhatsApp diferentes por dia neste
 // navegador (o limite por rede/IP é feito no servidor). Guardado em localStorage.
 const DISPOSITIVO_KEY = "quiz_wa_dispositivo";
@@ -161,7 +165,10 @@ export function QuizDoClay() {
   const [empresa, setEmpresa] = useState(""); // honeypot
   const [erroForm, setErroForm] = useState("");
 
-  const barraRef = useRef<HTMLDivElement>(null);
+  // Reloginho circular: o anel (arco) e o número dos segundos, atualizados por
+  // ref a cada quadro (sem re-render), direto no rAF do timer.
+  const arcoRef = useRef<SVGCircleElement>(null);
+  const segRef = useRef<HTMLSpanElement>(null);
   const rafRef = useRef<number | null>(null);
 
   const pararTimer = useCallback(() => {
@@ -222,11 +229,18 @@ export function QuizDoClay() {
     setVermelho(false);
     const inicio = performance.now();
 
+    // Reloginho começa cheio, com o número total de segundos.
+    if (arcoRef.current) arcoRef.current.style.strokeDashoffset = "0";
+    if (segRef.current) segRef.current.textContent = String(Math.round(TEMPO_MS / 1000));
+
     const tick = () => {
       const passado = performance.now() - inicio;
       const restante = Math.max(0, TEMPO_MS - passado);
-      const pct = (restante / TEMPO_MS) * 100;
-      if (barraRef.current) barraRef.current.style.width = `${pct}%`;
+      const frac = restante / TEMPO_MS; // 1 (cheio) -> 0 (vazio)
+      if (arcoRef.current)
+        arcoRef.current.style.strokeDashoffset = String(RELOGIO_C * (1 - frac));
+      if (segRef.current)
+        segRef.current.textContent = String(Math.max(0, Math.ceil(restante / 1000)));
       if (restante <= SEGUNDOS_VERMELHO * 1000) setVermelho(true);
       if (restante <= 0) {
         responder("tempo");
@@ -337,10 +351,22 @@ export function QuizDoClay() {
     setAceite(false);
   }, []);
 
+  // Durante a partida (cadastro → feedback), a tela ocupa a tela inteira: esconde
+  // o menu/rodapé do site e trava a rolagem. Volta ao normal no resultado/intro.
+  const jogando =
+    tela === "cadastro" || tela === "aviso" || tela === "pergunta" || tela === "feedback";
+  useEffect(() => {
+    if (jogando) document.body.classList.add("quiz-jogando");
+    else document.body.classList.remove("quiz-jogando");
+    return () => document.body.classList.remove("quiz-jogando");
+  }, [jogando]);
+
   return (
     <div
       onContextMenu={(e) => e.preventDefault()}
-      className="clay-nosel relative mx-auto flex min-h-[100svh] w-full max-w-lg flex-col items-center justify-start overflow-hidden px-4 pb-16 pt-6"
+      className={`clay-nosel relative mx-auto flex w-full max-w-lg flex-col items-center justify-start overflow-hidden px-4 ${
+        jogando ? "h-[100dvh] py-3" : "min-h-[100svh] pb-16 pt-6"
+      }`}
     >
       {tela === "intro" && <TelaIntro onComecar={() => setTela("cadastro")} />}
 
@@ -371,7 +397,8 @@ export function QuizDoClay() {
           vermelho={vermelho}
           selecionado={selecionado}
           carregando={carregando}
-          barraRef={barraRef}
+          arcoRef={arcoRef}
+          segRef={segRef}
           onResponder={(i) => {
             setSelecionado(i);
             responder(i);
@@ -583,7 +610,8 @@ function TelaPergunta({
   vermelho,
   selecionado,
   carregando,
-  barraRef,
+  arcoRef,
+  segRef,
   onResponder,
 }: {
   pergunta: PerguntaCliente;
@@ -592,58 +620,87 @@ function TelaPergunta({
   vermelho: boolean;
   selecionado: number | null;
   carregando: boolean;
-  barraRef: React.RefObject<HTMLDivElement | null>;
+  arcoRef: React.RefObject<SVGCircleElement | null>;
+  segRef: React.RefObject<HTMLSpanElement | null>;
   onResponder: (i: number) => void;
 }) {
   return (
-    <div className="flex w-full flex-1 flex-col gap-4 pt-2">
-      {/* Cabeçalho: progresso + pontos */}
-      <div className="flex items-center justify-between text-sm font-semibold">
-        <span className="text-muted">
-          Pergunta <span className="text-fog">{pergunta.numero}</span>/{total}
+    <div className="flex h-full w-full flex-1 flex-col gap-3 pt-1">
+      {/* Cabeçalho: mascote pequeno + progresso + pontos (tudo em uma linha) */}
+      <div className="flex shrink-0 items-center justify-between gap-2 text-sm font-semibold">
+        <div className="flex min-w-0 items-center gap-2">
+          <Claytinho
+            pose={vermelho ? "sem_tempo" : "rock"}
+            anim={vermelho ? "clay-pulse" : ""}
+            className="h-9 w-auto shrink-0"
+          />
+          <span className="truncate text-muted">
+            Pergunta <span className="text-fog">{pergunta.numero}</span>/{total}
+          </span>
+        </div>
+        <span className="shrink-0 rounded-full bg-surface-2 px-3 py-1 text-accent">
+          {pontos} pts
         </span>
-        <span className="rounded-full bg-surface-2 px-3 py-1 text-accent">{pontos} pts</span>
       </div>
 
-      {/* Etiqueta de pergunta difícil (2 por partida, posições sorteadas) */}
+      {/* Etiqueta de pergunta difícil (posições sorteadas na partida) */}
       {pergunta.dificil && (
-        <div className="clay-pop flex items-center justify-center gap-2 rounded-xl border border-red-500/60 bg-red-500/10 px-3 py-2 text-center text-sm font-extrabold uppercase tracking-wide text-red-300">
+        <div className="clay-pop flex shrink-0 items-center justify-center gap-2 rounded-xl border border-red-500/60 bg-red-500/10 px-3 py-1.5 text-center text-xs font-extrabold uppercase tracking-wide text-red-300">
           <span aria-hidden>🔥</span>
           Pergunta difícil
           <span aria-hidden>🔥</span>
         </div>
       )}
 
-      {/* Barra de tempo */}
-      <div className="h-3 w-full overflow-hidden rounded-full bg-surface-2">
+      {/* Quadro da pergunta com o reloginho no canto superior direito */}
+      <div className="relative shrink-0 rounded-2xl border border-border bg-surface p-4">
+        {/* Reloginho circular (contagem regressiva com os segundos no meio) */}
         <div
-          ref={barraRef}
-          style={{ width: "100%" }}
-          className={`h-full rounded-full transition-colors ${
-            vermelho ? "bg-red-500" : "bg-accent"
-          }`}
-        />
+          className={`absolute right-3 top-3 h-12 w-12 ${vermelho ? "clay-blink" : ""}`}
+          role="timer"
+          aria-label="Tempo restante"
+        >
+          <svg viewBox="0 0 44 44" className="h-12 w-12 -rotate-90">
+            <circle
+              cx="22"
+              cy="22"
+              r={RELOGIO_R}
+              fill="none"
+              strokeWidth="4"
+              stroke="currentColor"
+              className="text-surface-2"
+            />
+            <circle
+              ref={arcoRef}
+              cx="22"
+              cy="22"
+              r={RELOGIO_R}
+              fill="none"
+              strokeWidth="4"
+              strokeLinecap="round"
+              stroke="currentColor"
+              style={{ strokeDasharray: RELOGIO_C, strokeDashoffset: 0 }}
+              className={vermelho ? "text-red-500" : "text-accent"}
+            />
+          </svg>
+          <span
+            ref={segRef}
+            aria-hidden
+            className={`absolute inset-0 flex items-center justify-center font-display text-xl ${
+              vermelho ? "text-red-400" : "text-accent"
+            }`}
+          >
+            {Math.round(TEMPO_MS / 1000)}
+          </span>
+        </div>
+
+        <div className="min-h-[3rem] pr-14">
+          <TextoCanvas texto={pergunta.enunciado} fontPx={20} bold align="left" />
+        </div>
       </div>
 
-      {/* Mascote no canto + enunciado */}
-      <div className="relative mt-2 rounded-2xl border border-border bg-surface p-5">
-        <div className="pointer-events-none absolute -right-2 -top-10 h-24 w-auto">
-          {vermelho ? (
-            <div className="flex flex-col items-center">
-              <Balao className="mb-1 scale-90 border-red-500/60 text-red-300">Corre!</Balao>
-              <Claytinho pose="sem_tempo" anim="clay-pulse" className="h-20 w-auto" />
-            </div>
-          ) : (
-            <Claytinho pose="duvida" anim="clay-bob" className="h-20 w-auto" />
-          )}
-        </div>
-        <div className="min-h-[3.5rem] pr-16">
-          <TextoCanvas texto={pergunta.enunciado} fontPx={21} bold align="left" />
-        </div>
-      </div>
-
-      {/* Alternativas */}
-      <div className="mt-1 grid gap-3">
+      {/* Alternativas: ocupam o resto da altura, alinhadas ao topo, sem cortar */}
+      <div className="grid flex-1 content-start gap-2.5">
         {pergunta.alternativas.map((alt, i) => {
           const escolhida = selecionado === i;
           return (
@@ -651,7 +708,7 @@ function TelaPergunta({
               key={i}
               disabled={selecionado !== null || carregando}
               onClick={() => onResponder(i)}
-              className={`clay-pop flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors ${
+              className={`clay-pop flex items-center gap-3 rounded-2xl border px-4 py-2.5 text-left transition-colors ${
                 escolhida
                   ? "border-accent bg-accent-soft"
                   : "border-border bg-surface active:bg-surface-2"

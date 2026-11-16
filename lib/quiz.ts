@@ -138,13 +138,20 @@ function embaralhar<T>(arr: readonly T[]): T[] {
 
 /**
  * Cria uma partida nova. Cada partida tem QTD_DIFICEIS (3) perguntas do grupo
- * DIFÍCIL e as demais do grupo MÉDIO. As posições das difíceis são sorteadas
- * entre a 3ª e a 10ª pergunta (índices PRIMEIRA_POSICAO_DIFICIL..9) — nunca na 1ª
- * nem na 2ª. Nenhuma pergunta repete dentro da partida.
+ * DIFÍCIL, no máximo 1 PEGADINHA (numa posição do meio) e as demais do grupo
+ * MÉDIO. As posições das difíceis são sorteadas entre a 3ª e a 10ª pergunta
+ * (índices PRIMEIRA_POSICAO_DIFICIL..9) — nunca na 1ª nem na 2ª. A pegadinha cai
+ * numa posição do meio (nem a 1ª nem a última) fora das difíceis. Nenhuma
+ * pergunta repete dentro da partida.
  */
 export function novaPartida(wa: string, nome: string, dia: string): EstadoPartida {
+  const pegadinhas = embaralhar(
+    PERGUNTAS.filter((p) => p.tema === "pegadinha").map((p) => p.id),
+  );
   const medios = embaralhar(
-    PERGUNTAS.filter((p) => p.nivel === "medio").map((p) => p.id),
+    PERGUNTAS.filter((p) => p.nivel === "medio" && p.tema !== "pegadinha").map(
+      (p) => p.id,
+    ),
   );
   const dificeis = embaralhar(
     PERGUNTAS.filter((p) => p.nivel === "dificil").map((p) => p.id),
@@ -161,11 +168,24 @@ export function novaPartida(wa: string, nome: string, dia: string): EstadoPartid
     .sort((a, b) => a - b);
   const posDificil = new Set(dificeisIdx);
 
+  // No máximo 1 pegadinha por partida, numa posição "do meio" (nunca a 1ª nem a
+  // última) que não seja de pergunta difícil.
+  let posPegadinha = -1;
+  if (pegadinhas.length > 0) {
+    const posicoesMeio: number[] = [];
+    for (let pos = 1; pos < PERGUNTAS_POR_PARTIDA - 1; pos++) {
+      if (!posDificil.has(pos)) posicoesMeio.push(pos);
+    }
+    if (posicoesMeio.length > 0) posPegadinha = embaralhar(posicoesMeio)[0];
+  }
+
   const qids: number[] = [];
   let mi = 0;
   let di = 0;
   for (let pos = 0; pos < PERGUNTAS_POR_PARTIDA; pos++) {
-    if (posDificil.has(pos)) {
+    if (pos === posPegadinha) {
+      qids.push(pegadinhas[0]);
+    } else if (posDificil.has(pos)) {
       qids.push(dificeis[di++]);
     } else {
       qids.push(medios[mi++]);
@@ -200,7 +220,11 @@ export function montarPerguntaAtual(
   const p = perguntaPorId(qid);
   if (!p) return null;
 
-  const ordem = embaralhar([0, 1, 2, 3]); // posições originais, embaralhadas
+  // Embaralha as 4 alternativas. Nas pegadinhas com "Nenhuma das alternativas"
+  // (ultimaFixa), a 4ª fica fixa por último e só as 3 primeiras embaralham.
+  const ordem = p.ultimaFixa
+    ? [...embaralhar([0, 1, 2]), 3]
+    : embaralhar([0, 1, 2, 3]); // posições originais, embaralhadas
   const alternativas = ordem.map((orig) => p.alternativas[orig]);
   const correta = ordem.indexOf(p.correta);
 
