@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   abrirPartida,
   corrigir,
-  montarPerguntaAtual,
   selarPartida,
   gerarCodigo,
   validadeBR,
@@ -64,19 +63,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "fora_de_sincronia" }, { status: 400 });
   }
 
-  // Ainda há perguntas: devolve o resultado desta e a próxima pergunta.
+  // Ainda há perguntas: devolve só o resultado desta e a partida avançada. A
+  // próxima pergunta é buscada em /api/quiz/pergunta quando o cliente for
+  // mostrá-la (depois de revelar a resposta) — aí o servidor carimba o horário.
   if (!corr.terminou) {
-    const prox = montarPerguntaAtual(corr.partida);
-    if (!prox) {
-      return NextResponse.json({ ok: false, error: "instavel" }, { status: 500 });
-    }
     return NextResponse.json({
       ok: true,
       terminou: false,
       resultado: corr.resultado,
       gameToken: selarPartida(corr.partida),
-      questionToken: prox.questionToken,
-      pergunta: prox.pergunta,
     });
   }
 

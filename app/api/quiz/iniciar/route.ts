@@ -7,7 +7,6 @@ import {
 } from "@/lib/nome-na-lista";
 import {
   novaPartida,
-  montarPerguntaAtual,
   selarPartida,
   hojeSaoPauloISO,
   quizWebhookConfigurado,
@@ -116,18 +115,14 @@ export async function POST(request: NextRequest) {
     if (!r.ok) logQuiz("start", r.cause);
   }
 
+  // A partida começa no índice 0. A PRIMEIRA pergunta não é montada aqui: o
+  // cliente a busca em /api/quiz/pergunta ao tocar em "Bora!", e só então o
+  // servidor carimba o horário — assim o tempo da tela de aviso não conta.
   const partida = novaPartida(wa, nome, dia);
-  const montagem = montarPerguntaAtual(partida);
-  if (!montagem) {
-    logQuiz("start", "falha ao montar a primeira pergunta");
-    return NextResponse.json({ ok: false, error: "instavel" }, { status: 500 });
-  }
 
   return NextResponse.json({
     ok: true,
     gameToken: selarPartida(partida),
-    questionToken: montagem.questionToken,
-    pergunta: montagem.pergunta,
     tempoMs: TEMPO_MS,
     total: PERGUNTAS_POR_PARTIDA,
   });

@@ -97,7 +97,6 @@ type Tela =
   | "cadastro"
   | "aviso"
   | "pergunta"
-  | "feedback"
   | "resultado"
   | "jaJogou";
 
@@ -143,11 +142,9 @@ export function QuizDoClay() {
   const questionTokenRef = useRef("");
   const respondidoRef = useRef(false);
   const ultimaRespostaRef = useRef<RespostaCliente>("tempo");
-  const pendenteRef = useRef<
-    | { tipo: "pergunta"; pergunta: PerguntaCliente }
-    | { tipo: "final"; final: ResultadoFinal }
-    | null
-  >(null);
+  const terminouRef = useRef(false);
+  const finalRef = useRef<ResultadoFinal | null>(null);
+  const retryRef = useRef<() => void>(() => {});
 
   const [pergunta, setPergunta] = useState<PerguntaCliente | null>(null);
   const [selecionado, setSelecionado] = useState<number | null>(null);
@@ -178,7 +175,38 @@ export function QuizDoClay() {
     }
   }, []);
 
+  // ----- Buscar e MOSTRAR a pergunta atual (1ª ou próxima) -----
+  // Só aqui o servidor carimba o horário da pergunta, então o tempo começa a
+  // contar quando ela aparece na tela — não durante o aviso nem a revelação.
+  const carregarPergunta = useCallback(async () => {
+    setCarregando(true);
+    setErroRede(false);
+    try {
+      const res = await fetch("/api/quiz/pergunta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gameToken: gameTokenRef.current }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data?.error || "falha");
+      questionTokenRef.current = data.questionToken;
+      respondidoRef.current = false;
+      setSelecionado(null);
+      setResultadoP(null);
+      setVermelho(false);
+      setPergunta(data.pergunta as PerguntaCliente);
+      setCarregando(false);
+      setTela("pergunta");
+    } catch {
+      setCarregando(false);
+      setErroRede(true);
+      retryRef.current = carregarPergunta;
+    }
+  }, []);
+
   // ----- Enviar resposta (toque, tempo esgotado ou saída da tela) -----
+  // Guarda só o resultado desta pergunta (para REVELAR na própria tela) e a
+  // partida avançada. A próxima pergunta é buscada depois, ao revelar terminar.
   const responder = useCallback(
     async (resposta: RespostaCliente, opts: { retry?: boolean } = {}) => {
       if (respondidoRef.current && !opts.retry) return;
@@ -200,33 +228,32 @@ export function QuizDoClay() {
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data?.error || "falha");
 
-        setResultadoP(data.resultado as ResultadoPergunta);
         setPontosAcum((p) => p + (data.resultado?.pontos ?? 0));
-
         if (data.terminou) {
-          pendenteRef.current = { tipo: "final", final: data.final as ResultadoFinal };
+          terminouRef.current = true;
+          finalRef.current = data.final as ResultadoFinal;
         } else {
+          terminouRef.current = false;
           gameTokenRef.current = data.gameToken;
-          questionTokenRef.current = data.questionToken;
-          pendenteRef.current = { tipo: "pergunta", pergunta: data.pergunta as PerguntaCliente };
         }
         setCarregando(false);
-        setTela("feedback");
+        // Dispara a revelação da resposta na própria tela da pergunta.
+        setResultadoP(data.resultado as ResultadoPergunta);
       } catch {
         setCarregando(false);
         setErroRede(true);
-        setTela("feedback");
+        retryRef.current = () => responder(ultimaRespostaRef.current, { retry: true });
       }
     },
     [pararTimer],
   );
 
-  // ----- Timer + anti-cola, ativos só enquanto a pergunta está na tela -----
+  // ----- Timer + anti-cola, ativos só enquanto a pergunta está VIVA na tela -----
+  // (resultadoP === null = ainda não respondida; durante a revelação, o timer
+  // fica parado e os "ouvintes" de saída da tela são removidos.)
   useEffect(() => {
-    if (tela !== "pergunta" || !pergunta) return;
+    if (tela !== "pergunta" || !pergunta || resultadoP) return;
     respondidoRef.current = false;
-    setSelecionado(null);
-    setVermelho(false);
     const inicio = performance.now();
 
     // Reloginho começa cheio, com o número total de segundos.
@@ -265,25 +292,25 @@ export function QuizDoClay() {
       window.removeEventListener("blur", saiu);
       window.removeEventListener("pagehide", saiu);
     };
-  }, [tela, pergunta, responder, pararTimer]);
+  }, [tela, pergunta, resultadoP, responder, pararTimer]);
 
-  // ----- Depois do feedback, avança para a próxima pergunta ou o resultado -----
+  // ----- Revelação da resposta: mostra a certa/errada por um instante e então
+  // avança sozinho para a próxima pergunta (ou para o resultado final) -----
   useEffect(() => {
-    if (tela !== "feedback" || erroRede) return;
+    if (tela !== "pergunta" || !resultadoP || erroRede) return;
+    // Acertou: 1s. Errou / acabou o tempo / saiu: 1,5s para ler a resposta certa.
+    const espera = resultadoP.acertou ? 1000 : 1500;
     const t = setTimeout(() => {
-      const p = pendenteRef.current;
-      if (!p) return;
-      if (p.tipo === "final") {
-        setFinal(p.final);
+      if (terminouRef.current) {
+        setFinal(finalRef.current);
         setTela("resultado");
       } else {
-        setPergunta(p.pergunta);
-        setResultadoP(null);
-        setTela("pergunta");
+        // Busca a próxima pergunta só agora: o relógio do servidor começa aqui.
+        carregarPergunta();
       }
-    }, 1500);
+    }, espera);
     return () => clearTimeout(t);
-  }, [tela, erroRede]);
+  }, [tela, resultadoP, erroRede, carregarPergunta]);
 
   // ----- Iniciar a partida (após o cadastro) -----
   const iniciar = useCallback(async () => {
@@ -329,8 +356,10 @@ export function QuizDoClay() {
         return;
       }
       gameTokenRef.current = data.gameToken;
-      questionTokenRef.current = data.questionToken;
-      setPergunta(data.pergunta as PerguntaCliente);
+      terminouRef.current = false;
+      finalRef.current = null;
+      setPergunta(null);
+      setResultadoP(null);
       setPontosAcum(0);
       setCarregando(false);
       setTela("aviso");
@@ -349,25 +378,23 @@ export function QuizDoClay() {
     setNome("");
     setWhatsapp("");
     setAceite(false);
+    terminouRef.current = false;
+    finalRef.current = null;
   }, []);
 
-  // Durante a partida (cadastro → feedback), a tela ocupa a tela inteira: esconde
-  // o menu/rodapé do site e trava a rolagem. Volta ao normal no resultado/intro.
-  const jogando =
-    tela === "cadastro" || tela === "aviso" || tela === "pergunta" || tela === "feedback";
+  // Durante a partida (cadastro → pergunta/revelação) o jogo ocupa a tela
+  // inteira numa camada fixa por cima de tudo: esconde menu/rodapé/ranking do
+  // site e trava a rolagem. Volta ao normal na intro/resultado.
+  const jogando = tela === "cadastro" || tela === "aviso" || tela === "pergunta";
   useEffect(() => {
     if (jogando) document.body.classList.add("quiz-jogando");
     else document.body.classList.remove("quiz-jogando");
     return () => document.body.classList.remove("quiz-jogando");
   }, [jogando]);
 
-  return (
-    <div
-      onContextMenu={(e) => e.preventDefault()}
-      className={`clay-nosel relative mx-auto flex w-full max-w-lg flex-col items-center justify-start overflow-hidden px-4 ${
-        jogando ? "h-[100dvh] py-3" : "min-h-[100svh] pb-16 pt-6"
-      }`}
-    >
+  // Conteúdo das telas (o mesmo para a camada fixa do jogo e para o fluxo normal).
+  const conteudo = (
+    <>
       {tela === "intro" && <TelaIntro onComecar={() => setTela("cadastro")} />}
 
       {tela === "cadastro" && (
@@ -387,38 +414,73 @@ export function QuizDoClay() {
         />
       )}
 
-      {tela === "aviso" && <TelaAviso onBora={() => setTela("pergunta")} />}
+      {tela === "aviso" && <TelaAviso carregando={carregando} onBora={carregarPergunta} />}
 
-      {tela === "pergunta" && pergunta && (
-        <TelaPergunta
-          pergunta={pergunta}
-          total={PERGUNTAS_POR_PARTIDA}
-          pontos={pontosAcum}
-          vermelho={vermelho}
-          selecionado={selecionado}
-          carregando={carregando}
-          arcoRef={arcoRef}
-          segRef={segRef}
-          onResponder={(i) => {
-            setSelecionado(i);
-            responder(i);
-          }}
-        />
-      )}
-
-      {tela === "feedback" && (
-        <TelaFeedback
-          resultado={resultadoP}
-          erroRede={erroRede}
-          onTentarDeNovo={() => responder(ultimaRespostaRef.current, { retry: true })}
-        />
-      )}
+      {tela === "pergunta" &&
+        (erroRede ? (
+          <TelaErro onTentarDeNovo={() => retryRef.current()} />
+        ) : pergunta ? (
+          <TelaPergunta
+            pergunta={pergunta}
+            total={PERGUNTAS_POR_PARTIDA}
+            pontos={pontosAcum}
+            vermelho={vermelho}
+            selecionado={selecionado}
+            resultado={resultadoP}
+            carregando={carregando}
+            arcoRef={arcoRef}
+            segRef={segRef}
+            onResponder={(i) => {
+              setSelecionado(i);
+              responder(i);
+            }}
+          />
+        ) : (
+          <TelaCarregando />
+        ))}
 
       {tela === "resultado" && final && (
         <TelaResultado final={final} onJogarDeNovo={reiniciar} />
       )}
 
       {tela === "jaJogou" && <TelaJaJogou onVoltar={reiniciar} />}
+    </>
+  );
+
+  // Camada fixa (jogo) — cobre tudo, respeita a área segura do celular e não
+  // deixa a página rolar. A pergunta nunca rola; cadastro/aviso rolam se preciso.
+  if (jogando) {
+    return (
+      <div
+        onContextMenu={(e) => e.preventDefault()}
+        className="clay-nosel fixed inset-0 z-[100] flex flex-col items-center bg-ink"
+        style={{
+          height: "100dvh",
+          paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+          paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
+          paddingLeft: "env(safe-area-inset-left)",
+          paddingRight: "env(safe-area-inset-right)",
+        }}
+      >
+        <div
+          className={`flex w-full max-w-lg min-h-0 flex-1 flex-col px-4 ${
+            tela === "pergunta" ? "overflow-hidden" : "overflow-y-auto py-2"
+          }`}
+        >
+          {conteudo}
+        </div>
+      </div>
+    );
+  }
+
+  // Fluxo normal (intro, resultado, já jogou) — abaixo vêm o ranking e o
+  // regulamento da página.
+  return (
+    <div
+      onContextMenu={(e) => e.preventDefault()}
+      className="clay-nosel relative mx-auto flex min-h-[100svh] w-full max-w-lg flex-col items-center justify-start overflow-hidden px-4 pb-16 pt-6"
+    >
+      {conteudo}
     </div>
   );
 }
@@ -577,7 +639,7 @@ function TelaCadastro({
   );
 }
 
-function TelaAviso({ onBora }: { onBora: () => void }) {
+function TelaAviso({ carregando, onBora }: { carregando: boolean; onBora: () => void }) {
   return (
     <div className="clay-in flex w-full flex-1 flex-col items-center justify-center gap-6 text-center">
       <Claytinho pose="duvida" anim="clay-bob" className="h-44 w-auto" />
@@ -595,9 +657,10 @@ function TelaAviso({ onBora }: { onBora: () => void }) {
       </p>
       <button
         onClick={onBora}
-        className="w-full max-w-xs rounded-2xl bg-accent px-6 py-4 text-lg font-bold text-ink transition-transform hover:scale-[1.02] active:scale-95"
+        disabled={carregando}
+        className="w-full max-w-xs rounded-2xl bg-accent px-6 py-4 text-lg font-bold text-ink transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
       >
-        Bora!
+        {carregando ? "Preparando…" : "Bora!"}
       </button>
     </div>
   );
@@ -609,6 +672,7 @@ function TelaPergunta({
   pontos,
   vermelho,
   selecionado,
+  resultado,
   carregando,
   arcoRef,
   segRef,
@@ -619,107 +683,155 @@ function TelaPergunta({
   pontos: number;
   vermelho: boolean;
   selecionado: number | null;
+  resultado: ResultadoPergunta | null;
   carregando: boolean;
   arcoRef: React.RefObject<SVGCircleElement | null>;
   segRef: React.RefObject<HTMLSpanElement | null>;
   onResponder: (i: number) => void;
 }) {
-  return (
-    <div className="flex h-full w-full flex-1 flex-col gap-3 pt-1">
-      {/* Cabeçalho: mascote pequeno + progresso + pontos (tudo em uma linha) */}
-      <div className="flex shrink-0 items-center justify-between gap-2 text-sm font-semibold">
-        <div className="flex min-w-0 items-center gap-2">
-          <Claytinho
-            pose={vermelho ? "sem_tempo" : "rock"}
-            anim={vermelho ? "clay-pulse" : ""}
-            className="h-9 w-auto shrink-0"
-          />
-          <span className="truncate text-muted">
-            Pergunta <span className="text-fog">{pergunta.numero}</span>/{total}
-          </span>
-        </div>
-        <span className="shrink-0 rounded-full bg-surface-2 px-3 py-1 text-accent">
-          {pontos} pts
+  const revelando = resultado !== null;
+  const letraCerta = resultado ? String.fromCharCode(65 + resultado.correta) : "";
+
+  // Mensagem da revelação (slot reservado, sem empurrar o resto da tela).
+  let msgReveal: React.ReactNode = null;
+  if (revelando) {
+    if (resultado!.acertou) {
+      msgReveal = (
+        <span className="rounded-full bg-green-500 px-4 py-1 text-sm font-extrabold text-ink">
+          Mandou bem! +{resultado!.pontos} pts
         </span>
+      );
+    } else {
+      const prefixo =
+        resultado!.motivo === "tempo"
+          ? "Acabou o tempo! "
+          : resultado!.motivo === "saiu"
+            ? "Pergunta perdida. "
+            : "";
+      msgReveal = (
+        <span className="rounded-full border border-border bg-surface-2 px-4 py-1 text-sm font-bold text-fog">
+          {prefixo}
+          Resposta certa: <span className="text-green-400">{letraCerta}</span>
+        </span>
+      );
+    }
+  }
+
+  return (
+    <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-2 pt-1">
+      {/* Barra do topo: "Pergunta X/10" à esquerda, reloginho à direita */}
+      <div className="flex h-11 shrink-0 items-center justify-between gap-2 text-sm font-semibold">
+        <span className="truncate text-muted">
+          Pergunta <span className="text-fog">{pergunta.numero}</span>/{total}
+        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="rounded-full bg-surface-2 px-3 py-1 text-accent">{pontos} pts</span>
+          {/* Reloginho circular (segundos no meio). Some durante a revelação. */}
+          <div className="relative h-11 w-11 shrink-0">
+            {!revelando && (
+              <div
+                className={vermelho ? "clay-blink" : ""}
+                role="timer"
+                aria-label="Tempo restante"
+              >
+                <svg viewBox="0 0 44 44" className="h-11 w-11 -rotate-90">
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r={RELOGIO_R}
+                    fill="none"
+                    strokeWidth="4"
+                    stroke="currentColor"
+                    className="text-surface-2"
+                  />
+                  <circle
+                    ref={arcoRef}
+                    cx="22"
+                    cy="22"
+                    r={RELOGIO_R}
+                    fill="none"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    style={{ strokeDasharray: RELOGIO_C, strokeDashoffset: 0 }}
+                    className={vermelho ? "text-red-500" : "text-accent"}
+                  />
+                </svg>
+                <span
+                  ref={segRef}
+                  aria-hidden
+                  className={`absolute inset-0 flex items-center justify-center font-display text-lg ${
+                    vermelho ? "text-red-400" : "text-accent"
+                  }`}
+                >
+                  {Math.round(TEMPO_MS / 1000)}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Etiqueta de pergunta difícil (posições sorteadas na partida) */}
-      {pergunta.dificil && (
-        <div className="clay-pop flex shrink-0 items-center justify-center gap-2 rounded-xl border border-red-500/60 bg-red-500/10 px-3 py-1.5 text-center text-xs font-extrabold uppercase tracking-wide text-red-300">
-          <span aria-hidden>🔥</span>
-          Pergunta difícil
-          <span aria-hidden>🔥</span>
-        </div>
-      )}
-
-      {/* Quadro da pergunta com o reloginho no canto superior direito */}
-      <div className="relative shrink-0 rounded-2xl border border-border bg-surface p-4">
-        {/* Reloginho circular (contagem regressiva com os segundos no meio) */}
-        <div
-          className={`absolute right-3 top-3 h-12 w-12 ${vermelho ? "clay-blink" : ""}`}
-          role="timer"
-          aria-label="Tempo restante"
-        >
-          <svg viewBox="0 0 44 44" className="h-12 w-12 -rotate-90">
-            <circle
-              cx="22"
-              cy="22"
-              r={RELOGIO_R}
-              fill="none"
-              strokeWidth="4"
-              stroke="currentColor"
-              className="text-surface-2"
-            />
-            <circle
-              ref={arcoRef}
-              cx="22"
-              cy="22"
-              r={RELOGIO_R}
-              fill="none"
-              strokeWidth="4"
-              strokeLinecap="round"
-              stroke="currentColor"
-              style={{ strokeDasharray: RELOGIO_C, strokeDashoffset: 0 }}
-              className={vermelho ? "text-red-500" : "text-accent"}
-            />
-          </svg>
-          <span
-            ref={segRef}
-            aria-hidden
-            className={`absolute inset-0 flex items-center justify-center font-display text-xl ${
-              vermelho ? "text-red-400" : "text-accent"
-            }`}
-          >
-            {Math.round(TEMPO_MS / 1000)}
-          </span>
-        </div>
-
-        <div className="min-h-[3rem] pr-14">
-          <TextoCanvas texto={pergunta.enunciado} fontPx={20} bold align="left" />
-        </div>
+      {/* Quadro da pergunta: o texto inteiro aparece (a fonte encolhe se precisar) */}
+      <div className="flex shrink-0 items-center rounded-2xl border border-border bg-surface p-4">
+        <TextoCanvas
+          texto={pergunta.enunciado}
+          fontPx={20}
+          minFontPx={14}
+          maxLinhas={5}
+          bold
+          align="left"
+        />
       </div>
 
-      {/* Alternativas: ocupam o resto da altura, alinhadas ao topo, sem cortar */}
-      <div className="grid flex-1 content-start gap-2.5">
+      {/* Slot reservado: etiqueta "difícil" (ao vivo) ou a resposta certa (revelação) */}
+      <div className="flex min-h-9 shrink-0 items-center justify-center text-center">
+        {revelando ? (
+          <div className="clay-pop">{msgReveal}</div>
+        ) : pergunta.dificil ? (
+          <div className="clay-pop flex items-center gap-2 rounded-xl border border-red-500/60 bg-red-500/10 px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-red-300">
+            <span aria-hidden>🔥</span>
+            Pergunta difícil
+            <span aria-hidden>🔥</span>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Alternativas: dividem a altura que sobra (4 linhas iguais), sem vão
+          grande embaixo. Na revelação, a certa fica verde e a escolhida errada
+          fica vermelha. */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-4 gap-2.5">
         {pergunta.alternativas.map((alt, i) => {
-          const escolhida = selecionado === i;
+          let estilo = "border-border bg-surface active:bg-surface-2";
+          let badge = "bg-surface-2 text-accent";
+          if (revelando) {
+            if (i === resultado!.correta) {
+              estilo = "border-green-500 bg-green-500/15";
+              badge = "bg-green-500 text-ink";
+            } else if (i === selecionado) {
+              estilo = "border-red-500 bg-red-500/15";
+              badge = "bg-red-500 text-ink";
+            } else {
+              estilo = "border-border bg-surface opacity-50";
+            }
+          } else if (selecionado === i) {
+            estilo = "border-accent bg-accent-soft";
+          }
           return (
             <button
               key={i}
-              disabled={selecionado !== null || carregando}
+              disabled={revelando || selecionado !== null || carregando}
               onClick={() => onResponder(i)}
-              className={`clay-pop flex items-center gap-3 rounded-2xl border px-4 py-2.5 text-left transition-colors ${
-                escolhida
-                  ? "border-accent bg-accent-soft"
-                  : "border-border bg-surface active:bg-surface-2"
-              } disabled:opacity-80`}
+              className={`clay-pop flex items-center gap-3 rounded-2xl border px-4 py-2.5 text-left transition-colors ${estilo} disabled:opacity-80`}
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-2 font-bold text-accent">
+              <span
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-bold ${badge}`}
+              >
                 {String.fromCharCode(65 + i)}
               </span>
-              <span className="flex-1">
-                <TextoCanvas texto={alt} fontPx={17} align="left" cor="#f2ede4" />
+              <span className="min-w-0 flex-1">
+                <TextoCanvas texto={alt} fontPx={17} minFontPx={13} maxLinhas={2} align="left" cor="#f2ede4" />
               </span>
             </button>
           );
@@ -729,56 +841,28 @@ function TelaPergunta({
   );
 }
 
-function TelaFeedback({
-  resultado,
-  erroRede,
-  onTentarDeNovo,
-}: {
-  resultado: ResultadoPergunta | null;
-  erroRede: boolean;
-  onTentarDeNovo: () => void;
-}) {
-  if (erroRede) {
-    return (
-      <div className="clay-in flex w-full flex-1 flex-col items-center justify-center gap-5 text-center">
-        <Claytinho pose="duvida" className="h-40 w-auto" />
-        <p className="text-lg font-semibold text-fog">Falha de conexão.</p>
-        <button
-          onClick={onTentarDeNovo}
-          className="rounded-2xl bg-accent px-6 py-3 font-bold text-ink active:scale-95"
-        >
-          Tentar de novo
-        </button>
-      </div>
-    );
-  }
-
-  let pose: Pose = "comemorando";
-  let anim = "clay-jump";
-  let msg = "Mandou bem!";
-  if (resultado && !resultado.acertou) {
-    if (resultado.motivo === "saiu") {
-      pose = "nao_foi";
-      anim = "clay-shake";
-      msg = "Sem colar, hein! Pergunta perdida.";
-    } else if (resultado.motivo === "tempo") {
-      pose = "sem_tempo";
-      anim = "clay-shake";
-      msg = "Acabou o tempo!";
-    } else {
-      pose = "triste";
-      anim = "clay-shake";
-      msg = "Ih, essa passou!";
-    }
-  }
-
+/** Carregando (entre perguntas / buscando a próxima). */
+function TelaCarregando() {
   return (
-    <div className="clay-in flex w-full flex-1 flex-col items-center justify-center gap-4 text-center">
-      <Claytinho pose={pose} anim={anim} className="h-52 w-auto" />
-      <p className="font-display text-3xl text-fog">{msg}</p>
-      {resultado?.acertou && (
-        <p className="text-xl font-bold text-accent">+{resultado.pontos} pontos</p>
-      )}
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-4 text-center">
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-accent" />
+      <p className="text-sm text-muted">Carregando…</p>
+    </div>
+  );
+}
+
+/** Falha de rede durante a partida (buscar/enviar). Tenta de novo sem perder tudo. */
+function TelaErro({ onTentarDeNovo }: { onTentarDeNovo: () => void }) {
+  return (
+    <div className="clay-in flex w-full flex-1 flex-col items-center justify-center gap-5 text-center">
+      <Claytinho pose="duvida" className="h-40 w-auto" />
+      <p className="text-lg font-semibold text-fog">Falha de conexão.</p>
+      <button
+        onClick={onTentarDeNovo}
+        className="rounded-2xl bg-accent px-6 py-3 font-bold text-ink active:scale-95"
+      >
+        Tentar de novo
+      </button>
     </div>
   );
 }
