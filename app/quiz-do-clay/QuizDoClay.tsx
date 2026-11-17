@@ -154,6 +154,7 @@ export function QuizDoClay() {
   const [vermelho, setVermelho] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erroRede, setErroRede] = useState(false);
+  const [teste, setTeste] = useState(false); // MODO TESTE (liberado pelo servidor)
 
   // Formulário
   const [nome, setNome] = useState("");
@@ -315,19 +316,15 @@ export function QuizDoClay() {
   // ----- Iniciar a partida (após o cadastro) -----
   const iniciar = useCallback(async () => {
     setErroForm("");
-    if (!isNomeCompleto(nome)) {
-      setErroForm("Escreve seu nome e sobrenome, por favor.");
-      return;
-    }
-    if (!isWhatsappQuizValido(whatsapp)) {
-      setErroForm("Coloca um celular de verdade, com DDD e o 9 (vamos conferir no prêmio).");
-      return;
-    }
     if (!aceite) {
       setErroForm("Precisa marcar que tem 18+ e aceita o regulamento.");
       return;
     }
-    if (!registrarWaDispositivo(telefoneDigits(whatsapp))) {
+    // Jogo normal: nome e celular válidos. Entradas que NÃO passam aqui podem ser
+    // as credenciais de teste (conferidas só no servidor) — nesse caso deixamos o
+    // servidor decidir, sem gastar o limite por aparelho.
+    const entradaNormal = isNomeCompleto(nome) && isWhatsappQuizValido(whatsapp);
+    if (entradaNormal && !registrarWaDispositivo(telefoneDigits(whatsapp))) {
       setErroForm("Limite de partidas atingido hoje.");
       return;
     }
@@ -347,14 +344,19 @@ export function QuizDoClay() {
       if (!res.ok || !data.ok) {
         setCarregando(false);
         setErroForm(
-          data?.error === "limite_rede"
-            ? "Limite de partidas atingido hoje."
-            : data?.error === "muitas_tentativas"
-              ? "Opa, muita gente jogando. Tenta de novo em alguns minutos."
-              : "Deu ruim aqui. Tenta de novo?",
+          data?.error === "nome"
+            ? "Escreve seu nome e sobrenome, por favor."
+            : data?.error === "whatsapp"
+              ? "Coloca um celular de verdade, com DDD e o 9 (vamos conferir no prêmio)."
+              : data?.error === "limite_rede"
+                ? "Limite de partidas atingido hoje."
+                : data?.error === "muitas_tentativas"
+                  ? "Opa, muita gente jogando. Tenta de novo em alguns minutos."
+                  : "Deu ruim aqui. Tenta de novo?",
         );
         return;
       }
+      setTeste(data.teste === true);
       gameTokenRef.current = data.gameToken;
       terminouRef.current = false;
       finalRef.current = null;
@@ -378,6 +380,7 @@ export function QuizDoClay() {
     setNome("");
     setWhatsapp("");
     setAceite(false);
+    setTeste(false);
     terminouRef.current = false;
     finalRef.current = null;
   }, []);
@@ -406,7 +409,7 @@ export function QuizDoClay() {
           erro={erroForm}
           carregando={carregando}
           onNome={setNome}
-          onWhatsapp={(v) => setWhatsapp(formatTelefone(v))}
+          onWhatsapp={(v) => setWhatsapp(formatTelefone(v) || v)}
           onAceite={setAceite}
           onEmpresa={setEmpresa}
           onVoltar={() => setTela("intro")}
@@ -427,6 +430,7 @@ export function QuizDoClay() {
             vermelho={vermelho}
             selecionado={selecionado}
             resultado={resultadoP}
+            teste={teste}
             carregando={carregando}
             arcoRef={arcoRef}
             segRef={segRef}
@@ -440,7 +444,7 @@ export function QuizDoClay() {
         ))}
 
       {tela === "resultado" && final && (
-        <TelaResultado final={final} onJogarDeNovo={reiniciar} />
+        <TelaResultado final={final} teste={teste || final.teste === true} onJogarDeNovo={reiniciar} />
       )}
 
       {tela === "jaJogou" && <TelaJaJogou onVoltar={reiniciar} />}
@@ -467,6 +471,7 @@ export function QuizDoClay() {
             tela === "pergunta" ? "overflow-hidden" : "overflow-y-auto py-2"
           }`}
         >
+          {teste && <SeloTeste className="pb-1 pt-0.5" />}
           {conteudo}
         </div>
       </div>
@@ -673,6 +678,7 @@ function TelaPergunta({
   vermelho,
   selecionado,
   resultado,
+  teste,
   carregando,
   arcoRef,
   segRef,
@@ -684,6 +690,7 @@ function TelaPergunta({
   vermelho: boolean;
   selecionado: number | null;
   resultado: ResultadoPergunta | null;
+  teste: boolean;
   carregando: boolean;
   arcoRef: React.RefObject<SVGCircleElement | null>;
   segRef: React.RefObject<HTMLSpanElement | null>;
@@ -691,6 +698,9 @@ function TelaPergunta({
 }) {
   const revelando = resultado !== null;
   const letraCerta = resultado ? String.fromCharCode(65 + resultado.correta) : "";
+  // No MODO TESTE, ao errar NÃO revelamos a resposta certa (nem em verde nem no
+  // texto): é só pra treinar sem ver a resposta. No jogo normal, revela sempre.
+  const revelarCerta = revelando && !(teste && !resultado!.acertou);
 
   // Mensagem da revelação (slot reservado, sem empurrar o resto da tela).
   let msgReveal: React.ReactNode = null;
@@ -701,7 +711,7 @@ function TelaPergunta({
           Mandou bem! +{resultado!.pontos} pts
         </span>
       );
-    } else {
+    } else if (revelarCerta) {
       const prefixo =
         resultado!.motivo === "tempo"
           ? "Acabou o tempo! "
@@ -712,6 +722,19 @@ function TelaPergunta({
         <span className="rounded-full border border-border bg-surface-2 px-4 py-1 text-sm font-bold text-fog">
           {prefixo}
           Resposta certa: <span className="text-green-400">{letraCerta}</span>
+        </span>
+      );
+    } else {
+      // Modo teste, errou: só o status, sem a resposta certa.
+      const texto =
+        resultado!.motivo === "tempo"
+          ? "Acabou o tempo!"
+          : resultado!.motivo === "saiu"
+            ? "Pergunta perdida."
+            : "Errou";
+      msgReveal = (
+        <span className="rounded-full border border-red-500/60 bg-red-500/10 px-4 py-1 text-sm font-bold text-red-300">
+          {texto}
         </span>
       );
     }
@@ -805,7 +828,7 @@ function TelaPergunta({
           let estilo = "border-border bg-surface active:bg-surface-2";
           let badge = "bg-surface-2 text-accent";
           if (revelando) {
-            if (i === resultado!.correta) {
+            if (revelarCerta && i === resultado!.correta) {
               estilo = "border-green-500 bg-green-500/15";
               badge = "bg-green-500 text-ink";
             } else if (i === selecionado) {
@@ -841,6 +864,18 @@ function TelaPergunta({
   );
 }
 
+/** Selo vermelho "MODO TESTE" no topo (durante o jogo e no resultado). */
+function SeloTeste({ className = "" }: { className?: string }) {
+  return (
+    <div className={`flex w-full shrink-0 items-center justify-center ${className}`}>
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg">
+        <span aria-hidden className="h-2 w-2 rounded-full bg-white" />
+        Modo teste
+      </span>
+    </div>
+  );
+}
+
 /** Carregando (entre perguntas / buscando a próxima). */
 function TelaCarregando() {
   return (
@@ -869,9 +904,11 @@ function TelaErro({ onTentarDeNovo }: { onTentarDeNovo: () => void }) {
 
 function TelaResultado({
   final,
+  teste,
   onJogarDeNovo,
 }: {
   final: ResultadoFinal;
+  teste: boolean;
   onJogarDeNovo: () => void;
 }) {
   const [dica, setDica] = useState("");
@@ -942,6 +979,7 @@ function TelaResultado({
 
   return (
     <div className="clay-in relative flex w-full flex-1 flex-col items-center justify-center gap-4 text-center">
+      {teste && <SeloTeste className="pb-1" />}
       {final.faixa === "lenda" && <Confete />}
       {/* Referência escondida para pegar a família da fonte display (Anton) no canvas. */}
       <span ref={fonteDisplayRef} className="font-display sr-only" aria-hidden>

@@ -94,6 +94,8 @@ export type ResultadoFinal = {
    * quando não há nenhuma data aberta no momento — aí o prêmio fica guardado.
    */
   datasPremio?: DataPremio[];
+  /** true quando a partida foi jogada no MODO TESTE (não vale prêmio/ranking). */
+  teste?: boolean;
 };
 
 /** Uma linha do ranking mensal (nome já reduzido para privacidade). */

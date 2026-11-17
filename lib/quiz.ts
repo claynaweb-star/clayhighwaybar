@@ -89,6 +89,8 @@ export type EstadoPartida = {
   nome: string;
   /** Dia da partida, ISO AAAA-MM-DD (fuso São Paulo). */
   dia: string;
+  /** MODO TESTE: não grava nada, sem prêmio/ranking, sem limites. */
+  teste?: boolean;
   /** Ids das 10 perguntas sorteadas, na ordem da partida. */
   qids: number[];
   /** Posições (0..9) que receberam pergunta difícil nesta partida. */
@@ -144,7 +146,12 @@ function embaralhar<T>(arr: readonly T[]): T[] {
  * numa posição do meio (nem a 1ª nem a última) fora das difíceis. Nenhuma
  * pergunta repete dentro da partida.
  */
-export function novaPartida(wa: string, nome: string, dia: string): EstadoPartida {
+export function novaPartida(
+  wa: string,
+  nome: string,
+  dia: string,
+  teste: boolean = false,
+): EstadoPartida {
   const pegadinhas = embaralhar(
     PERGUNTAS.filter((p) => p.tema === "pegadinha").map((p) => p.id),
   );
@@ -195,6 +202,7 @@ export function novaPartida(wa: string, nome: string, dia: string): EstadoPartid
     wa,
     nome,
     dia,
+    teste,
     qids,
     dificeisIdx,
     idx: 0,
@@ -202,6 +210,25 @@ export function novaPartida(wa: string, nome: string, dia: string): EstadoPartid
     acertos: 0,
     tempoMs: 0,
   };
+}
+
+// ---- Modo teste (credenciais no servidor) ----------------------------------
+
+// Credenciais do MODO TESTE. Ficam só neste arquivo do servidor (nunca vão para
+// o bundle do cliente). Para entrar no modo teste, o cadastro precisa bater com
+// AS DUAS: o nome e o "celular". Como não dá prêmio nem entra no ranking, não há
+// risco em alguém descobrir — no máximo joga partidas de teste sem valor.
+const TESTE_NOME = "CLAYXXX";
+const TESTE_TEL = "XXX";
+
+/**
+ * Diz se o cadastro corresponde às credenciais de TESTE (conferência só no
+ * servidor). Precisa bater nome E celular.
+ */
+export function ehCredencialTeste(nome: string, whatsapp: string): boolean {
+  const nomeIgual = nome.trim().toLowerCase() === TESTE_NOME.toLowerCase();
+  const telIgual = whatsapp.trim().toLowerCase() === TESTE_TEL.toLowerCase();
+  return nomeIgual && telIgual;
 }
 
 function perguntaPorId(id: number): Pergunta | undefined {

@@ -12,6 +12,7 @@ import {
   quizWebhookConfigurado,
   chamarQuizWebhook,
   logQuiz,
+  ehCredencialTeste,
 } from "@/lib/quiz";
 import {
   TEMPO_MS,
@@ -62,9 +63,6 @@ function dentroDoLimiteWaIp(ip: string, wa: string, dia: string): boolean {
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
-  if (!dentroDoLimite(ip)) {
-    return NextResponse.json({ ok: false, error: "muitas_tentativas" }, { status: 429 });
-  }
 
   let nome = "";
   let whatsapp = "";
@@ -83,11 +81,21 @@ export async function POST(request: NextRequest) {
   if (honeypot.trim() !== "") {
     return NextResponse.json({ ok: false, error: "invalido" }, { status: 400 });
   }
-  if (!isNomeCompleto(nome)) {
-    return NextResponse.json({ ok: false, error: "nome" }, { status: 400 });
-  }
-  if (!isWhatsappQuizValido(whatsapp)) {
-    return NextResponse.json({ ok: false, error: "whatsapp" }, { status: 400 });
+
+  // MODO TESTE: credenciais conferidas só aqui no servidor (env do Netlify).
+  const teste = ehCredencialTeste(nome, whatsapp);
+
+  // Fora do modo teste valem os freios e a validação de sempre.
+  if (!teste) {
+    if (!dentroDoLimite(ip)) {
+      return NextResponse.json({ ok: false, error: "muitas_tentativas" }, { status: 429 });
+    }
+    if (!isNomeCompleto(nome)) {
+      return NextResponse.json({ ok: false, error: "nome" }, { status: 400 });
+    }
+    if (!isWhatsappQuizValido(whatsapp)) {
+      return NextResponse.json({ ok: false, error: "whatsapp" }, { status: 400 });
+    }
   }
   if (!aceite) {
     return NextResponse.json({ ok: false, error: "aceite" }, { status: 400 });
@@ -96,32 +104,35 @@ export async function POST(request: NextRequest) {
   const wa = telefoneDigits(whatsapp);
   const dia = hojeSaoPauloISO();
 
-  // Limite por rede: muitos WhatsApp diferentes no mesmo IP no dia.
-  if (!dentroDoLimiteWaIp(ip, wa, dia)) {
-    return NextResponse.json({ ok: false, error: "limite_rede" }, { status: 429 });
-  }
-
-  // Limite de 1 partida por WhatsApp por dia. O "start" reserva o dia na
-  // planilha. Em "duplicate", bloqueia. Em falha técnica do webhook, libera
-  // (fail-open) para o jogo não travar por causa de rede.
-  if (quizWebhookConfigurado()) {
-    const r = await chamarQuizWebhook(
-      { action: "quiz_start", wa, nome, dia, telefone: formatTelefone(whatsapp) },
-      { timeoutMs: 8000 },
-    );
-    if (r.ok && r.text === "duplicate") {
-      return NextResponse.json({ ok: false, error: "ja_jogou" }, { status: 409 });
+  if (!teste) {
+    // Limite por rede: muitos WhatsApp diferentes no mesmo IP no dia.
+    if (!dentroDoLimiteWaIp(ip, wa, dia)) {
+      return NextResponse.json({ ok: false, error: "limite_rede" }, { status: 429 });
     }
-    if (!r.ok) logQuiz("start", r.cause);
+
+    // Limite de 1 partida por WhatsApp por dia. O "start" reserva o dia na
+    // planilha. Em "duplicate", bloqueia. Em falha técnica do webhook, libera
+    // (fail-open) para o jogo não travar por causa de rede.
+    if (quizWebhookConfigurado()) {
+      const r = await chamarQuizWebhook(
+        { action: "quiz_start", wa, nome, dia, telefone: formatTelefone(whatsapp) },
+        { timeoutMs: 8000 },
+      );
+      if (r.ok && r.text === "duplicate") {
+        return NextResponse.json({ ok: false, error: "ja_jogou" }, { status: 409 });
+      }
+      if (!r.ok) logQuiz("start", r.cause);
+    }
   }
 
   // A partida começa no índice 0. A PRIMEIRA pergunta não é montada aqui: o
   // cliente a busca em /api/quiz/pergunta ao tocar em "Bora!", e só então o
   // servidor carimba o horário — assim o tempo da tela de aviso não conta.
-  const partida = novaPartida(wa, nome, dia);
+  const partida = novaPartida(wa, nome, dia, teste);
 
   return NextResponse.json({
     ok: true,
+    teste,
     gameToken: selarPartida(partida),
     tempoMs: TEMPO_MS,
     total: PERGUNTAS_POR_PARTIDA,

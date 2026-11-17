@@ -75,6 +75,29 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  // MODO TESTE: fim de partida não grava nada na planilha, não entra no ranking
+  // e não gera código de prêmio. Só devolve o placar com o selo de teste.
+  if (corr.partida.teste) {
+    const { pontos, acertos, tempoMs } = corr.partida;
+    const final: ResultadoFinal = {
+      acertos,
+      pontos,
+      tempoMs,
+      faixa: faixaPorAcertos(acertos),
+      codigo: null,
+      jaGanhouCodigo: false,
+      validadeCodigo: null,
+      datasPremio: [],
+      teste: true,
+    };
+    return NextResponse.json({
+      ok: true,
+      terminou: true,
+      resultado: corr.resultado,
+      final,
+    });
+  }
+
   // Fim da partida: finaliza, grava o resultado e decide o prêmio.
   const { wa, nome, dia, pontos, acertos, tempoMs } = corr.partida;
   const acertouTudo = acertos >= 10;
