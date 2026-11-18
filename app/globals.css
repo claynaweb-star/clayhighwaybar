@@ -34,6 +34,38 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Altura real do viewport para a moldura 9:16 do Quiz: dvh/svh com fallback; o
+   JS sobrescreve esta variável com window.innerHeight, porque o navegador do
+   WhatsApp/Instagram no iPhone não calcula 100dvh corretamente. */
+:root {
+  --altura-real: 100vh;
+}
+@supports (height: 100svh) {
+  :root {
+    --altura-real: 100svh;
+  }
+}
+@supports (height: 100dvh) {
+  :root {
+    --altura-real: 100dvh;
+  }
+}
+
+/* iPhone: a página nunca pode rolar de lado (corte do lado direito). */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* iPhone: campos de texto com no mínimo 16px evitam o zoom automático do Safari
+   (que amplia a página e "estoura" a largura). Checkbox/radio/range não contam. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+textarea {
+  font-size: 16px;
+}
+
 /* Strong, condensed display type for show titles */
 .font-display {
   font-family: var(--font-display);

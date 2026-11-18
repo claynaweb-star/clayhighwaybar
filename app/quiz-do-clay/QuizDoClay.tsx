@@ -230,20 +230,33 @@ function Moldura({
       className={
         fixo
           ? "fixed inset-0 z-[100] flex items-center justify-center bg-[#050505]"
-          : "relative flex min-h-[100dvh] w-full items-center justify-center bg-[#050505]"
+          : "relative flex w-full items-center justify-center bg-[#050505]"
       }
-      style={fixo ? { height: "100dvh" } : undefined}
+      style={{
+        maxWidth: "100%",
+        overflowX: "hidden",
+        // Altura real do viewport (o JS mantém --altura-real = innerHeight).
+        ...(fixo
+          ? { height: "var(--altura-real, 100svh)" }
+          : { minHeight: "var(--altura-real, 100svh)" }),
+      }}
     >
       <div
         id="quiz-moldura"
-        className="relative z-10 flex w-full flex-col overflow-hidden"
+        className="relative z-10 flex w-full flex-col"
         style={{
-          width: "min(100vw, calc(100dvh * 9 / 16))",
-          height: "min(100dvh, calc(100vw * 16 / 9))",
-          maxHeight: "100dvh",
+          // Largura 9:16 sem usar 100vw (no iPhone o 100vw passa da tela): o
+          // menor entre a largura do contêiner (100%) e altura·9/16. A altura
+          // vem da proporção (aspect-ratio), limitada à altura real da tela.
+          width: "min(100%, calc(var(--altura-real, 100svh) * 9 / 16))",
+          aspectRatio: "9 / 16",
+          maxHeight: "var(--altura-real, 100svh)",
+          maxWidth: "100%",
+          boxSizing: "border-box",
           borderRadius: "28px",
           boxShadow: "0 0 0 2px #222, 0 30px 60px rgba(0,0,0,.6)",
-          overflow: scroll ? "hidden auto" : "hidden",
+          overflowX: "hidden",
+          overflowY: scroll ? "auto" : "hidden",
         }}
       >
         {/* Fundo de caveiras + glow laranja: cobre toda a moldura, atrás de tudo. */}
@@ -604,6 +617,24 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
   useEffect(() => {
     document.body.classList.add("quiz-aberto");
     return () => document.body.classList.remove("quiz-aberto");
+  }, []);
+
+  // iPhone (Safari e navegador do WhatsApp/Instagram): o 100dvh não é confiável.
+  // Fixamos --altura-real = window.innerHeight e atualizamos ao girar/redimensionar.
+  useEffect(() => {
+    const ajustar = () => {
+      document.documentElement.style.setProperty(
+        "--altura-real",
+        `${window.innerHeight}px`,
+      );
+    };
+    ajustar();
+    window.addEventListener("resize", ajustar);
+    window.addEventListener("orientationchange", ajustar);
+    return () => {
+      window.removeEventListener("resize", ajustar);
+      window.removeEventListener("orientationchange", ajustar);
+    };
   }, []);
 
   // Camada de topo da moldura: botão de som (sempre visível) e selo de teste.
@@ -1400,18 +1431,19 @@ function TelaResultado({
     );
 
   const botoes = (
-    <div className="flex w-full gap-2.5">
+    // Lado a lado só quando cabe (>= 380px); abaixo disso, um embaixo do outro.
+    <div className="flex w-full flex-col gap-2.5 min-[380px]:flex-row">
       <button
         onClick={compartilhar}
         disabled={compartilhando}
-        className="flex h-[50px] flex-1 items-center justify-center gap-2 rounded-[14px] text-sm font-extrabold transition-transform active:scale-95 disabled:opacity-60"
+        className="flex h-[50px] w-full items-center justify-center gap-2 rounded-[14px] text-sm font-extrabold transition-transform active:scale-95 disabled:opacity-60 min-[380px]:flex-1"
         style={{ background: "linear-gradient(180deg,#f2a93b,#e8892b)", color: "#140f0b" }}
       >
         {compartilhando ? "Gerando…" : "📸 Postar no Stories"}
       </button>
       <button
         onClick={desafiar}
-        className="flex h-[50px] flex-1 items-center justify-center gap-2 rounded-[14px] text-sm font-extrabold text-[#F6EFE6] transition-transform active:scale-95"
+        className="flex h-[50px] w-full items-center justify-center gap-2 rounded-[14px] text-sm font-extrabold text-[#F6EFE6] transition-transform active:scale-95 min-[380px]:flex-1"
         style={{ background: "rgba(23,18,14,.9)", border: "1.5px solid #E8892B" }}
       >
         💬 Desafiar amigo

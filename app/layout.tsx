@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { Anton, Inter } from "next/font/google";
 import "./globals.css";
@@ -72,6 +72,14 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+};
+
+// viewport-fit=cover para respeitar as áreas seguras do iPhone (notch / home
+// indicator) via env(safe-area-inset-*). width=device-width + initial-scale=1.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 /** Faixa de selos de confiança no rodapé (SVGs inline, sem dependências). */
