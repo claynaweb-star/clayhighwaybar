@@ -22,8 +22,8 @@ import { criarMotorDeSom, type MotorDeSom } from "@/lib/quiz-sons";
 import { TextoCanvas } from "./TextoCanvas";
 import { FundoCaveiras } from "./FundoCaveiras";
 
-const SITE_URL = "clayhighwaybar.com.br/quiz-do-clay";
-const GAME_URL = "https://clayhighwaybar.com.br/quiz-do-clay";
+const SITE_URL = "clayhighwaybar.com.br/quiz";
+const GAME_URL = "https://clayhighwaybar.com.br/quiz";
 
 // Reloginho circular da pergunta (62 px): raio e circunferência do anel.
 const RELOGIO_R = 27;
@@ -1311,7 +1311,7 @@ function TelaResultado({
     }
     const dicaLink = linkCopiado
       ? "Link copiado! No story, toque no ícone de figurinha, escolha LINK e cole."
-      : "No story, toque no ícone de figurinha, escolha LINK e cole clayhighwaybar.com.br/quiz-do-clay.";
+      : "No story, toque no ícone de figurinha, escolha LINK e cole clayhighwaybar.com.br/quiz.";
     const textoShare = `Duvido você acertar 10 de 10! Jogue: ${GAME_URL}`;
     try {
       const blob = await gerarStory(final, pose, fonteDisplayRef.current);
