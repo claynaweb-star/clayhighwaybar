@@ -11,7 +11,6 @@ import {
 } from "@/lib/nome-na-lista";
 import {
   TEMPO_MS,
-  SEGUNDOS_VERMELHO,
   PERGUNTAS_POR_PARTIDA,
   isWhatsappQuizValido,
   type PerguntaCliente,
@@ -26,13 +25,19 @@ import { FundoCaveiras } from "./FundoCaveiras";
 const SITE_URL = "clayhighwaybar.com.br/quiz-do-clay";
 const GAME_URL = "https://clayhighwaybar.com.br/quiz-do-clay";
 
-// Reloginho circular da pergunta: raio e circunferência do anel de progresso.
-const RELOGIO_R = 18;
+// Reloginho circular da pergunta (62 px): raio e circunferência do anel.
+const RELOGIO_R = 27;
 const RELOGIO_C = 2 * Math.PI * RELOGIO_R;
 
-// Formato hexagonal alongado (cantos chanfrados) das alternativas.
-const HEX =
-  "polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%)";
+// Cores do tempo (reloginho + linha), por fase dos segundos restantes:
+// verde 15→9 s, amarelo 8→5 s, vermelho 4→0 s. Transição suave entre elas.
+const COR_RELOGIO = {
+  verde: "#2FB86A",
+  amarelo: "#F2C23B",
+  vermelho: "#E2452B",
+} as const;
+type FaseRelogio = keyof typeof COR_RELOGIO;
+
 
 /** Uma data de Nome na Lista aberta (para o bloco de quem perde). */
 export type DataLista = {
@@ -73,36 +78,6 @@ function registrarWaDispositivo(wa: string): boolean {
   }
 }
 
-/** Ícone do WhatsApp (inline, herda a cor via currentColor). */
-function IconeWhatsApp({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden className={className} fill="currentColor">
-      <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.82 9.82 0 001.516 5.26l-.999 3.648 3.472-.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-    </svg>
-  );
-}
-
-/** Ícone de compartilhar (seta saindo de uma caixa). */
-function IconeShare({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" />
-      <path d="M12 3v13" />
-      <path d="M8 7l4-4 4 4" />
-    </svg>
-  );
-}
-
-/** Ícone de início (casinha). */
-function IconeHome({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 10.5 12 3l9 7.5" />
-      <path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5" />
-    </svg>
-  );
-}
-
 /** Ícone de som ligado / desligado. */
 function IconeSom({ ligado, className = "" }: { ligado: boolean; className?: string }) {
   return (
@@ -130,9 +105,9 @@ function BotaoSom({ ligado, onToggle }: { ligado: boolean; onToggle: () => void 
       type="button"
       onClick={onToggle}
       aria-label={ligado ? "Desligar o som" : "Ligar o som"}
-      className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/50 text-fog backdrop-blur-sm transition-transform active:scale-90"
+      className="pointer-events-auto flex h-[38px] w-[38px] items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-fog backdrop-blur-sm transition-transform active:scale-90"
     >
-      <IconeSom ligado={ligado} className="h-5 w-5" />
+      <IconeSom ligado={ligado} className="h-[18px] w-[18px]" />
     </button>
   );
 }
@@ -216,29 +191,35 @@ function Moldura({
     <div
       className={
         fixo
-          ? "fixed inset-0 z-[100] flex items-center justify-center"
-          : "relative flex min-h-[100dvh] w-full items-center justify-center"
+          ? "fixed inset-0 z-[100] flex items-center justify-center bg-[#050505]"
+          : "relative flex min-h-[100dvh] w-full items-center justify-center bg-[#050505]"
       }
       style={fixo ? { height: "100dvh" } : undefined}
     >
-      <FundoCaveiras />
       <div
         id="quiz-moldura"
-        className="clay-moldura relative z-10 flex w-full flex-col border border-white/10 sm:rounded-[2rem]"
+        className="relative z-10 flex w-full flex-col overflow-hidden"
         style={{
           width: "min(100vw, calc(100dvh * 9 / 16))",
           height: "min(100dvh, calc(100vw * 16 / 9))",
           maxHeight: "100dvh",
-          backgroundColor: "#0b0b0c",
+          borderRadius: "28px",
+          boxShadow: "0 0 0 2px #222, 0 30px 60px rgba(0,0,0,.6)",
           overflow: scroll ? "hidden auto" : "hidden",
         }}
       >
+        {/* Fundo de caveiras + glow laranja: cobre toda a moldura, atrás de tudo. */}
+        <FundoCaveiras />
         {topo}
+        {/* Padding da referência: 22px em cima, 18px nas laterais, 26px embaixo
+            (respeitando as áreas seguras do aparelho). */}
         <div
-          className={`flex w-full flex-col px-4 ${scroll ? "min-h-full" : "h-full"}`}
+          className={`relative z-[1] flex w-full flex-col ${scroll ? "min-h-full" : "h-full"}`}
           style={{
-            paddingTop: "max(0.85rem, env(safe-area-inset-top))",
-            paddingBottom: "max(0.85rem, env(safe-area-inset-bottom))",
+            paddingTop: "max(22px, env(safe-area-inset-top))",
+            paddingLeft: "18px",
+            paddingRight: "18px",
+            paddingBottom: "max(26px, env(safe-area-inset-bottom))",
           }}
         >
           {children}
@@ -265,7 +246,7 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
   const [resultadoP, setResultadoP] = useState<ResultadoPergunta | null>(null);
   const [final, setFinal] = useState<ResultadoFinal | null>(null);
   const [pontosAcum, setPontosAcum] = useState(0);
-  const [vermelho, setVermelho] = useState(false);
+  const [fase, setFase] = useState<FaseRelogio>("verde");
   const [carregando, setCarregando] = useState(false);
   const [erroRede, setErroRede] = useState(false);
   const [teste, setTeste] = useState(false); // MODO TESTE (liberado pelo servidor)
@@ -288,6 +269,8 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
   // ref a cada quadro (sem re-render), direto no rAF do timer.
   const arcoRef = useRef<SVGCircleElement>(null);
   const segRef = useRef<HTMLSpanElement>(null);
+  const barraRef = useRef<HTMLDivElement>(null);
+  const faseRef = useRef<FaseRelogio>("verde");
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -327,7 +310,8 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
       respondidoRef.current = false;
       setSelecionado(null);
       setResultadoP(null);
-      setVermelho(false);
+      setFase("verde");
+      faseRef.current = "verde";
       setPergunta(data.pergunta as PerguntaCliente);
       setCarregando(false);
       setTela("pergunta");
@@ -394,9 +378,12 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
     tiqueSegRef.current = 99;
     const inicio = performance.now();
 
-    // Reloginho começa cheio, com o número total de segundos.
+    // Reloginho e linha começam cheios, com o número total de segundos.
     if (arcoRef.current) arcoRef.current.style.strokeDashoffset = "0";
+    if (barraRef.current) barraRef.current.style.width = "100%";
     if (segRef.current) segRef.current.textContent = String(Math.round(TEMPO_MS / 1000));
+    faseRef.current = "verde";
+    setFase("verde");
 
     const tick = () => {
       const passado = performance.now() - inicio;
@@ -404,9 +391,16 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
       const frac = restante / TEMPO_MS; // 1 (cheio) -> 0 (vazio)
       if (arcoRef.current)
         arcoRef.current.style.strokeDashoffset = String(RELOGIO_C * (1 - frac));
+      // Linha de tempo: diminui da direita para a esquerda (largura 100%→0).
+      if (barraRef.current) barraRef.current.style.width = `${frac * 100}%`;
       const seg = Math.max(0, Math.ceil(restante / 1000));
       if (segRef.current) segRef.current.textContent = String(seg);
-      if (restante <= SEGUNDOS_VERMELHO * 1000) setVermelho(true);
+      // Fase da cor pelos segundos restantes: 15–9 verde, 8–5 amarelo, 4–0 vermelho.
+      const novaFase: FaseRelogio = seg >= 9 ? "verde" : seg >= 5 ? "amarelo" : "vermelho";
+      if (novaFase !== faseRef.current) {
+        faseRef.current = novaFase;
+        setFase(novaFase);
+      }
       // Tique-taque nos últimos 5 segundos (um por segundo).
       if (seg <= 5 && seg >= 1 && seg !== tiqueSegRef.current) {
         tiqueSegRef.current = seg;
@@ -563,11 +557,11 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
   // Camada de topo da moldura: botão de som (sempre visível) e selo de teste.
   const topo = (
     <>
-      <div className="absolute left-3 top-3 z-30">
+      <div className="absolute left-[18px] top-[20px] z-30">
         <BotaoSom ligado={somLigado} onToggle={alternarSom} />
       </div>
       {teste && (
-        <div className="pointer-events-none absolute left-1/2 top-3 z-30 -translate-x-1/2">
+        <div className="pointer-events-none absolute left-1/2 top-[3px] z-30 -translate-x-1/2">
           <SeloTeste />
         </div>
       )}
@@ -608,13 +602,13 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
             pergunta={pergunta}
             total={PERGUNTAS_POR_PARTIDA}
             pontos={pontosAcum}
-            vermelho={vermelho}
+            fase={fase}
             selecionado={selecionado}
             resultado={resultadoP}
-            teste={teste}
             carregando={carregando}
             arcoRef={arcoRef}
             segRef={segRef}
+            barraRef={barraRef}
             onResponder={(i) => {
               setSelecionado(i);
               responder(i);
@@ -627,12 +621,10 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
       {tela === "resultado" && final && (
         <TelaResultado
           final={final}
-          teste={teste || final.teste === true}
           datas={datas}
           nome={nome}
           whatsapp={whatsapp}
           novidades={novidades}
-          onInicio={reiniciar}
         />
       )}
 
@@ -859,205 +851,223 @@ function TelaPergunta({
   pergunta,
   total,
   pontos,
-  vermelho,
+  fase,
   selecionado,
   resultado,
-  teste,
   carregando,
   arcoRef,
   segRef,
+  barraRef,
   onResponder,
 }: {
   pergunta: PerguntaCliente;
   total: number;
   pontos: number;
-  vermelho: boolean;
+  fase: FaseRelogio;
   selecionado: number | null;
   resultado: ResultadoPergunta | null;
-  teste: boolean;
   carregando: boolean;
   arcoRef: React.RefObject<SVGCircleElement | null>;
   segRef: React.RefObject<HTMLSpanElement | null>;
+  barraRef: React.RefObject<HTMLDivElement | null>;
   onResponder: (i: number) => void;
 }) {
   const revelando = resultado !== null;
-  const letraCerta = resultado ? String.fromCharCode(65 + resultado.correta) : "";
-  // No MODO TESTE, ao errar NÃO revelamos a resposta certa (nem em verde nem no
-  // texto): é só pra treinar sem ver a resposta. No jogo normal, revela sempre.
-  const revelarCerta = revelando && !(teste && !resultado!.acertou);
+  const cor = COR_RELOGIO[fase]; // cor atual do tempo (reloginho + linha)
 
-  // Mensagem da revelação (slot reservado, sem empurrar o resto da tela).
+  // Revelação: SEMPRE mostra a resposta certa ao terminar a pergunta — inclusive
+  // no MODO TESTE (antes ficava escondida; agora o modo teste também revela).
   let msgReveal: React.ReactNode = null;
   if (revelando) {
-    if (resultado!.acertou) {
-      msgReveal = (
-        <span className="rounded-full bg-[#2fb86a] px-4 py-1 text-sm font-extrabold text-[#06130c]">
-          Mandou bem! +{resultado!.pontos} pts
-        </span>
-      );
-    } else if (revelarCerta) {
-      const prefixo =
-        resultado!.motivo === "tempo"
-          ? "Acabou o tempo! "
-          : resultado!.motivo === "saiu"
-            ? "Pergunta perdida. "
-            : "";
-      msgReveal = (
-        <span className="rounded-full border border-border bg-surface-2 px-4 py-1 text-sm font-bold text-fog">
-          {prefixo}
-          Resposta certa: <span className="text-[#2fb86a]">{letraCerta}</span>
-        </span>
-      );
-    } else {
-      const texto =
-        resultado!.motivo === "tempo"
-          ? "Acabou o tempo!"
-          : resultado!.motivo === "saiu"
-            ? "Pergunta perdida."
-            : "Errou";
-      msgReveal = (
-        <span className="rounded-full border border-[#d9452b]/60 bg-[#d9452b]/10 px-4 py-1 text-sm font-bold text-[#f2a93b]">
-          {texto}
-        </span>
-      );
-    }
+    const texto = resultado!.acertou
+      ? `✓ Mandou bem! +${resultado!.pontos} pts`
+      : `✓ Resposta certa: ${pergunta.alternativas[resultado!.correta]}`;
+    msgReveal = (
+      <div
+        className="clay-nosel w-full rounded-[14px] px-3.5 py-2.5 text-center text-[15px] font-extrabold"
+        style={{
+          background: "rgba(47,184,106,.14)",
+          border: "1px solid rgba(47,184,106,.6)",
+          color: "#8ff0b8",
+        }}
+      >
+        {texto}
+      </div>
+    );
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-2">
-      {/* Barra do topo: "Pergunta X/10" (à esq, com folga do botão de som) e
-          reloginho circular (à dir, sempre visível durante a pergunta). */}
-      <div className="flex h-11 shrink-0 items-center justify-between gap-2 pl-10 text-sm font-semibold">
-        <span className="truncate text-muted">
-          Pergunta <span className="text-fog">{pergunta.numero}</span>/{total}
+    <div className="flex h-full min-h-0 w-full flex-1 flex-col">
+      {/* Barra do topo: chips "Pergunta X/10" e pontos (o botão de som fica à
+          esquerda, absoluto; o reloginho saiu do topo — agora fica sobre o quadro). */}
+      <div className="flex h-[38px] shrink-0 items-center gap-2 pl-[46px] text-sm font-semibold">
+        <span className="flex h-[34px] items-center rounded-full border border-white/10 bg-white/[0.06] px-3.5 text-[#A99C8C]">
+          Pergunta <b className="ml-1 text-[#F6EFE6]">{pergunta.numero}/{total}</b>
         </span>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="rounded-full bg-[#17120e] px-3 py-1 text-accent ring-1 ring-accent/30">
-            {pontos} pts
-          </span>
-          <div className="relative h-11 w-11 shrink-0">
-            {!revelando && (
-              <div className={vermelho ? "clay-blink" : ""} role="timer" aria-label="Tempo restante">
-                <svg viewBox="0 0 44 44" className="h-11 w-11 -rotate-90">
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r={RELOGIO_R}
-                    fill="none"
-                    strokeWidth="4"
-                    stroke="currentColor"
-                    className="text-surface-2"
-                  />
-                  <circle
-                    ref={arcoRef}
-                    cx="22"
-                    cy="22"
-                    r={RELOGIO_R}
-                    fill="none"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    stroke="currentColor"
-                    style={{ strokeDasharray: RELOGIO_C, strokeDashoffset: 0 }}
-                    className={vermelho ? "text-[#d9452b]" : "text-[#f2a93b]"}
-                  />
-                </svg>
-                <span
-                  ref={segRef}
-                  aria-hidden
-                  className={`absolute inset-0 flex items-center justify-center font-display text-lg ${
-                    vermelho ? "text-[#d9452b]" : "text-[#f2a93b]"
-                  }`}
-                >
-                  {Math.round(TEMPO_MS / 1000)}
-                </span>
+        <span className="flex h-[34px] items-center rounded-full border border-[#F2A93B]/40 bg-white/[0.06] px-3.5 text-[#F2A93B]">
+          {pontos} pts
+        </span>
+      </div>
+
+      {/* Miolo: cartão da pergunta + (revelação) + alternativas, centralizado. */}
+      <div className="flex min-h-0 flex-1 flex-col justify-center gap-4">
+        {/* Cartão da pergunta: gradiente, borda âmbar fina, brilho suave; texto
+            23px centralizado. O reloginho (62 px) fica sobreposto no topo-centro,
+            metade pra fora; a linha de tempo fica dentro, embaixo do texto. */}
+        <div
+          className="relative shrink-0 rounded-[22px] px-5 pb-3 pt-7 text-center"
+          style={{
+            background: "linear-gradient(180deg,#22190f,#140f0b)",
+            border: "1px solid rgba(242,169,59,.35)",
+            boxShadow: "0 0 30px rgba(232,137,43,.12) inset, 0 10px 30px rgba(0,0,0,.5)",
+          }}
+        >
+          {/* Reloginho circular sobreposto na borda de cima. */}
+          {!revelando && (
+            <div
+              className={`absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 ${
+                fase === "vermelho" ? "clay-blink" : ""
+              }`}
+              role="timer"
+              aria-label="Tempo restante"
+            >
+              <svg width={62} height={62} viewBox="0 0 62 62" className="-rotate-90">
+                <circle cx="31" cy="31" r={RELOGIO_R} fill="#0b0b0c" stroke="#201e20" strokeWidth="5" />
+                <circle
+                  ref={arcoRef}
+                  cx="31"
+                  cy="31"
+                  r={RELOGIO_R}
+                  fill="none"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                  stroke={cor}
+                  style={{
+                    strokeDasharray: RELOGIO_C,
+                    strokeDashoffset: 0,
+                    filter: `drop-shadow(0 0 5px ${cor})`,
+                    transition: "stroke 400ms ease, filter 400ms ease",
+                  }}
+                />
+              </svg>
+              <span
+                ref={segRef}
+                aria-hidden
+                className="font-display absolute inset-0 flex items-center justify-center"
+                style={{ fontSize: 26, color: cor, transition: "color 400ms ease" }}
+              >
+                {Math.round(TEMPO_MS / 1000)}
+              </span>
+            </div>
+          )}
+
+          <div className="flex items-center justify-center">
+            <TextoCanvas
+              texto={pergunta.enunciado}
+              fontPx={23}
+              minFontPx={15}
+              maxLinhas={5}
+              bold
+              align="center"
+            />
+          </div>
+
+          {/* Linha de tempo: diminui da direita para a esquerda, mesma cor do relógio. */}
+          <div
+            className="mt-3 h-1.5 w-full overflow-hidden rounded-full"
+            style={{ background: "#1F1812" }}
+          >
+            <div
+              ref={barraRef}
+              className={`h-full rounded-full ${fase === "vermelho" && !revelando ? "clay-blink" : ""}`}
+              style={{
+                width: "100%",
+                backgroundColor: cor,
+                boxShadow: `0 0 8px ${cor}`,
+                transition: "background-color 400ms ease, box-shadow 400ms ease",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Revelação (resposta certa) ou etiqueta "difícil" — só aparece quando há algo. */}
+        {(revelando || pergunta.dificil) && (
+          <div className="flex shrink-0 items-center justify-center text-center">
+            {revelando ? (
+              <div className="clay-pop w-full">{msgReveal}</div>
+            ) : (
+              <div className="clay-pop flex items-center gap-2 rounded-xl border border-[#d9452b]/60 bg-[#d9452b]/10 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[#f2a93b]">
+                <span aria-hidden>🔥</span>
+                Pergunta difícil
+                <span aria-hidden>🔥</span>
               </div>
             )}
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* Quadro da pergunta: escuro, borda laranja fina, texto grande centralizado. */}
-      <div className="flex shrink-0 items-center justify-center rounded-2xl border border-accent/60 bg-[#17120e] p-4 shadow-[0_0_24px_-10px_rgba(224,137,43,0.6)]">
-        <TextoCanvas
-          texto={pergunta.enunciado}
-          fontPx={21}
-          minFontPx={14}
-          maxLinhas={5}
-          bold
-          align="center"
-        />
-      </div>
-
-      {/* Slot reservado: etiqueta "difícil" (ao vivo) ou a resposta certa (revelação). */}
-      <div className="flex min-h-8 shrink-0 items-center justify-center text-center">
-        {revelando ? (
-          <div className="clay-pop">{msgReveal}</div>
-        ) : pergunta.dificil ? (
-          <div className="clay-pop flex items-center gap-2 rounded-xl border border-[#d9452b]/60 bg-[#d9452b]/10 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[#f2a93b]">
-            <span aria-hidden>🔥</span>
-            Pergunta difícil
-            <span aria-hidden>🔥</span>
-          </div>
-        ) : null}
-      </div>
-
-      {/* Alternativas hexagonais: dividem a altura que sobra (4 linhas iguais). */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-4 gap-2.5">
-        {pergunta.alternativas.map((alt, i) => {
-          let borda = "rgba(242,169,59,0.65)";
-          let fundo = "#17120e";
-          let badgeBg = "#f2a93b";
-          let badgeTxt = "#17120e";
-          let anim = "";
-          let dim = false;
-          let filtro: string | undefined;
-          if (revelando) {
-            if (revelarCerta && i === resultado!.correta) {
-              borda = "#2fb86a";
-              fundo = "rgba(47,184,106,0.16)";
-              badgeBg = "#2fb86a";
-              badgeTxt = "#06130c";
-              anim = "clay-certa";
-              filtro = "drop-shadow(0 0 10px rgba(47,184,106,0.6))";
-            } else if (i === selecionado) {
-              borda = "#d9452b";
-              fundo = "rgba(217,69,43,0.18)";
-              badgeBg = "#d9452b";
-              badgeTxt = "#ffffff";
-              anim = "clay-errou";
-            } else {
-              dim = true;
+        {/* Alternativas: botões arredondados (16 px), altura 58 px, 10 px de gap. */}
+        <div className="flex shrink-0 flex-col gap-2.5">
+          {pergunta.alternativas.map((alt, i) => {
+            let bg = "rgba(23,18,14,.92)";
+            let borda = "1.5px solid rgba(242,169,59,.4)";
+            let sombra = "0 4px 14px rgba(0,0,0,.35)";
+            let badgeBg = "#F2A93B";
+            let badgeTxt = "#140f0b";
+            let txtCor = "#F6EFE6";
+            let anim = "";
+            let dim = false;
+            if (revelando) {
+              if (i === resultado!.correta) {
+                bg = "linear-gradient(180deg,#36c777,#249a57)";
+                borda = "1.5px solid #5fe39a";
+                sombra = "0 0 22px rgba(47,184,106,.55)";
+                badgeBg = "#ffffff";
+                badgeTxt = "#1f7f48";
+                txtCor = "#ffffff";
+                anim = "clay-certa";
+              } else if (i === selecionado) {
+                bg = "linear-gradient(180deg,#e35a3f,#b73620)";
+                borda = "1.5px solid #ff8a70";
+                badgeBg = "#ffffff";
+                badgeTxt = "#b73620";
+                txtCor = "#ffffff";
+                anim = "clay-errou";
+              } else {
+                dim = true;
+              }
+            } else if (selecionado === i) {
+              borda = "1.5px solid #F2A93B";
+              bg = "#3a2a14";
             }
-          } else if (selecionado === i) {
-            borda = "#f2a93b";
-            fundo = "#3a2a14";
-          }
-          return (
-            <button
-              key={i}
-              disabled={revelando || selecionado !== null || carregando}
-              onClick={() => onResponder(i)}
-              style={{ animationDelay: `${i * 60}ms`, filter: filtro }}
-              className={`clay-pop relative block h-full w-full ${anim} ${dim ? "opacity-50" : ""}`}
-            >
-              <span aria-hidden className="absolute inset-0" style={{ clipPath: HEX, background: borda }} />
-              <span
-                className="absolute inset-[2px] flex items-center gap-3 px-4"
-                style={{ clipPath: HEX, background: fundo }}
+            return (
+              <button
+                key={i}
+                disabled={revelando || selecionado !== null || carregando}
+                onClick={() => onResponder(i)}
+                style={{
+                  animationDelay: `${i * 60}ms`,
+                  height: 58,
+                  background: bg,
+                  border: borda,
+                  boxShadow: sombra,
+                }}
+                className={`clay-pop flex w-full items-center gap-3.5 rounded-2xl px-4 text-left ${anim} ${
+                  dim ? "opacity-45" : ""
+                }`}
               >
                 <span
-                  className="font-display flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-lg"
+                  className="font-display flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-base"
                   style={{ background: badgeBg, color: badgeTxt }}
                 >
                   {String.fromCharCode(65 + i)}
                 </span>
                 <span className="min-w-0 flex-1 text-left">
-                  <TextoCanvas texto={alt} fontPx={17} minFontPx={13} maxLinhas={2} align="left" cor="#f2ede4" />
+                  <TextoCanvas texto={alt} fontPx={19} minFontPx={13} maxLinhas={2} bold align="left" cor={txtCor} />
                 </span>
-              </span>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -1066,8 +1076,7 @@ function TelaPergunta({
 /** Selo vermelho "MODO TESTE". */
 function SeloTeste() {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#d9452b] px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg">
-      <span aria-hidden className="h-2 w-2 rounded-full bg-white" />
+    <span className="inline-flex items-center rounded-full bg-[#D9452B] px-2.5 py-[3px] text-[10px] font-extrabold uppercase tracking-[0.12em] text-white shadow-lg">
       Modo teste
     </span>
   );
@@ -1099,32 +1108,6 @@ function TelaErro({ onTentarDeNovo }: { onTentarDeNovo: () => void }) {
   );
 }
 
-/** Linha de 3 ícones pequenos das telas finais. */
-function IconesFinais({
-  onCompartilhar,
-  onDesafiar,
-  onInicio,
-}: {
-  onCompartilhar: () => void;
-  onDesafiar: () => void;
-  onInicio: () => void;
-}) {
-  const botao =
-    "flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-muted transition-colors hover:border-accent hover:text-accent active:scale-90";
-  return (
-    <div className="mt-1 flex items-center justify-center gap-5">
-      <button type="button" onClick={onCompartilhar} aria-label="Compartilhar" className={botao}>
-        <IconeShare className="h-5 w-5" />
-      </button>
-      <button type="button" onClick={onDesafiar} aria-label="Desafiar um amigo" className={botao}>
-        <IconeWhatsApp className="h-5 w-5" />
-      </button>
-      <button type="button" onClick={onInicio} aria-label="Início" className={botao}>
-        <IconeHome className="h-5 w-5" />
-      </button>
-    </div>
-  );
-}
 
 /**
  * Bloco "Nome na Lista" para quem NÃO ganhou a entrada grátis: reaproveita o
@@ -1208,15 +1191,20 @@ function BlocoNomeNaLista({
     }
   }
 
+  const idxSel = sel ? datas.findIndex((d) => d.data === sel) : 0;
+
   return (
-    <div className="w-full max-w-sm rounded-2xl border border-accent/50 bg-[#17120e] p-3 text-left">
-      <p className="font-display text-base text-fog">Ainda dá pra economizar!</p>
-      <p className="mt-0.5 text-[0.7rem] leading-snug text-muted">
-        Garanta o valor promocional: escolha a data, entre na lista e chegue até as 21h.
+    <div
+      className="w-full rounded-[20px] p-[14px] text-left"
+      style={{ background: "rgba(23,18,14,.92)", border: "1px solid rgba(242,169,59,.35)" }}
+    >
+      <h3 className="font-display text-xl uppercase text-fog">Ainda dá pra economizar!</h3>
+      <p className="mt-1 text-[13px] text-[#A99C8C]">
+        Seu nome e WhatsApp já estão preenchidos. É só escolher a data.
       </p>
 
-      {/* Mini carrossel de datas. */}
-      <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* Carrossel de datas: arte + data + preço. */}
+      <div className="-mx-1 mt-2.5 flex gap-2.5 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {datas.map((d) => {
           const marcado = sel === d.data;
           return (
@@ -1225,11 +1213,12 @@ function BlocoNomeNaLista({
               type="button"
               onClick={() => setSel(d.data)}
               aria-pressed={marcado}
-              className={`flex w-32 shrink-0 flex-col overflow-hidden rounded-xl border text-left transition-all ${
-                marcado ? "border-2 border-accent" : "border-border"
+              className={`flex w-[150px] shrink-0 flex-col overflow-hidden rounded-[14px] text-left transition-all ${
+                marcado ? "border-2 border-accent" : "border border-white/10"
               }`}
+              style={{ background: "#100c09" }}
             >
-              <span className="relative block h-16 w-full bg-surface-2">
+              <span className="relative block h-[62px] w-full bg-surface-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={d.banner}
@@ -1238,16 +1227,30 @@ function BlocoNomeNaLista({
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               </span>
-              <span className="flex flex-col px-2 py-1.5">
-                <span className="font-display text-sm leading-tight text-white">{d.label}</span>
-                <span className="font-display text-sm text-accent">R$ {d.preco} até 21h</span>
+              <span className="flex flex-col px-2.5 py-2">
+                <span className="font-display text-sm uppercase leading-tight text-white">{d.label}</span>
+                <span className="font-display text-sm uppercase text-accent">R$ {d.preco} até 21h</span>
               </span>
             </button>
           );
         })}
       </div>
 
-      <label className="mt-2 flex flex-col gap-1 text-sm">
+      {/* Bolinhas indicadoras + dica de arrastar para o lado. */}
+      {datas.length > 1 && (
+        <div className="mt-2 flex items-center justify-between text-xs font-bold text-[#A99C8C]">
+          <span className="flex gap-1" aria-hidden>
+            {datas.map((d, i) => (
+              <span key={d.data} className={i === idxSel ? "text-fog" : "text-[#A99C8C]/40"}>
+                ●
+              </span>
+            ))}
+          </span>
+          <span>arraste para o lado →</span>
+        </div>
+      )}
+
+      <label className="mt-2.5 flex flex-col gap-1 text-sm">
         <span className="font-semibold text-fog">Seu e-mail</span>
         <input
           type="email"
@@ -1266,7 +1269,8 @@ function BlocoNomeNaLista({
         type="button"
         onClick={enviar}
         disabled={enviando}
-        className="glow-accent mt-2.5 w-full rounded-2xl bg-accent px-6 py-2.5 font-display text-lg text-ink transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
+        className="mt-2.5 w-full rounded-[14px] px-6 py-3 font-extrabold text-[#140f0b] transition-transform active:scale-95 disabled:opacity-60"
+        style={{ background: "linear-gradient(180deg,#f2a93b,#e8892b)" }}
       >
         {enviando ? "Enviando…" : "Nome na Lista"}
       </button>
@@ -1276,20 +1280,16 @@ function BlocoNomeNaLista({
 
 function TelaResultado({
   final,
-  teste,
   datas,
   nome,
   whatsapp,
   novidades,
-  onInicio,
 }: {
   final: ResultadoFinal;
-  teste: boolean;
   datas: DataLista[];
   nome: string;
   whatsapp: string;
   novidades: boolean;
-  onInicio: () => void;
 }) {
   const [dica, setDica] = useState("");
   const [compartilhando, setCompartilhando] = useState(false);
@@ -1298,9 +1298,6 @@ function TelaResultado({
   const ganhou = final.faixa === "lenda";
   const pose: Pose = ganhou ? "comemorando" : "nao_foi";
   const titulo = ganhou ? "Você é lenda!" : "Não foi dessa vez!";
-  const sub = ganhou
-    ? "Gabaritou! Ganhou entrada grátis. 🤘"
-    : "Volta amanhã e manda ver!";
 
   const compartilhar = useCallback(async () => {
     setCompartilhando(true);
@@ -1350,8 +1347,28 @@ function TelaResultado({
       `Fiz ${final.pontos} pontos no Quiz do Clay! 🤘 Duvido você acertar 10 de 10 e ganhar entrada grátis: ${GAME_URL}`,
     );
 
+  const botoes = (
+    <div className="flex w-full gap-2.5">
+      <button
+        onClick={compartilhar}
+        disabled={compartilhando}
+        className="flex h-[50px] flex-1 items-center justify-center gap-2 rounded-[14px] text-sm font-extrabold transition-transform active:scale-95 disabled:opacity-60"
+        style={{ background: "linear-gradient(180deg,#f2a93b,#e8892b)", color: "#140f0b" }}
+      >
+        {compartilhando ? "Gerando…" : "📸 Postar no Stories"}
+      </button>
+      <button
+        onClick={desafiar}
+        className="flex h-[50px] flex-1 items-center justify-center gap-2 rounded-[14px] text-sm font-extrabold text-[#F6EFE6] transition-transform active:scale-95"
+        style={{ background: "rgba(23,18,14,.9)", border: "1.5px solid #E8892B" }}
+      >
+        💬 Desafiar amigo
+      </button>
+    </div>
+  );
+
   return (
-    <div className="clay-troca relative flex w-full flex-1 flex-col items-center justify-center gap-2.5 py-2 text-center">
+    <div className="clay-troca relative flex w-full flex-1 flex-col items-center gap-3 py-1 text-center">
       {ganhou && <Confete />}
       {/* Referência escondida para pegar a família da fonte display (Anton) no canvas. */}
       <span ref={fonteDisplayRef} className="font-display sr-only" aria-hidden>
@@ -1361,52 +1378,48 @@ function TelaResultado({
       <Claytinho
         pose={pose}
         anim={ganhou ? "clay-jump" : "clay-bob"}
-        className={ganhou ? "h-28 w-auto" : "h-24 w-auto"}
+        className="h-24 w-auto"
       />
 
-      {/* Cartão inclinado do título. */}
+      {/* Título inclinado, numa linha só. */}
       <div
-        className={`${ganhou ? "clay-tilt-l clay-glow border-accent" : "clay-tilt-r clay-glow-ambar border-[#f2a93b]"} rounded-2xl border-2 bg-[#17120e] px-6 py-2`}
+        className="font-display whitespace-nowrap"
+        style={{
+          transform: "rotate(-3deg)",
+          padding: "12px 20px",
+          borderRadius: 18,
+          background: "#120d0a",
+          border: "2px solid #F2A93B",
+          boxShadow: "0 0 26px rgba(242,169,59,.45)",
+          fontSize: 27,
+          lineHeight: 1,
+          letterSpacing: "-.5px",
+          color: "#F6EFE6",
+        }}
       >
-        <h2 className="font-display text-3xl leading-tight text-fog">{titulo}</h2>
+        {titulo}
       </div>
-      <p className="text-sm text-muted">{sub}</p>
 
-      {ganhou ? (
-        <div className="flex items-stretch gap-3">
-          <div className="rounded-2xl border border-border bg-surface px-6 py-2">
-            <p className="font-display text-2xl text-accent">{final.acertos}/10</p>
-            <p className="text-xs text-muted">acertos</p>
-          </div>
-          <div className="rounded-2xl border border-border bg-surface px-6 py-2">
-            <p className="font-display text-2xl text-accent">{final.pontos}</p>
-            <p className="text-xs text-muted">pontos</p>
-          </div>
-        </div>
-      ) : (
-        <p className="text-sm text-muted">
-          Você fez <span className="font-display text-accent">{final.acertos}/10</span> ·{" "}
-          <span className="font-display text-accent">{final.pontos}</span> pontos
-        </p>
-      )}
+      <p className="text-[15px] text-[#A99C8C]">
+        Você fez <b className="text-[#F2A93B]">{final.acertos}/10</b> ·{" "}
+        <b className="text-[#F2A93B]">{final.pontos}</b> pontos
+      </p>
 
-      {final.codigo && (
-        <>
-          <div className="w-full max-w-xs rounded-2xl border-2 border-accent bg-accent-soft/40 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-accent">
-              Entrada grátis
-            </p>
-            <p className="font-display text-3xl tracking-widest text-fog">{final.codigo}</p>
-          </div>
-          <p className="max-w-xs text-xs font-semibold text-fog">
+      {ganhou && final.codigo && (
+        <div className="w-full max-w-xs rounded-2xl border-2 border-accent bg-accent-soft/40 p-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+            Entrada grátis
+          </p>
+          <p className="font-display text-3xl tracking-widest text-fog">{final.codigo}</p>
+          <p className="mt-1 text-xs font-semibold text-fog">
             {(final.datasPremio?.length ?? 0) > 0
-              ? "Seu nome já está em todas as listas com Nome na Lista! Vale 1 entrada grátis, numa noite à sua escolha."
-              : "Seu nome vai entrar automaticamente nas próximas listas com Nome na Lista. Prêmio válido por 30 dias."}
+              ? "Seu nome já está em todas as listas com Nome na Lista! Vale 1 entrada, numa noite à sua escolha."
+              : "Seu nome entra automaticamente nas próximas listas. Prêmio válido por 30 dias."}
           </p>
           {final.validadeCodigo ? (
-            <p className="max-w-xs text-[0.7rem] text-muted">Vale até {final.validadeCodigo}.</p>
+            <p className="mt-1 text-[0.7rem] text-muted">Vale até {final.validadeCodigo}.</p>
           ) : null}
-        </>
+        </div>
       )}
       {final.jaGanhouCodigo && (
         <p className="max-w-xs text-sm text-muted">
@@ -1415,31 +1428,19 @@ function TelaResultado({
         </p>
       )}
 
-      {/* Quem GANHOU: compartilhar + desafiar. Quem NÃO ganhou: Nome na Lista. */}
-      {ganhou ? (
-        <div className="mt-1 flex w-full max-w-xs flex-col gap-2">
-          <button
-            onClick={compartilhar}
-            disabled={compartilhando}
-            className="clay-glow rounded-2xl bg-accent px-6 py-3 font-display text-lg text-ink transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
-          >
-            {compartilhando ? "Gerando…" : "Compartilhar no Instagram"}
-          </button>
-          <button
-            onClick={desafiar}
-            className="flex items-center justify-center gap-2 rounded-2xl border border-accent px-6 py-3 font-semibold text-accent"
-          >
-            <IconeWhatsApp className="h-4 w-4 shrink-0 text-[#25D366]" />
-            Desafiar um amigo
-          </button>
-        </div>
-      ) : (
-        <BlocoNomeNaLista datas={datas} nome={nome} whatsapp={whatsapp} novidades={novidades} />
+      {botoes}
+      {dica && <p className="max-w-full text-sm text-accent">{dica}</p>}
+
+      {/* Quem NÃO ganhou: aviso piscando + bloco Nome na Lista. */}
+      {!ganhou && (
+        <>
+          <div className="clay-blink mt-1 flex flex-col items-center gap-0.5 text-[13px] font-extrabold uppercase leading-tight tracking-[0.06em] text-[#F2A93B]">
+            <span>Arraste para baixo e veja os dias com Nome na Lista</span>
+            <span aria-hidden className="clay-seta text-[22px] leading-none">⌄</span>
+          </div>
+          <BlocoNomeNaLista datas={datas} nome={nome} whatsapp={whatsapp} novidades={novidades} />
+        </>
       )}
-
-      <IconesFinais onCompartilhar={compartilhar} onDesafiar={desafiar} onInicio={onInicio} />
-
-      {dica && <p className="max-w-xs text-sm text-accent">{dica}</p>}
     </div>
   );
 }
@@ -1462,8 +1463,7 @@ function TelaJaJogou({ onVoltar }: { onVoltar: () => void }) {
         }
         className="flex w-full max-w-xs items-center justify-center gap-2 rounded-2xl border border-accent px-6 py-3 font-semibold text-accent"
       >
-        <IconeWhatsApp className="h-4 w-4 shrink-0 text-[#25D366]" />
-        Desafiar um amigo
+        💬 Desafiar amigo
       </button>
       <button onClick={onVoltar} className="text-xs text-muted underline hover:text-fog">
         Voltar ao início

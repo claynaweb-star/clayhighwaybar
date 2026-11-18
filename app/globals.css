@@ -218,6 +218,13 @@ body.quiz-aberto a[aria-label="Falar com o Clay Highway no WhatsApp"] {
 }
 .clay-certa { animation: clay-certa 0.6s ease-out; }
 
+/* Setinha "arraste para baixo" das telas finais: pulinho suave pra baixo. */
+@keyframes clay-seta {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+.clay-seta { animation: clay-seta 1.1s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
-  .clay-troca, .clay-errou, .clay-certa { animation: none !important; }
+  .clay-troca, .clay-errou, .clay-certa, .clay-seta { animation: none !important; }
 }

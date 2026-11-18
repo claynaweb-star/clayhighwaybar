@@ -1,59 +1,27 @@
 /**
- * Fundo do Quiz do Clay: um padrão contínuo de caveiras em contorno (SVG
- * próprio, bem leve) em cinza muito escuro sobre preto, com baixa opacidade, e
- * um brilho laranja suave vindo de baixo. Cobre a tela inteira — dentro e fora
- * da moldura 9:16 do jogo. Desenhado do zero (não copia nenhuma referência).
+ * Fundo do Quiz do Clay: padrão contínuo de caveiras em contorno + brilho
+ * laranja vindo de baixo. Reproduz EXATAMENTE o fundo da referência visual
+ * (docs/quiz-referencia.html): caveira em contorno #1f1f22 (traço 1,6), olhos e
+ * nariz #161618, dentes; 4 caveiras por tile de 140×140 em rotações variadas,
+ * sobre #0B0B0C, com um glow radial laranja embaixo.
  *
- * Fica numa camada atrás de tudo (absolute inset-0) e não captura toques.
+ * Fica numa camada atrás do conteúdo (absolute inset-0) e não captura toques.
  */
+const CAVEIRAS_SVG =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cdefs%3E%3Cg id='s' fill='none' stroke='%231f1f22' stroke-width='1.6'%3E%3Cpath d='M20 2C10 2 3 9 3 18c0 6 3 10 7 12v6c0 2 1 3 3 3h14c2 0 3-1 3-3v-6c4-2 7-6 7-12C37 9 30 2 20 2z'/%3E%3Cellipse cx='13' cy='19' rx='4' ry='5' fill='%23161618'/%3E%3Cellipse cx='27' cy='19' rx='4' ry='5' fill='%23161618'/%3E%3Cpath d='M20 25l-2 4h4z' fill='%23161618'/%3E%3Cpath d='M16 33v6M20 33v6M24 33v6'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23s' transform='translate(8 10) rotate(-12 20 22)'/%3E%3Cuse href='%23s' transform='translate(78 4) scale(.6) rotate(14 20 22)'/%3E%3Cuse href='%23s' transform='translate(84 70) scale(1.3) rotate(-6 20 22)'/%3E%3Cuse href='%23s' transform='translate(14 86) scale(.75) rotate(20 20 22)'/%3E%3C/svg%3E";
+
 export function FundoCaveiras({ className = "" }: { className?: string }) {
   return (
     <div
       aria-hidden
       className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
-      style={{ backgroundColor: "#0B0B0C" }}
-    >
-      {/* Padrão de caveiras (contorno). Uma caveira por tile, repetida. */}
-      <svg
-        className="absolute inset-0 h-full w-full"
-        xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="xMidYMid slice"
-      >
-        <defs>
-          <pattern
-            id="caveiras"
-            x="0"
-            y="0"
-            width="118"
-            height="140"
-            patternUnits="userSpaceOnUse"
-            patternTransform="rotate(-4)"
-          >
-            {/* Caveira: crânio + mandíbula com dentes, olhos e nariz. */}
-            <g
-              fill="none"
-              stroke="#2b2420"
-              strokeWidth="2"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-              opacity="0.55"
-            >
-              <path d="M59 22 C41 22 29 35 29 52 C29 63 34 69 35 75 L41 75 L41 84 L48 84 L48 75 L55 75 L55 84 L63 84 L63 75 L70 75 L70 84 L77 84 L77 75 L83 75 C84 69 89 63 89 52 C89 35 77 22 59 22 Z" />
-              <circle cx="46" cy="51" r="7.5" />
-              <circle cx="72" cy="51" r="7.5" />
-              <path d="M59 58 L54 69 L64 69 Z" />
-            </g>
-          </pattern>
-          {/* Brilho laranja vindo de baixo. */}
-          <radialGradient id="brilho" cx="50%" cy="112%" r="75%">
-            <stop offset="0%" stopColor="#e0892b" stopOpacity="0.28" />
-            <stop offset="45%" stopColor="#e0892b" stopOpacity="0.08" />
-            <stop offset="100%" stopColor="#e0892b" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <rect x="0" y="0" width="100%" height="100%" fill="url(#caveiras)" />
-        <rect x="0" y="0" width="100%" height="100%" fill="url(#brilho)" />
-      </svg>
-    </div>
+      style={{
+        backgroundColor: "#0B0B0C",
+        backgroundImage: `radial-gradient(120% 60% at 50% 115%,rgba(232,137,43,.28),transparent 60%), url("${CAVEIRAS_SVG}")`,
+        backgroundRepeat: "no-repeat, repeat",
+        backgroundPosition: "center, top left",
+        backgroundSize: "100% 100%, 140px 140px",
+      }}
+    />
   );
 }

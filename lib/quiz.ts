@@ -186,16 +186,43 @@ export function novaPartida(
     if (posicoesMeio.length > 0) posPegadinha = embaralhar(posicoesMeio)[0];
   }
 
+  // Trava de BANDA: no máximo 1 pergunta da mesma banda por partida. Perguntas
+  // sem `banda` (eventos, curiosidades gerais, pegadinhas) ficam fora da trava.
+  const bandaDe = new Map(
+    PERGUNTAS.filter((p) => p.banda).map((p) => [p.id, p.banda as string]),
+  );
+  const bandasUsadas = new Set<string>();
+  const consumido = new Set<number>();
+  const escolher = (pool: number[]): number => {
+    // 1ª escolha: um id de banda ainda não usada nesta partida.
+    for (const id of pool) {
+      if (consumido.has(id)) continue;
+      const b = bandaDe.get(id);
+      if (!b || !bandasUsadas.has(b)) {
+        consumido.add(id);
+        if (b) bandasUsadas.add(b);
+        return id;
+      }
+    }
+    // Sem banda inédita disponível no grupo: pega a próxima livre (fail-safe).
+    for (const id of pool) {
+      if (consumido.has(id)) continue;
+      consumido.add(id);
+      const b = bandaDe.get(id);
+      if (b) bandasUsadas.add(b);
+      return id;
+    }
+    return pool[0];
+  };
+
   const qids: number[] = [];
-  let mi = 0;
-  let di = 0;
   for (let pos = 0; pos < PERGUNTAS_POR_PARTIDA; pos++) {
     if (pos === posPegadinha) {
-      qids.push(pegadinhas[0]);
+      qids.push(escolher(pegadinhas));
     } else if (posDificil.has(pos)) {
-      qids.push(dificeis[di++]);
+      qids.push(escolher(dificeis));
     } else {
-      qids.push(medios[mi++]);
+      qids.push(escolher(medios));
     }
   }
   return {
