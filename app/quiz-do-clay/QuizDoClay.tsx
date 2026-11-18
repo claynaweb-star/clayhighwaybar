@@ -78,6 +78,44 @@ function registrarWaDispositivo(wa: string): boolean {
   }
 }
 
+// Anti-repetição no APARELHO: guarda os IDs das perguntas das últimas 5 partidas
+// (inclusive no modo teste) para não repetir enquanto houver perguntas novas.
+const RECENTES_KEY = "quiz_recentes";
+const MAX_PARTIDAS_RECENTES = 5;
+
+/** IDs das perguntas das últimas partidas guardadas neste aparelho (sem repetir). */
+function lerRecentesIds(): number[] {
+  try {
+    const raw = localStorage.getItem(RECENTES_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    const flat = arr.flat().filter((n: unknown) => Number.isInteger(n));
+    return [...new Set(flat as number[])];
+  } catch {
+    return [];
+  }
+}
+
+/** Guarda os IDs de uma partida recém-jogada (mantém só as 5 últimas partidas). */
+function salvarPartidaRecente(ids: number[]): void {
+  try {
+    const limpos = [...new Set(ids.filter((n) => Number.isInteger(n) && n > 0))];
+    if (limpos.length === 0) return;
+    const raw = localStorage.getItem(RECENTES_KEY);
+    let arr: number[][] = [];
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (Array.isArray(p)) arr = p;
+    }
+    arr.push(limpos);
+    while (arr.length > MAX_PARTIDAS_RECENTES) arr.shift();
+    localStorage.setItem(RECENTES_KEY, JSON.stringify(arr));
+  } catch {
+    /* sem localStorage: segue sem anti-repetição no aparelho */
+  }
+}
+
 /** Ícone de som ligado / desligado. */
 function IconeSom({ ligado, className = "" }: { ligado: boolean; className?: string }) {
   return (
@@ -264,6 +302,8 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
   const [somLigado, setSomLigado] = useState(true);
   const tiqueSegRef = useRef(99);
   const somFinalRef = useRef(false);
+  // IDs das perguntas vistas NESTA partida (para guardar no anti-repetição no fim).
+  const idsVistosRef = useRef<number[]>([]);
 
   // Reloginho circular: o anel (arco) e o número dos segundos, atualizados por
   // ref a cada quadro (sem re-render), direto no rAF do timer.
@@ -312,7 +352,9 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
       setResultadoP(null);
       setFase("verde");
       faseRef.current = "verde";
-      setPergunta(data.pergunta as PerguntaCliente);
+      const q = data.pergunta as PerguntaCliente;
+      if (typeof q.id === "number") idsVistosRef.current.push(q.id);
+      setPergunta(q);
       setCarregando(false);
       setTela("pergunta");
     } catch {
@@ -439,6 +481,8 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
     const espera = resultadoP.acertou ? 1000 : 1500;
     const t = setTimeout(() => {
       if (terminouRef.current) {
+        // Fim da partida: guarda os IDs vistos no anti-repetição do aparelho.
+        salvarPartidaRecente(idsVistosRef.current);
         setFinal(finalRef.current);
         setTela("resultado");
       } else {
@@ -477,7 +521,14 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
       const res = await fetch("/api/quiz/iniciar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, whatsapp, aceite, aceitaNovidades: novidades, empresa }),
+        body: JSON.stringify({
+          nome,
+          whatsapp,
+          aceite,
+          aceitaNovidades: novidades,
+          empresa,
+          evitarIds: lerRecentesIds(),
+        }),
       });
       const data = await res.json();
       if (res.status === 409 && data?.error === "ja_jogou") {
@@ -505,6 +556,7 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
       terminouRef.current = false;
       finalRef.current = null;
       somFinalRef.current = false;
+      idsVistosRef.current = [];
       setPergunta(null);
       setResultadoP(null);
       setPontosAcum(0);

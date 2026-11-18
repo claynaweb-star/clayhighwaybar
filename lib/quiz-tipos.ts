@@ -24,7 +24,7 @@ export const SEGUNDOS_VERMELHO = 4;
 export const PERGUNTAS_POR_PARTIDA = 10;
 
 /** Quantas perguntas difíceis por partida. */
-export const QTD_DIFICEIS = 3;
+export const QTD_DIFICEIS = 2;
 
 /**
  * Menor posição (base 0) que pode receber uma pergunta difícil: índice 2 = 3ª
@@ -50,6 +50,8 @@ export const VALIDADE_CODIGO_DIAS = 30;
 
 /** Uma pergunta como o navegador a recebe: SEM a resposta certa. */
 export type PerguntaCliente = {
+  /** ID da pergunta no banco (usado só para não repetir entre partidas). */
+  id: number;
   /** Número da pergunta na partida (1..10). */
   numero: number;
   /** Texto da pergunta (desenhado em canvas no cliente). */

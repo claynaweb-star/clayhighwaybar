@@ -128,63 +128,93 @@ export function abrirPartida(token: string): EstadoPartida | null {
 
 // ---- Sorteio e montagem das perguntas --------------------------------------
 
-/** Embaralha uma cópia do array (Fisher-Yates com aleatoriedade de crypto). */
+/** Inteiro uniforme em [0, max) via Web Crypto (crypto.getRandomValues), sem viés. */
+function randInt(max: number): number {
+  if (max <= 1) return 0;
+  const buf = new Uint32Array(1);
+  const limite = Math.floor(0x1_0000_0000 / max) * max; // descarta a "sobra" (sem viés)
+  let x: number;
+  do {
+    crypto.webcrypto.getRandomValues(buf);
+    x = buf[0];
+  } while (x >= limite);
+  return x % max;
+}
+
+/** Embaralha uma cópia do array (Fisher-Yates com crypto.getRandomValues). */
 function embaralhar<T>(arr: readonly T[]): T[] {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
-    const j = crypto.randomInt(i + 1);
+    const j = randInt(i + 1);
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
 }
 
+// Anti-repetição no SERVIDOR, por WhatsApp: guarda os IDs das últimas 5 partidas
+// de cada número. É em memória por instância (zera no cold start) — um reforço
+// best-effort; a trava confiável é a lista que o aparelho manda (localStorage).
+// Vale também no modo teste (o "wa" do teste é sempre o mesmo número).
+const MAX_PARTIDAS_MEMORIA = 5;
+const recentesPorWa = new Map<string, number[][]>();
+
+/** IDs das perguntas das últimas partidas deste WhatsApp (para não repetir). */
+export function idsRecentesDoWa(wa: string): number[] {
+  const lista = recentesPorWa.get(wa);
+  return lista ? [...new Set(lista.flat())] : [];
+}
+
+/** Guarda os IDs de uma partida recém-criada deste WhatsApp (mantém só as 5 últimas). */
+export function registrarPartidaDoWa(wa: string, qids: number[]): void {
+  const lista = recentesPorWa.get(wa) ?? [];
+  lista.push(qids.slice());
+  while (lista.length > MAX_PARTIDAS_MEMORIA) lista.shift();
+  recentesPorWa.set(wa, lista);
+}
+
 /**
- * Cria uma partida nova. Cada partida tem QTD_DIFICEIS (3) perguntas do grupo
- * DIFÍCIL, no máximo 1 PEGADINHA (numa posição do meio) e as demais do grupo
- * MÉDIO. As posições das difíceis são sorteadas entre a 3ª e a 10ª pergunta
- * (índices PRIMEIRA_POSICAO_DIFICIL..9) — nunca na 1ª nem na 2ª. A pegadinha cai
- * numa posição do meio (nem a 1ª nem a última) fora das difíceis. Nenhuma
- * pergunta repete dentro da partida.
+ * Cria uma partida nova: 7 MÉDIAS + QTD_DIFICEIS (2) DIFÍCEIS + 1 PEGADINHA. As
+ * 2 difíceis e a pegadinha ficam em posições sorteadas a partir da 3ª pergunta
+ * (índice PRIMEIRA_POSICAO_DIFICIL = 2), NUNCA uma colada na outra (sempre há
+ * pelo menos 1 pergunta normal entre elas). `evitar` traz os IDs das últimas
+ * partidas (aparelho + servidor): essas perguntas só voltam quando acabarem as
+ * novas. Nenhuma pergunta repete na partida, e no máximo 1 banda por partida.
  */
 export function novaPartida(
   wa: string,
   nome: string,
   dia: string,
   teste: boolean = false,
+  evitar: number[] = [],
 ): EstadoPartida {
-  const pegadinhas = embaralhar(
-    PERGUNTAS.filter((p) => p.tema === "pegadinha").map((p) => p.id),
-  );
-  const medios = embaralhar(
-    PERGUNTAS.filter((p) => p.nivel === "medio" && p.tema !== "pegadinha").map(
-      (p) => p.id,
-    ),
-  );
-  const dificeis = embaralhar(
-    PERGUNTAS.filter((p) => p.nivel === "dificil").map((p) => p.id),
-  );
+  const excluir = new Set(evitar);
+  // Pools por grupo: as perguntas "frescas" (fora do evitar) vêm PRIMEIRO; as já
+  // vistas ficam no fim, como reserva — só repete se as novas acabarem.
+  const poolDe = (filtro: (p: Pergunta) => boolean): number[] => {
+    const grupo = PERGUNTAS.filter(filtro);
+    const frescos = embaralhar(grupo.filter((p) => !excluir.has(p.id)).map((p) => p.id));
+    const vistos = embaralhar(grupo.filter((p) => excluir.has(p.id)).map((p) => p.id));
+    return [...frescos, ...vistos];
+  };
+  const pegadinhas = poolDe((p) => p.tema === "pegadinha");
+  const medios = poolDe((p) => p.nivel === "medio" && p.tema !== "pegadinha");
+  const dificeis = poolDe((p) => p.nivel === "dificil");
 
-  // Sorteia as posições das difíceis entre PRIMEIRA_POSICAO_DIFICIL e a última.
-  const posicoesPossiveis: number[] = [];
-  for (let pos = PRIMEIRA_POSICAO_DIFICIL; pos < PERGUNTAS_POR_PARTIDA; pos++) {
-    posicoesPossiveis.push(pos);
-  }
+  // Posições das "especiais" (2 difíceis + 1 pegadinha): 3 posições entre a 3ª e
+  // a 10ª pergunta (índices 2..9), nunca coladas. Técnica: escolhe N de 6 e soma
+  // deslocamentos 0,1,2,... — isso garante distância >= 2 entre elas.
   const quantasDificeis = Math.min(QTD_DIFICEIS, dificeis.length);
-  const dificeisIdx = embaralhar(posicoesPossiveis)
-    .slice(0, quantasDificeis)
+  const temPegadinha = pegadinhas.length > 0;
+  const qtdEspeciais = quantasDificeis + (temPegadinha ? 1 : 0);
+  const base = embaralhar([0, 1, 2, 3, 4, 5])
+    .slice(0, qtdEspeciais)
     .sort((a, b) => a - b);
-  const posDificil = new Set(dificeisIdx);
-
-  // Exatamente 1 pegadinha por partida, sorteada a partir da 3ª pergunta (índice
-  // 2) e nunca na última, numa posição que não seja de pergunta difícil.
-  let posPegadinha = -1;
-  if (pegadinhas.length > 0) {
-    const posicoesMeio: number[] = [];
-    for (let pos = 2; pos < PERGUNTAS_POR_PARTIDA - 1; pos++) {
-      if (!posDificil.has(pos)) posicoesMeio.push(pos);
-    }
-    if (posicoesMeio.length > 0) posPegadinha = embaralhar(posicoesMeio)[0];
-  }
+  const posEspeciais = embaralhar(
+    base.map((b, i) => b + i + PRIMEIRA_POSICAO_DIFICIL),
+  );
+  const posDificil = new Set(posEspeciais.slice(0, quantasDificeis));
+  const posPegadinha = temPegadinha ? posEspeciais[quantasDificeis] : -1;
+  const dificeisIdx = [...posDificil].sort((a, b) => a - b);
 
   // Trava de BANDA: no máximo 1 pergunta da mesma banda por partida. Perguntas
   // sem `banda` (eventos, curiosidades gerais, pegadinhas) ficam fora da trava.
@@ -263,6 +293,14 @@ function perguntaPorId(id: number): Pergunta | undefined {
   return PERGUNTAS.find((p) => p.id === id);
 }
 
+/** Frases "engraçadas" das pegadinhas: a CERTA é sorteada entre elas a cada vez. */
+const FRASES_PEGADINHA = [
+  "Acredito que esta pergunta não deveria estar aqui",
+  "Isso é pegadinha, né?",
+  "Nenhuma, isso é sacanagem!",
+  "Nenhuma das alternativas",
+] as const;
+
 /**
  * Monta a pergunta atual (idx) para enviar ao cliente, com as alternativas
  * embaralhadas, e o token cifrado da pergunta (com a resposta certa e o horário
@@ -275,15 +313,22 @@ export function montarPerguntaAtual(
   const p = perguntaPorId(qid);
   if (!p) return null;
 
-  // Embaralha as 4 alternativas. Nas pegadinhas com "Nenhuma das alternativas"
-  // (ultimaFixa), a 4ª fica fixa por último e só as 3 primeiras embaralham.
+  // Embaralha as 4 alternativas. Nas pegadinhas com resposta fixa no fim
+  // (ultimaFixa), a 4ª fica por último e só as 3 primeiras embaralham.
   const ordem = p.ultimaFixa
     ? [...embaralhar([0, 1, 2]), 3]
     : embaralhar([0, 1, 2, 3]); // posições originais, embaralhadas
   const alternativas = ordem.map((orig) => p.alternativas[orig]);
   const correta = ordem.indexOf(p.correta);
 
+  // Pegadinha: a alternativa CERTA recebe uma frase "engraçada" sorteada a cada
+  // vez que a pergunta aparece (as 3 erradas continuam sendo bandas de rock/metal).
+  if (p.tema === "pegadinha") {
+    alternativas[correta] = FRASES_PEGADINHA[randInt(FRASES_PEGADINHA.length)];
+  }
+
   const pergunta: PerguntaCliente = {
+    id: qid,
     numero: partida.idx + 1,
     enunciado: p.enunciado,
     alternativas,

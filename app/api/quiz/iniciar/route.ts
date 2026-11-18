@@ -13,6 +13,8 @@ import {
   chamarQuizWebhook,
   logQuiz,
   ehCredencialTeste,
+  idsRecentesDoWa,
+  registrarPartidaDoWa,
 } from "@/lib/quiz";
 import {
   TEMPO_MS,
@@ -67,13 +69,22 @@ export async function POST(request: NextRequest) {
   let nome = "";
   let whatsapp = "";
   let aceite = false;
+  let aceitaNovidades = false;
   let honeypot = "";
+  let evitarIds: number[] = []; // IDs das últimas partidas do aparelho (anti-repetição)
   try {
     const body = (await request.json()) as Record<string, unknown>;
     if (typeof body.nome === "string") nome = body.nome.trim();
     if (typeof body.whatsapp === "string") whatsapp = body.whatsapp;
     if (typeof body.empresa === "string") honeypot = body.empresa; // campo oculto
     aceite = body.aceite === true;
+    aceitaNovidades = body.aceitaNovidades === true;
+    if (Array.isArray(body.evitarIds)) {
+      evitarIds = (body.evitarIds as unknown[])
+        .map((v) => Number(v))
+        .filter((n) => Number.isInteger(n) && n > 0)
+        .slice(0, 300);
+    }
   } catch {
     // corpo inválido tratado abaixo
   }
@@ -115,7 +126,7 @@ export async function POST(request: NextRequest) {
     // (fail-open) para o jogo não travar por causa de rede.
     if (quizWebhookConfigurado()) {
       const r = await chamarQuizWebhook(
-        { action: "quiz_start", wa, nome, dia, telefone: formatTelefone(whatsapp) },
+        { action: "quiz_start", wa, nome, dia, telefone: formatTelefone(whatsapp), aceitaNovidades },
         { timeoutMs: 8000 },
       );
       if (r.ok && r.text === "duplicate") {
@@ -125,10 +136,16 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Anti-repetição: evita as perguntas das últimas partidas, combinando a lista
+  // do APARELHO (localStorage) com a memória do SERVIDOR por WhatsApp. Vale no
+  // modo teste também. Depois registra a nova partida na memória do servidor.
+  const evitar = [...new Set([...evitarIds, ...idsRecentesDoWa(wa)])];
+
   // A partida começa no índice 0. A PRIMEIRA pergunta não é montada aqui: o
   // cliente a busca em /api/quiz/pergunta ao tocar em "Bora!", e só então o
   // servidor carimba o horário — assim o tempo da tela de aviso não conta.
-  const partida = novaPartida(wa, nome, dia, teste);
+  const partida = novaPartida(wa, nome, dia, teste, evitar);
+  registrarPartidaDoWa(wa, partida.qids);
 
   return NextResponse.json({
     ok: true,
