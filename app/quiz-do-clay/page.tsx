@@ -19,10 +19,25 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
   alternates: { canonical: "/quiz-do-clay" },
   openGraph: {
-    title: "Quiz do Clay · Teste seu conhecimento de rock",
+    title: "Quiz do Clay 🤘 Duvido você acertar 10 de 10!",
     description:
-      "10 perguntas de rock, 10 segundos cada. Gabarite e ganhe entrada grátis no Clay Highway Bar.",
-    url: `${SITE.url}/quiz-do-clay`,
+      "Responda 10 perguntas de rock e ganhe entrada grátis no Clay Highway Bar.",
+    url: "https://clayhighwaybar.com.br/quiz-do-clay",
+    images: [
+      {
+        url: "https://clayhighwaybar.com.br/og/quiz-do-clay-og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Quiz do Clay, teste seu conhecimento de rock e ganhe entrada grátis",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Quiz do Clay 🤘 Duvido você acertar 10 de 10!",
+    description:
+      "Responda 10 perguntas de rock e ganhe entrada grátis no Clay Highway Bar.",
+    images: ["https://clayhighwaybar.com.br/og/quiz-do-clay-og.jpg"],
   },
 };
 
