@@ -175,12 +175,12 @@ export function novaPartida(
     .sort((a, b) => a - b);
   const posDificil = new Set(dificeisIdx);
 
-  // No máximo 1 pegadinha por partida, numa posição "do meio" (nunca a 1ª nem a
-  // última) que não seja de pergunta difícil.
+  // Exatamente 1 pegadinha por partida, sorteada a partir da 3ª pergunta (índice
+  // 2) e nunca na última, numa posição que não seja de pergunta difícil.
   let posPegadinha = -1;
   if (pegadinhas.length > 0) {
     const posicoesMeio: number[] = [];
-    for (let pos = 1; pos < PERGUNTAS_POR_PARTIDA - 1; pos++) {
+    for (let pos = 2; pos < PERGUNTAS_POR_PARTIDA - 1; pos++) {
       if (!posDificil.has(pos)) posicoesMeio.push(pos);
     }
     if (posicoesMeio.length > 0) posPegadinha = embaralhar(posicoesMeio)[0];
