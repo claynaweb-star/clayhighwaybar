@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
+  formatDiaLabel,
   formatTelefone,
   isNomeCompleto,
+  isValidEmail,
   telefoneDigits,
 } from "@/lib/nome-na-lista";
 import {
@@ -17,7 +19,9 @@ import {
   type ResultadoFinal,
   type RespostaCliente,
 } from "@/lib/quiz-tipos";
+import { criarMotorDeSom, type MotorDeSom } from "@/lib/quiz-sons";
 import { TextoCanvas } from "./TextoCanvas";
+import { FundoCaveiras } from "./FundoCaveiras";
 
 const SITE_URL = "clayhighwaybar.com.br/quiz-do-clay";
 const GAME_URL = "https://clayhighwaybar.com.br/quiz-do-clay";
@@ -25,6 +29,19 @@ const GAME_URL = "https://clayhighwaybar.com.br/quiz-do-clay";
 // Reloginho circular da pergunta: raio e circunferência do anel de progresso.
 const RELOGIO_R = 18;
 const RELOGIO_C = 2 * Math.PI * RELOGIO_R;
+
+// Formato hexagonal alongado (cantos chanfrados) das alternativas.
+const HEX =
+  "polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%)";
+
+/** Uma data de Nome na Lista aberta (para o bloco de quem perde). */
+export type DataLista = {
+  data: string;
+  preco: number;
+  banner: string;
+  titulo?: string;
+  label: string;
+};
 
 // Limite por APARELHO: no máximo 2 números de WhatsApp diferentes por dia neste
 // navegador (o limite por rede/IP é feito no servidor). Guardado em localStorage.
@@ -62,6 +79,61 @@ function IconeWhatsApp({ className = "" }: { className?: string }) {
     <svg viewBox="0 0 24 24" aria-hidden className={className} fill="currentColor">
       <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.82 9.82 0 001.516 5.26l-.999 3.648 3.472-.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
     </svg>
+  );
+}
+
+/** Ícone de compartilhar (seta saindo de uma caixa). */
+function IconeShare({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" />
+      <path d="M12 3v13" />
+      <path d="M8 7l4-4 4 4" />
+    </svg>
+  );
+}
+
+/** Ícone de início (casinha). */
+function IconeHome({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 10.5 12 3l9 7.5" />
+      <path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5" />
+    </svg>
+  );
+}
+
+/** Ícone de som ligado / desligado. */
+function IconeSom({ ligado, className = "" }: { ligado: boolean; className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+      {ligado ? (
+        <>
+          <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+          <path d="M18.5 6a9 9 0 0 1 0 12" />
+        </>
+      ) : (
+        <>
+          <path d="M22 9l-6 6" />
+          <path d="M16 9l6 6" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+/** Botão de som ligado/desligado (lembrado no aparelho). */
+function BotaoSom({ ligado, onToggle }: { ligado: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={ligado ? "Desligar o som" : "Ligar o som"}
+      className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/50 text-fog backdrop-blur-sm transition-transform active:scale-90"
+    >
+      <IconeSom ligado={ligado} className="h-5 w-5" />
+    </button>
   );
 }
 
@@ -123,18 +195,60 @@ function Claytinho({
   );
 }
 
-/** Balãozinho de fala do mascote. */
-function Balao({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+/**
+ * Moldura 9:16 do jogo: largura = o menor entre 100vw e (100dvh·9/16); altura =
+ * o menor entre 100dvh e (100vw·16/9) — sempre 9:16, nunca maior que a tela. No
+ * celular encosta nas laterais; no computador vira um "celular" centralizado com
+ * cantos arredondados e sombra. O fundo de caveiras cobre tudo, dentro e fora.
+ */
+function Moldura({
+  fixo,
+  scroll,
+  topo,
+  children,
+}: {
+  fixo: boolean;
+  scroll: boolean;
+  topo?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div
-      className={`relative max-w-[16rem] rounded-2xl border border-accent/40 bg-surface-2 px-4 py-2 text-center text-sm font-semibold text-fog shadow-lg ${className}`}
+      className={
+        fixo
+          ? "fixed inset-0 z-[100] flex items-center justify-center"
+          : "relative flex min-h-[100dvh] w-full items-center justify-center"
+      }
+      style={fixo ? { height: "100dvh" } : undefined}
     >
-      {children}
+      <FundoCaveiras />
+      <div
+        id="quiz-moldura"
+        className="clay-moldura relative z-10 flex w-full flex-col border border-white/10 sm:rounded-[2rem]"
+        style={{
+          width: "min(100vw, calc(100dvh * 9 / 16))",
+          height: "min(100dvh, calc(100vw * 16 / 9))",
+          maxHeight: "100dvh",
+          backgroundColor: "#0b0b0c",
+          overflow: scroll ? "hidden auto" : "hidden",
+        }}
+      >
+        {topo}
+        <div
+          className={`flex w-full flex-col px-4 ${scroll ? "min-h-full" : "h-full"}`}
+          style={{
+            paddingTop: "max(0.85rem, env(safe-area-inset-top))",
+            paddingBottom: "max(0.85rem, env(safe-area-inset-bottom))",
+          }}
+        >
+          {children}
+        </div>
+      </div>
     </div>
   );
 }
 
-export function QuizDoClay() {
+export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
   const [tela, setTela] = useState<Tela>("intro");
 
   // Dados da partida em curso (refs: usados em callbacks assíncronos).
@@ -160,14 +274,33 @@ export function QuizDoClay() {
   const [nome, setNome] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [aceite, setAceite] = useState(false);
+  const [novidades, setNovidades] = useState(false); // opt-in novidades (opcional)
   const [empresa, setEmpresa] = useState(""); // honeypot
   const [erroForm, setErroForm] = useState("");
+
+  // Som (Web Audio, sintetizado). Criado no 1º gesto (COMEÇAR).
+  const somRef = useRef<MotorDeSom | null>(null);
+  const [somLigado, setSomLigado] = useState(true);
+  const tiqueSegRef = useRef(99);
+  const somFinalRef = useRef(false);
 
   // Reloginho circular: o anel (arco) e o número dos segundos, atualizados por
   // ref a cada quadro (sem re-render), direto no rAF do timer.
   const arcoRef = useRef<SVGCircleElement>(null);
   const segRef = useRef<HTMLSpanElement>(null);
   const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const m = criarMotorDeSom();
+    somRef.current = m;
+    if (m) setSomLigado(m.ligado);
+  }, []);
+
+  const alternarSom = useCallback(() => {
+    const m = somRef.current;
+    if (!m) return;
+    setSomLigado(m.alternar());
+  }, []);
 
   const pararTimer = useCallback(() => {
     if (rafRef.current !== null) {
@@ -238,6 +371,9 @@ export function QuizDoClay() {
           gameTokenRef.current = data.gameToken;
         }
         setCarregando(false);
+        // Som do resultado desta pergunta.
+        if ((data.resultado as ResultadoPergunta)?.acertou) somRef.current?.acerto();
+        else somRef.current?.erro();
         // Dispara a revelação da resposta na própria tela da pergunta.
         setResultadoP(data.resultado as ResultadoPergunta);
       } catch {
@@ -255,6 +391,7 @@ export function QuizDoClay() {
   useEffect(() => {
     if (tela !== "pergunta" || !pergunta || resultadoP) return;
     respondidoRef.current = false;
+    tiqueSegRef.current = 99;
     const inicio = performance.now();
 
     // Reloginho começa cheio, com o número total de segundos.
@@ -267,9 +404,14 @@ export function QuizDoClay() {
       const frac = restante / TEMPO_MS; // 1 (cheio) -> 0 (vazio)
       if (arcoRef.current)
         arcoRef.current.style.strokeDashoffset = String(RELOGIO_C * (1 - frac));
-      if (segRef.current)
-        segRef.current.textContent = String(Math.max(0, Math.ceil(restante / 1000)));
+      const seg = Math.max(0, Math.ceil(restante / 1000));
+      if (segRef.current) segRef.current.textContent = String(seg);
       if (restante <= SEGUNDOS_VERMELHO * 1000) setVermelho(true);
+      // Tique-taque nos últimos 5 segundos (um por segundo).
+      if (seg <= 5 && seg >= 1 && seg !== tiqueSegRef.current) {
+        tiqueSegRef.current = seg;
+        somRef.current?.tique();
+      }
       if (restante <= 0) {
         responder("tempo");
         return;
@@ -313,6 +455,14 @@ export function QuizDoClay() {
     return () => clearTimeout(t);
   }, [tela, resultadoP, erroRede, carregarPergunta]);
 
+  // ----- Som do resultado final (uma vez) -----
+  useEffect(() => {
+    if (tela !== "resultado" || !final || somFinalRef.current) return;
+    somFinalRef.current = true;
+    if (final.faixa === "lenda") somRef.current?.vitoria();
+    else somRef.current?.derrota();
+  }, [tela, final]);
+
   // ----- Iniciar a partida (após o cadastro) -----
   const iniciar = useCallback(async () => {
     setErroForm("");
@@ -333,7 +483,7 @@ export function QuizDoClay() {
       const res = await fetch("/api/quiz/iniciar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, whatsapp, aceite, empresa }),
+        body: JSON.stringify({ nome, whatsapp, aceite, aceitaNovidades: novidades, empresa }),
       });
       const data = await res.json();
       if (res.status === 409 && data?.error === "ja_jogou") {
@@ -360,6 +510,7 @@ export function QuizDoClay() {
       gameTokenRef.current = data.gameToken;
       terminouRef.current = false;
       finalRef.current = null;
+      somFinalRef.current = false;
       setPergunta(null);
       setResultadoP(null);
       setPontosAcum(0);
@@ -369,7 +520,7 @@ export function QuizDoClay() {
       setCarregando(false);
       setErroForm("Sem conexão. Confere a internet e tenta de novo.");
     }
-  }, [nome, whatsapp, aceite, empresa]);
+  }, [nome, whatsapp, aceite, novidades, empresa]);
 
   const reiniciar = useCallback(() => {
     setTela("intro");
@@ -380,14 +531,21 @@ export function QuizDoClay() {
     setNome("");
     setWhatsapp("");
     setAceite(false);
+    setNovidades(false);
     setTeste(false);
     terminouRef.current = false;
     finalRef.current = null;
+    somFinalRef.current = false;
   }, []);
 
-  // Durante a partida (cadastro → pergunta/revelação) o jogo ocupa a tela
-  // inteira numa camada fixa por cima de tudo: esconde menu/rodapé/ranking do
-  // site e trava a rolagem. Volta ao normal na intro/resultado.
+  // No 1º gesto (COMEÇAR) o celular libera o áudio.
+  const comecar = useCallback(() => {
+    somRef.current?.destravar();
+    setTela("cadastro");
+  }, []);
+
+  // Durante a partida (cadastro → pergunta/revelação) o jogo trava a rolagem da
+  // página e esconde o menu/rodapé do site. Volta ao normal na intro/resultado.
   const jogando = tela === "cadastro" || tela === "aviso" || tela === "pergunta";
   useEffect(() => {
     if (jogando) document.body.classList.add("quiz-jogando");
@@ -395,22 +553,45 @@ export function QuizDoClay() {
     return () => document.body.classList.remove("quiz-jogando");
   }, [jogando]);
 
-  // Conteúdo das telas (o mesmo para a camada fixa do jogo e para o fluxo normal).
+  // Enquanto o Quiz está na tela, esconde o cabeçalho fixo e o botão flutuante
+  // do site (experiência imersiva), sem travar a rolagem até o ranking abaixo.
+  useEffect(() => {
+    document.body.classList.add("quiz-aberto");
+    return () => document.body.classList.remove("quiz-aberto");
+  }, []);
+
+  // Camada de topo da moldura: botão de som (sempre visível) e selo de teste.
+  const topo = (
+    <>
+      <div className="absolute left-3 top-3 z-30">
+        <BotaoSom ligado={somLigado} onToggle={alternarSom} />
+      </div>
+      {teste && (
+        <div className="pointer-events-none absolute left-1/2 top-3 z-30 -translate-x-1/2">
+          <SeloTeste />
+        </div>
+      )}
+    </>
+  );
+
+  // Conteúdo de cada tela.
   const conteudo = (
     <>
-      {tela === "intro" && <TelaIntro onComecar={() => setTela("cadastro")} />}
+      {tela === "intro" && <TelaIntro onComecar={comecar} />}
 
       {tela === "cadastro" && (
         <TelaCadastro
           nome={nome}
           whatsapp={whatsapp}
           aceite={aceite}
+          novidades={novidades}
           empresa={empresa}
           erro={erroForm}
           carregando={carregando}
           onNome={setNome}
           onWhatsapp={(v) => setWhatsapp(formatTelefone(v) || v)}
           onAceite={setAceite}
+          onNovidades={setNovidades}
           onEmpresa={setEmpresa}
           onVoltar={() => setTela("intro")}
           onEnviar={iniciar}
@@ -444,48 +625,29 @@ export function QuizDoClay() {
         ))}
 
       {tela === "resultado" && final && (
-        <TelaResultado final={final} teste={teste || final.teste === true} onJogarDeNovo={reiniciar} />
+        <TelaResultado
+          final={final}
+          teste={teste || final.teste === true}
+          datas={datas}
+          nome={nome}
+          whatsapp={whatsapp}
+          novidades={novidades}
+          onInicio={reiniciar}
+        />
       )}
 
       {tela === "jaJogou" && <TelaJaJogou onVoltar={reiniciar} />}
     </>
   );
 
-  // Camada fixa (jogo) — cobre tudo, respeita a área segura do celular e não
-  // deixa a página rolar. A pergunta nunca rola; cadastro/aviso rolam se preciso.
-  if (jogando) {
-    return (
-      <div
-        onContextMenu={(e) => e.preventDefault()}
-        className="clay-nosel fixed inset-0 z-[100] flex flex-col items-center bg-ink"
-        style={{
-          height: "100dvh",
-          paddingTop: "max(0.5rem, env(safe-area-inset-top))",
-          paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
-          paddingLeft: "env(safe-area-inset-left)",
-          paddingRight: "env(safe-area-inset-right)",
-        }}
-      >
-        <div
-          className={`flex w-full max-w-lg min-h-0 flex-1 flex-col px-4 ${
-            tela === "pergunta" ? "overflow-hidden" : "overflow-y-auto py-2"
-          }`}
-        >
-          {teste && <SeloTeste className="pb-1 pt-0.5" />}
-          {conteudo}
-        </div>
-      </div>
-    );
-  }
+  const fixo = jogando;
+  const scroll = tela !== "aviso" && tela !== "pergunta";
 
-  // Fluxo normal (intro, resultado, já jogou) — abaixo vêm o ranking e o
-  // regulamento da página.
   return (
-    <div
-      onContextMenu={(e) => e.preventDefault()}
-      className="clay-nosel relative mx-auto flex min-h-[100svh] w-full max-w-lg flex-col items-center justify-start overflow-hidden px-4 pb-16 pt-6"
-    >
-      {conteudo}
+    <div onContextMenu={(e) => e.preventDefault()} className="clay-nosel">
+      <Moldura fixo={fixo} scroll={scroll} topo={topo}>
+        {conteudo}
+      </Moldura>
     </div>
   );
 }
@@ -494,26 +656,33 @@ export function QuizDoClay() {
 
 function TelaIntro({ onComecar }: { onComecar: () => void }) {
   return (
-    <div className="clay-in flex w-full flex-1 flex-col items-center justify-center gap-6 text-center">
-      <p className="text-xs font-semibold tracking-[0.3em] text-accent">CLAY HIGHWAY BAR</p>
-      <div className="flex flex-col items-center gap-3">
-        <Claytinho pose="rock" anim="clay-bob" className="h-56 w-auto" />
-        <Balao className="-mt-2">Será que você manja de rock? Prova aí!</Balao>
+    <div className="clay-troca flex w-full flex-1 flex-col items-center justify-center gap-5 py-2 text-center">
+      <p className="text-[0.7rem] font-semibold tracking-[0.35em] text-accent">
+        CLAY HIGHWAY BAR
+      </p>
+
+      {/* Cartão inclinado do título + mascote. */}
+      <div className="relative flex flex-col items-center">
+        <div className="clay-tilt-l clay-glow rounded-2xl border-2 border-accent bg-[#17120e] px-6 py-5">
+          <h1 className="font-display text-5xl leading-[0.9] text-fog">
+            Quiz do
+            <br />
+            <span className="text-accent">Clay</span>
+          </h1>
+        </div>
+        <Claytinho pose="rock" anim="clay-bob" className="mt-3 h-40 w-auto" />
       </div>
-      <h1 className="font-display text-5xl leading-none text-fog sm:text-6xl">
-        Quiz do <span className="text-accent">Clay</span>
-      </h1>
-      <p className="max-w-xs text-sm font-semibold text-accent">
-        Acertou 10 de 10? Ganha entrada grátis em uma noite com Nome na Lista!
+
+      <p className="max-w-[17rem] text-sm font-semibold text-[#f2a93b]">
+        Acertou 10 de 10? Ganha entrada grátis numa noite com Nome na Lista! 🤘
       </p>
-      <p className="max-w-xs text-sm text-muted">
-        10 perguntas de rock, 15 segundos cada. Mandou bem de verdade? Pode sair
-        com <span className="font-semibold text-fog">entrada grátis</span>. O prêmio
-        é válido somente nas datas específicas que têm Nome na Lista.
+      <p className="max-w-[17rem] text-xs text-muted">
+        10 perguntas de rock · 15 segundos cada · só conhecimento.
       </p>
+
       <button
         onClick={onComecar}
-        className="w-full max-w-xs rounded-2xl bg-accent px-6 py-4 text-lg font-bold text-ink transition-transform hover:scale-[1.02] active:scale-95"
+        className="clay-glow w-full max-w-xs rounded-2xl bg-accent px-6 py-4 font-display text-2xl text-ink transition-transform hover:scale-[1.02] active:scale-95"
       >
         Começar
       </button>
@@ -528,12 +697,14 @@ function TelaCadastro({
   nome,
   whatsapp,
   aceite,
+  novidades,
   empresa,
   erro,
   carregando,
   onNome,
   onWhatsapp,
   onAceite,
+  onNovidades,
   onEmpresa,
   onVoltar,
   onEnviar,
@@ -541,23 +712,25 @@ function TelaCadastro({
   nome: string;
   whatsapp: string;
   aceite: boolean;
+  novidades: boolean;
   empresa: string;
   erro: string;
   carregando: boolean;
   onNome: (v: string) => void;
   onWhatsapp: (v: string) => void;
   onAceite: (v: boolean) => void;
+  onNovidades: (v: boolean) => void;
   onEmpresa: (v: string) => void;
   onVoltar: () => void;
   onEnviar: () => void;
 }) {
   return (
-    <div className="clay-in flex w-full flex-1 flex-col justify-center gap-5">
+    <div className="clay-troca flex w-full flex-1 flex-col justify-center gap-4 pt-6">
       <div className="flex items-center gap-3">
-        <Claytinho pose="rock" className="h-20 w-auto" />
+        <Claytinho pose="rock" className="h-16 w-auto" />
         <div>
-          <h2 className="font-display text-3xl text-fog">Bora jogar</h2>
-          <p className="text-sm text-muted">Só o básico pra você entrar no ranking.</p>
+          <h2 className="font-display text-2xl text-fog">Bora jogar</h2>
+          <p className="text-xs text-muted">Só o básico pra você entrar no ranking.</p>
         </div>
       </div>
 
@@ -566,7 +739,7 @@ function TelaCadastro({
           e.preventDefault();
           onEnviar();
         }}
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-3"
       >
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-semibold text-fog">Seu nome</span>
@@ -603,7 +776,7 @@ function TelaCadastro({
           className="absolute left-[-9999px] h-0 w-0 opacity-0"
         />
 
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-surface p-3 text-sm text-muted">
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-surface p-3 text-xs text-muted">
           <input
             type="checkbox"
             checked={aceite}
@@ -621,7 +794,18 @@ function TelaCadastro({
           </span>
         </label>
 
-        {erro && <p className="text-sm font-semibold text-red-400">{erro}</p>}
+        {/* Opt-in OPCIONAL de novidades (desmarcado por padrão). */}
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-surface p-3 text-xs text-muted">
+          <input
+            type="checkbox"
+            checked={novidades}
+            onChange={(e) => onNovidades(e.target.checked)}
+            className="mt-0.5 h-5 w-5 shrink-0 accent-accent"
+          />
+          <span>Quero receber novidades e promoções do Clay pelo WhatsApp.</span>
+        </label>
+
+        {erro && <p className="text-sm font-semibold text-[#d9452b]">{erro}</p>}
 
         <div className="flex gap-3">
           <button
@@ -634,7 +818,7 @@ function TelaCadastro({
           <button
             type="submit"
             disabled={carregando}
-            className="flex-1 rounded-2xl bg-accent px-6 py-3 text-lg font-bold text-ink transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
+            className="flex-1 rounded-2xl bg-accent px-6 py-3 font-display text-xl text-ink transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
           >
             {carregando ? "Carregando…" : "Jogar"}
           </button>
@@ -646,15 +830,15 @@ function TelaCadastro({
 
 function TelaAviso({ carregando, onBora }: { carregando: boolean; onBora: () => void }) {
   return (
-    <div className="clay-in flex w-full flex-1 flex-col items-center justify-center gap-6 text-center">
-      <Claytinho pose="duvida" anim="clay-bob" className="h-44 w-auto" />
-      <div className="rounded-2xl border-2 border-accent bg-accent-soft/40 p-6">
-        <p className="font-display text-2xl text-accent">Atenção!</p>
+    <div className="clay-troca flex w-full flex-1 flex-col items-center justify-center gap-6 text-center">
+      <Claytinho pose="duvida" anim="clay-bob" className="h-40 w-auto" />
+      <div className="clay-tilt-r clay-glow-ambar rounded-2xl border-2 border-[#f2a93b] bg-[#17120e] p-6">
+        <p className="font-display text-2xl text-[#f2a93b]">Atenção!</p>
         <p className="mt-2 text-lg font-semibold text-fog">
-          Você tem <span className="text-accent">15 segundos</span> por pergunta.
+          Você tem <span className="text-[#f2a93b]">15 segundos</span> por pergunta.
         </p>
         <p className="mt-1 text-base text-fog">
-          Se sair da tela, <span className="font-bold text-accent">perde a pergunta</span>.
+          Se sair da tela, <span className="font-bold text-[#d9452b]">perde a pergunta</span>.
         </p>
       </div>
       <p className="max-w-xs text-sm text-muted">
@@ -663,7 +847,7 @@ function TelaAviso({ carregando, onBora }: { carregando: boolean; onBora: () => 
       <button
         onClick={onBora}
         disabled={carregando}
-        className="w-full max-w-xs rounded-2xl bg-accent px-6 py-4 text-lg font-bold text-ink transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
+        className="clay-glow w-full max-w-xs rounded-2xl bg-accent px-6 py-4 font-display text-2xl text-ink transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
       >
         {carregando ? "Preparando…" : "Bora!"}
       </button>
@@ -707,7 +891,7 @@ function TelaPergunta({
   if (revelando) {
     if (resultado!.acertou) {
       msgReveal = (
-        <span className="rounded-full bg-green-500 px-4 py-1 text-sm font-extrabold text-ink">
+        <span className="rounded-full bg-[#2fb86a] px-4 py-1 text-sm font-extrabold text-[#06130c]">
           Mandou bem! +{resultado!.pontos} pts
         </span>
       );
@@ -721,11 +905,10 @@ function TelaPergunta({
       msgReveal = (
         <span className="rounded-full border border-border bg-surface-2 px-4 py-1 text-sm font-bold text-fog">
           {prefixo}
-          Resposta certa: <span className="text-green-400">{letraCerta}</span>
+          Resposta certa: <span className="text-[#2fb86a]">{letraCerta}</span>
         </span>
       );
     } else {
-      // Modo teste, errou: só o status, sem a resposta certa.
       const texto =
         resultado!.motivo === "tempo"
           ? "Acabou o tempo!"
@@ -733,7 +916,7 @@ function TelaPergunta({
             ? "Pergunta perdida."
             : "Errou";
       msgReveal = (
-        <span className="rounded-full border border-red-500/60 bg-red-500/10 px-4 py-1 text-sm font-bold text-red-300">
+        <span className="rounded-full border border-[#d9452b]/60 bg-[#d9452b]/10 px-4 py-1 text-sm font-bold text-[#f2a93b]">
           {texto}
         </span>
       );
@@ -741,22 +924,20 @@ function TelaPergunta({
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-2 pt-1">
-      {/* Barra do topo: "Pergunta X/10" à esquerda, reloginho à direita */}
-      <div className="flex h-11 shrink-0 items-center justify-between gap-2 text-sm font-semibold">
+    <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-2">
+      {/* Barra do topo: "Pergunta X/10" (à esq, com folga do botão de som) e
+          reloginho circular (à dir, sempre visível durante a pergunta). */}
+      <div className="flex h-11 shrink-0 items-center justify-between gap-2 pl-10 text-sm font-semibold">
         <span className="truncate text-muted">
           Pergunta <span className="text-fog">{pergunta.numero}</span>/{total}
         </span>
         <div className="flex shrink-0 items-center gap-2">
-          <span className="rounded-full bg-surface-2 px-3 py-1 text-accent">{pontos} pts</span>
-          {/* Reloginho circular (segundos no meio). Some durante a revelação. */}
+          <span className="rounded-full bg-[#17120e] px-3 py-1 text-accent ring-1 ring-accent/30">
+            {pontos} pts
+          </span>
           <div className="relative h-11 w-11 shrink-0">
             {!revelando && (
-              <div
-                className={vermelho ? "clay-blink" : ""}
-                role="timer"
-                aria-label="Tempo restante"
-              >
+              <div className={vermelho ? "clay-blink" : ""} role="timer" aria-label="Tempo restante">
                 <svg viewBox="0 0 44 44" className="h-11 w-11 -rotate-90">
                   <circle
                     cx="22"
@@ -777,14 +958,14 @@ function TelaPergunta({
                     strokeLinecap="round"
                     stroke="currentColor"
                     style={{ strokeDasharray: RELOGIO_C, strokeDashoffset: 0 }}
-                    className={vermelho ? "text-red-500" : "text-accent"}
+                    className={vermelho ? "text-[#d9452b]" : "text-[#f2a93b]"}
                   />
                 </svg>
                 <span
                   ref={segRef}
                   aria-hidden
                   className={`absolute inset-0 flex items-center justify-center font-display text-lg ${
-                    vermelho ? "text-red-400" : "text-accent"
+                    vermelho ? "text-[#d9452b]" : "text-[#f2a93b]"
                   }`}
                 >
                   {Math.round(TEMPO_MS / 1000)}
@@ -795,24 +976,24 @@ function TelaPergunta({
         </div>
       </div>
 
-      {/* Quadro da pergunta: o texto inteiro aparece (a fonte encolhe se precisar) */}
-      <div className="flex shrink-0 items-center rounded-2xl border border-border bg-surface p-4">
+      {/* Quadro da pergunta: escuro, borda laranja fina, texto grande centralizado. */}
+      <div className="flex shrink-0 items-center justify-center rounded-2xl border border-accent/60 bg-[#17120e] p-4 shadow-[0_0_24px_-10px_rgba(224,137,43,0.6)]">
         <TextoCanvas
           texto={pergunta.enunciado}
-          fontPx={20}
+          fontPx={21}
           minFontPx={14}
           maxLinhas={5}
           bold
-          align="left"
+          align="center"
         />
       </div>
 
-      {/* Slot reservado: etiqueta "difícil" (ao vivo) ou a resposta certa (revelação) */}
-      <div className="flex min-h-9 shrink-0 items-center justify-center text-center">
+      {/* Slot reservado: etiqueta "difícil" (ao vivo) ou a resposta certa (revelação). */}
+      <div className="flex min-h-8 shrink-0 items-center justify-center text-center">
         {revelando ? (
           <div className="clay-pop">{msgReveal}</div>
         ) : pergunta.dificil ? (
-          <div className="clay-pop flex items-center gap-2 rounded-xl border border-red-500/60 bg-red-500/10 px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-red-300">
+          <div className="clay-pop flex items-center gap-2 rounded-xl border border-[#d9452b]/60 bg-[#d9452b]/10 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[#f2a93b]">
             <span aria-hidden>🔥</span>
             Pergunta difícil
             <span aria-hidden>🔥</span>
@@ -820,41 +1001,59 @@ function TelaPergunta({
         ) : null}
       </div>
 
-      {/* Alternativas: dividem a altura que sobra (4 linhas iguais), sem vão
-          grande embaixo. Na revelação, a certa fica verde e a escolhida errada
-          fica vermelha. */}
+      {/* Alternativas hexagonais: dividem a altura que sobra (4 linhas iguais). */}
       <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-4 gap-2.5">
         {pergunta.alternativas.map((alt, i) => {
-          let estilo = "border-border bg-surface active:bg-surface-2";
-          let badge = "bg-surface-2 text-accent";
+          let borda = "rgba(242,169,59,0.65)";
+          let fundo = "#17120e";
+          let badgeBg = "#f2a93b";
+          let badgeTxt = "#17120e";
+          let anim = "";
+          let dim = false;
+          let filtro: string | undefined;
           if (revelando) {
             if (revelarCerta && i === resultado!.correta) {
-              estilo = "border-green-500 bg-green-500/15";
-              badge = "bg-green-500 text-ink";
+              borda = "#2fb86a";
+              fundo = "rgba(47,184,106,0.16)";
+              badgeBg = "#2fb86a";
+              badgeTxt = "#06130c";
+              anim = "clay-certa";
+              filtro = "drop-shadow(0 0 10px rgba(47,184,106,0.6))";
             } else if (i === selecionado) {
-              estilo = "border-red-500 bg-red-500/15";
-              badge = "bg-red-500 text-ink";
+              borda = "#d9452b";
+              fundo = "rgba(217,69,43,0.18)";
+              badgeBg = "#d9452b";
+              badgeTxt = "#ffffff";
+              anim = "clay-errou";
             } else {
-              estilo = "border-border bg-surface opacity-50";
+              dim = true;
             }
           } else if (selecionado === i) {
-            estilo = "border-accent bg-accent-soft";
+            borda = "#f2a93b";
+            fundo = "#3a2a14";
           }
           return (
             <button
               key={i}
               disabled={revelando || selecionado !== null || carregando}
               onClick={() => onResponder(i)}
-              className={`clay-pop flex items-center gap-3 rounded-2xl border px-4 py-2.5 text-left transition-colors ${estilo} disabled:opacity-80`}
-              style={{ animationDelay: `${i * 60}ms` }}
+              style={{ animationDelay: `${i * 60}ms`, filter: filtro }}
+              className={`clay-pop relative block h-full w-full ${anim} ${dim ? "opacity-50" : ""}`}
             >
+              <span aria-hidden className="absolute inset-0" style={{ clipPath: HEX, background: borda }} />
               <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-bold ${badge}`}
+                className="absolute inset-[2px] flex items-center gap-3 px-4"
+                style={{ clipPath: HEX, background: fundo }}
               >
-                {String.fromCharCode(65 + i)}
-              </span>
-              <span className="min-w-0 flex-1">
-                <TextoCanvas texto={alt} fontPx={17} minFontPx={13} maxLinhas={2} align="left" cor="#f2ede4" />
+                <span
+                  className="font-display flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-lg"
+                  style={{ background: badgeBg, color: badgeTxt }}
+                >
+                  {String.fromCharCode(65 + i)}
+                </span>
+                <span className="min-w-0 flex-1 text-left">
+                  <TextoCanvas texto={alt} fontPx={17} minFontPx={13} maxLinhas={2} align="left" cor="#f2ede4" />
+                </span>
               </span>
             </button>
           );
@@ -864,15 +1063,13 @@ function TelaPergunta({
   );
 }
 
-/** Selo vermelho "MODO TESTE" no topo (durante o jogo e no resultado). */
-function SeloTeste({ className = "" }: { className?: string }) {
+/** Selo vermelho "MODO TESTE". */
+function SeloTeste() {
   return (
-    <div className={`flex w-full shrink-0 items-center justify-center ${className}`}>
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg">
-        <span aria-hidden className="h-2 w-2 rounded-full bg-white" />
-        Modo teste
-      </span>
-    </div>
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#d9452b] px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg">
+      <span aria-hidden className="h-2 w-2 rounded-full bg-white" />
+      Modo teste
+    </span>
   );
 }
 
@@ -889,8 +1086,8 @@ function TelaCarregando() {
 /** Falha de rede durante a partida (buscar/enviar). Tenta de novo sem perder tudo. */
 function TelaErro({ onTentarDeNovo }: { onTentarDeNovo: () => void }) {
   return (
-    <div className="clay-in flex w-full flex-1 flex-col items-center justify-center gap-5 text-center">
-      <Claytinho pose="duvida" className="h-40 w-auto" />
+    <div className="clay-troca flex w-full flex-1 flex-col items-center justify-center gap-5 text-center">
+      <Claytinho pose="duvida" className="h-36 w-auto" />
       <p className="text-lg font-semibold text-fog">Falha de conexão.</p>
       <button
         onClick={onTentarDeNovo}
@@ -902,38 +1099,212 @@ function TelaErro({ onTentarDeNovo }: { onTentarDeNovo: () => void }) {
   );
 }
 
+/** Linha de 3 ícones pequenos das telas finais. */
+function IconesFinais({
+  onCompartilhar,
+  onDesafiar,
+  onInicio,
+}: {
+  onCompartilhar: () => void;
+  onDesafiar: () => void;
+  onInicio: () => void;
+}) {
+  const botao =
+    "flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-muted transition-colors hover:border-accent hover:text-accent active:scale-90";
+  return (
+    <div className="mt-1 flex items-center justify-center gap-5">
+      <button type="button" onClick={onCompartilhar} aria-label="Compartilhar" className={botao}>
+        <IconeShare className="h-5 w-5" />
+      </button>
+      <button type="button" onClick={onDesafiar} aria-label="Desafiar um amigo" className={botao}>
+        <IconeWhatsApp className="h-5 w-5" />
+      </button>
+      <button type="button" onClick={onInicio} aria-label="Início" className={botao}>
+        <IconeHome className="h-5 w-5" />
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Bloco "Nome na Lista" para quem NÃO ganhou a entrada grátis: reaproveita o
+ * nome e o WhatsApp do jogo, pede só o e-mail (campo que o jogo não pediu) e usa
+ * a mesma opção de novidades. Some se não houver datas abertas.
+ */
+function BlocoNomeNaLista({
+  datas,
+  nome,
+  whatsapp,
+  novidades,
+}: {
+  datas: DataLista[];
+  nome: string;
+  whatsapp: string;
+  novidades: boolean;
+}) {
+  const [sel, setSel] = useState<string>(datas.length === 1 ? datas[0].data : "");
+  const [email, setEmail] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState("");
+  const [okData, setOkData] = useState<string | null>(null);
+
+  if (datas.length === 0) return null;
+
+  if (okData) {
+    return (
+      <div className="w-full max-w-sm rounded-2xl border border-[#2fb86a]/60 bg-[#2fb86a]/10 p-4 text-center">
+        <p className="font-display text-xl text-[#2fb86a]">Pronto!</p>
+        <p className="mt-1 text-sm text-fog">
+          Seu nome está na lista de {formatDiaLabel(okData)}. Chegue até as 21h. 🤘
+        </p>
+      </div>
+    );
+  }
+
+  async function enviar() {
+    setErro("");
+    if (!sel) {
+      setErro("Escolhe a data que você vem.");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setErro("Confere o e-mail.");
+      return;
+    }
+    setEnviando(true);
+    try {
+      const res = await fetch("/api/nome-na-lista", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome,
+          telefone: whatsapp,
+          email: email.trim(),
+          empresa: "",
+          dias: [sel],
+          aceite: true,
+          aceitaNovidades: novidades,
+        }),
+        cache: "no-store",
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.ok) {
+        setOkData(sel);
+        return;
+      }
+      setErro(
+        res.status === 429
+          ? "Muita gente agora. Tenta de novo em 1 minuto."
+          : data?.error === "telefone"
+            ? "Seu WhatsApp do jogo não passou na conferência. Faça pela página do Nome na Lista."
+            : data?.error === "email"
+              ? "Confere o e-mail."
+              : "Não rolou agora. Tenta de novo?",
+      );
+    } catch {
+      setErro("Sem conexão. Tenta de novo?");
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <div className="w-full max-w-sm rounded-2xl border border-accent/50 bg-[#17120e] p-3 text-left">
+      <p className="font-display text-base text-fog">Ainda dá pra economizar!</p>
+      <p className="mt-0.5 text-[0.7rem] leading-snug text-muted">
+        Garanta o valor promocional: escolha a data, entre na lista e chegue até as 21h.
+      </p>
+
+      {/* Mini carrossel de datas. */}
+      <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {datas.map((d) => {
+          const marcado = sel === d.data;
+          return (
+            <button
+              key={d.data}
+              type="button"
+              onClick={() => setSel(d.data)}
+              aria-pressed={marcado}
+              className={`flex w-32 shrink-0 flex-col overflow-hidden rounded-xl border text-left transition-all ${
+                marcado ? "border-2 border-accent" : "border-border"
+              }`}
+            >
+              <span className="relative block h-16 w-full bg-surface-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={d.banner}
+                  alt={`Arte de ${d.label}`}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </span>
+              <span className="flex flex-col px-2 py-1.5">
+                <span className="font-display text-sm leading-tight text-white">{d.label}</span>
+                <span className="font-display text-sm text-accent">R$ {d.preco} até 21h</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <label className="mt-2 flex flex-col gap-1 text-sm">
+        <span className="font-semibold text-fog">Seu e-mail</span>
+        <input
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="voce@email.com"
+          className="rounded-xl border border-border bg-surface px-4 py-2.5 text-fog outline-none focus:border-accent"
+        />
+      </label>
+
+      {erro && <p className="mt-2 text-sm font-semibold text-[#d9452b]">{erro}</p>}
+
+      <button
+        type="button"
+        onClick={enviar}
+        disabled={enviando}
+        className="glow-accent mt-2.5 w-full rounded-2xl bg-accent px-6 py-2.5 font-display text-lg text-ink transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
+      >
+        {enviando ? "Enviando…" : "Nome na Lista"}
+      </button>
+    </div>
+  );
+}
+
 function TelaResultado({
   final,
   teste,
-  onJogarDeNovo,
+  datas,
+  nome,
+  whatsapp,
+  novidades,
+  onInicio,
 }: {
   final: ResultadoFinal;
   teste: boolean;
-  onJogarDeNovo: () => void;
+  datas: DataLista[];
+  nome: string;
+  whatsapp: string;
+  novidades: boolean;
+  onInicio: () => void;
 }) {
   const [dica, setDica] = useState("");
   const [compartilhando, setCompartilhando] = useState(false);
   const fonteDisplayRef = useRef<HTMLSpanElement>(null);
 
-  const pose: Pose =
-    final.faixa === "lenda" ? "comemorando" : final.faixa === "quase" ? "rock" : "nao_foi";
-  const titulo =
-    final.faixa === "lenda"
-      ? "Você é lenda do rock!"
-      : final.faixa === "quase"
-        ? "Quase lá!"
-        : "Não foi desta vez!";
-  const sub =
-    final.faixa === "lenda"
-      ? "Gabaritou! Ganhou entrada grátis."
-      : final.faixa === "quase"
-        ? "Mandou bem. Volta amanhã!"
-        : "Volta amanhã e manda ver!";
+  const ganhou = final.faixa === "lenda";
+  const pose: Pose = ganhou ? "comemorando" : "nao_foi";
+  const titulo = ganhou ? "Você é lenda!" : "Não foi dessa vez!";
+  const sub = ganhou
+    ? "Gabaritou! Ganhou entrada grátis. 🤘"
+    : "Volta amanhã e manda ver!";
 
   const compartilhar = useCallback(async () => {
     setCompartilhando(true);
     setDica("");
-    // Copia o link do jogo para a pessoa colar no sticker de LINK do story.
     let linkCopiado = false;
     try {
       await navigator.clipboard?.writeText(GAME_URL);
@@ -949,14 +1320,11 @@ function TelaResultado({
       const blob = await gerarStory(final, pose, fonteDisplayRef.current);
       if (!blob) throw new Error("sem imagem");
       const file = new File([blob], "quiz-do-clay.png", { type: "image/png" });
-      const nav = navigator as Navigator & {
-        canShare?: (d: ShareData) => boolean;
-      };
+      const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
       if (nav.canShare && nav.canShare({ files: [file] })) {
         try {
           await nav.share({ files: [file], title: "Quiz do Clay", text: textoShare });
         } catch (e) {
-          // Cancelar o compartilhamento não é erro.
           if ((e as Error)?.name === "AbortError") return;
           throw e;
         }
@@ -977,51 +1345,67 @@ function TelaResultado({
     }
   }, [final, pose]);
 
+  const desafiar = () =>
+    desafiarAmigo(
+      `Fiz ${final.pontos} pontos no Quiz do Clay! 🤘 Duvido você acertar 10 de 10 e ganhar entrada grátis: ${GAME_URL}`,
+    );
+
   return (
-    <div className="clay-in relative flex w-full flex-1 flex-col items-center justify-center gap-4 text-center">
-      {teste && <SeloTeste className="pb-1" />}
-      {final.faixa === "lenda" && <Confete />}
+    <div className="clay-troca relative flex w-full flex-1 flex-col items-center justify-center gap-2.5 py-2 text-center">
+      {ganhou && <Confete />}
       {/* Referência escondida para pegar a família da fonte display (Anton) no canvas. */}
       <span ref={fonteDisplayRef} className="font-display sr-only" aria-hidden>
         .
       </span>
 
-      <Claytinho pose={pose} anim={final.faixa === "lenda" ? "clay-jump" : "clay-bob"} className="h-48 w-auto" />
-      <h2 className="font-display text-4xl leading-tight text-fog">{titulo}</h2>
-      <p className="text-base text-muted">{sub}</p>
+      <Claytinho
+        pose={pose}
+        anim={ganhou ? "clay-jump" : "clay-bob"}
+        className={ganhou ? "h-28 w-auto" : "h-24 w-auto"}
+      />
 
-      <div className="flex items-stretch gap-3">
-        <div className="rounded-2xl border border-border bg-surface px-6 py-3">
-          <p className="font-display text-3xl text-accent">{final.acertos}/10</p>
-          <p className="text-xs text-muted">acertos</p>
-        </div>
-        <div className="rounded-2xl border border-border bg-surface px-6 py-3">
-          <p className="font-display text-3xl text-accent">{final.pontos}</p>
-          <p className="text-xs text-muted">pontos</p>
-        </div>
+      {/* Cartão inclinado do título. */}
+      <div
+        className={`${ganhou ? "clay-tilt-l clay-glow border-accent" : "clay-tilt-r clay-glow-ambar border-[#f2a93b]"} rounded-2xl border-2 bg-[#17120e] px-6 py-2`}
+      >
+        <h2 className="font-display text-3xl leading-tight text-fog">{titulo}</h2>
       </div>
+      <p className="text-sm text-muted">{sub}</p>
+
+      {ganhou ? (
+        <div className="flex items-stretch gap-3">
+          <div className="rounded-2xl border border-border bg-surface px-6 py-2">
+            <p className="font-display text-2xl text-accent">{final.acertos}/10</p>
+            <p className="text-xs text-muted">acertos</p>
+          </div>
+          <div className="rounded-2xl border border-border bg-surface px-6 py-2">
+            <p className="font-display text-2xl text-accent">{final.pontos}</p>
+            <p className="text-xs text-muted">pontos</p>
+          </div>
+        </div>
+      ) : (
+        <p className="text-sm text-muted">
+          Você fez <span className="font-display text-accent">{final.acertos}/10</span> ·{" "}
+          <span className="font-display text-accent">{final.pontos}</span> pontos
+        </p>
+      )}
 
       {final.codigo && (
         <>
-          <div className="w-full max-w-xs rounded-2xl border-2 border-accent bg-accent-soft/40 p-4">
+          <div className="w-full max-w-xs rounded-2xl border-2 border-accent bg-accent-soft/40 p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-accent">
               Entrada grátis
             </p>
             <p className="font-display text-3xl tracking-widest text-fog">{final.codigo}</p>
           </div>
-          <p className="max-w-xs text-sm font-semibold text-fog">
+          <p className="max-w-xs text-xs font-semibold text-fog">
             {(final.datasPremio?.length ?? 0) > 0
-              ? "Seu nome já está em todas as listas com Nome na Lista! Vale 1 entrada grátis, em uma noite à sua escolha."
+              ? "Seu nome já está em todas as listas com Nome na Lista! Vale 1 entrada grátis, numa noite à sua escolha."
               : "Seu nome vai entrar automaticamente nas próximas listas com Nome na Lista. Prêmio válido por 30 dias."}
           </p>
           {final.validadeCodigo ? (
-            <p className="max-w-xs text-xs text-muted">Vale até {final.validadeCodigo}.</p>
+            <p className="max-w-xs text-[0.7rem] text-muted">Vale até {final.validadeCodigo}.</p>
           ) : null}
-          <p className="max-w-xs text-xs text-muted">
-            O prêmio vale 1 entrada grátis, usada uma única vez. Só é liberado na portaria
-            após conferência do nome com documento com foto e do número de telefone no
-            celular do vencedor. Nome ou telefone diferentes do cadastro anulam o prêmio.
-          </p>
         </>
       )}
       {final.jaGanhouCodigo && (
@@ -1031,44 +1415,30 @@ function TelaResultado({
         </p>
       )}
 
-      <div className="mt-2 flex w-full max-w-xs flex-col gap-3">
-        <button
-          onClick={compartilhar}
-          disabled={compartilhando}
-          className="rounded-2xl bg-accent px-6 py-3 text-lg font-bold text-ink transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
-        >
-          {compartilhando ? "Gerando…" : "Compartilhar no Instagram"}
-        </button>
-        <Link
-          href="/agenda"
-          className="rounded-2xl border border-accent px-6 py-3 text-center font-semibold text-accent transition-transform hover:scale-[1.02] active:scale-95"
-        >
-          Ver a agenda de shows
-        </Link>
-        <Link
-          href="/"
-          className="rounded-2xl border border-border px-6 py-3 text-center font-semibold text-fog hover:border-accent"
-        >
-          Conhecer o Clay
-        </Link>
-        <button
-          onClick={() =>
-            desafiarAmigo(
-              `Fiz ${final.pontos} pontos no Quiz do Clay! 🤘 Duvido você acertar 10 de 10 e ganhar entrada grátis: ${GAME_URL}`,
-            )
-          }
-          className="flex items-center justify-center gap-2 rounded-2xl border border-accent px-6 py-3 text-center font-semibold text-accent"
-        >
-          <IconeWhatsApp className="h-4 w-4 shrink-0 text-[#25D366]" />
-          Desafiar um amigo
-        </button>
-        <button
-          onClick={onJogarDeNovo}
-          className="text-xs text-muted underline hover:text-fog"
-        >
-          Volte amanhã para jogar de novo
-        </button>
-      </div>
+      {/* Quem GANHOU: compartilhar + desafiar. Quem NÃO ganhou: Nome na Lista. */}
+      {ganhou ? (
+        <div className="mt-1 flex w-full max-w-xs flex-col gap-2">
+          <button
+            onClick={compartilhar}
+            disabled={compartilhando}
+            className="clay-glow rounded-2xl bg-accent px-6 py-3 font-display text-lg text-ink transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
+          >
+            {compartilhando ? "Gerando…" : "Compartilhar no Instagram"}
+          </button>
+          <button
+            onClick={desafiar}
+            className="flex items-center justify-center gap-2 rounded-2xl border border-accent px-6 py-3 font-semibold text-accent"
+          >
+            <IconeWhatsApp className="h-4 w-4 shrink-0 text-[#25D366]" />
+            Desafiar um amigo
+          </button>
+        </div>
+      ) : (
+        <BlocoNomeNaLista datas={datas} nome={nome} whatsapp={whatsapp} novidades={novidades} />
+      )}
+
+      <IconesFinais onCompartilhar={compartilhar} onDesafiar={desafiar} onInicio={onInicio} />
+
       {dica && <p className="max-w-xs text-sm text-accent">{dica}</p>}
     </div>
   );
@@ -1076,9 +1446,11 @@ function TelaResultado({
 
 function TelaJaJogou({ onVoltar }: { onVoltar: () => void }) {
   return (
-    <div className="clay-in flex w-full flex-1 flex-col items-center justify-center gap-5 text-center">
-      <Claytinho pose="nao_foi" anim="clay-bob" className="h-48 w-auto" />
-      <h2 className="font-display text-3xl text-fog">Você já jogou hoje!</h2>
+    <div className="clay-troca flex w-full flex-1 flex-col items-center justify-center gap-5 text-center">
+      <Claytinho pose="nao_foi" anim="clay-bob" className="h-40 w-auto" />
+      <div className="clay-tilt-r clay-glow-ambar rounded-2xl border-2 border-[#f2a93b] bg-[#17120e] px-6 py-3">
+        <h2 className="font-display text-2xl text-fog">Você já jogou hoje!</h2>
+      </div>
       <p className="max-w-xs text-sm text-muted">
         É 1 partida por dia por WhatsApp. Volta amanhã pra tentar de novo e subir no ranking. 🤘
       </p>
@@ -1088,16 +1460,13 @@ function TelaJaJogou({ onVoltar }: { onVoltar: () => void }) {
             `Jogue o Quiz do Clay e tente acertar 10 de 10 para ganhar entrada grátis! 🤘 ${GAME_URL}`,
           )
         }
-        className="flex w-full max-w-xs items-center justify-center gap-2 rounded-2xl border border-accent px-6 py-3 text-center font-semibold text-accent"
+        className="flex w-full max-w-xs items-center justify-center gap-2 rounded-2xl border border-accent px-6 py-3 font-semibold text-accent"
       >
         <IconeWhatsApp className="h-4 w-4 shrink-0 text-[#25D366]" />
         Desafiar um amigo
       </button>
-      <button
-        onClick={onVoltar}
-        className="text-xs text-muted underline hover:text-fog"
-      >
-        Volte amanhã para jogar de novo
+      <button onClick={onVoltar} className="text-xs text-muted underline hover:text-fog">
+        Voltar ao início
       </button>
     </div>
   );
@@ -1105,7 +1474,7 @@ function TelaJaJogou({ onVoltar }: { onVoltar: () => void }) {
 
 /** Confete leve (CSS) para o 10/10. */
 function Confete() {
-  const cores = ["#e0892b", "#f2ede4", "#c67318", "#ffffff", "#e0892b"];
+  const cores = ["#e0892b", "#f2a93b", "#f2ede4", "#2fb86a", "#ffffff"];
   const pecas = Array.from({ length: 28 });
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
@@ -1161,21 +1530,18 @@ async function gerarStory(
     : "Impact, system-ui, sans-serif";
   const familiaCorpo = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
 
-  // Fundo
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, "#0d0d0e");
+  g.addColorStop(0, "#0b0b0c");
   g.addColorStop(1, "#201e20");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
-  // Moldura/acento
   ctx.strokeStyle = "#e0892b";
   ctx.lineWidth = 10;
   ctx.strokeRect(28, 28, W - 56, H - 56);
 
   ctx.textAlign = "center";
 
-  // Logo
   try {
     const logo = await carregarImagem("/logo-clay-highway.webp");
     const lw = 180;
@@ -1185,12 +1551,10 @@ async function gerarStory(
     /* sem logo */
   }
 
-  // Título
   ctx.fillStyle = "#e0892b";
   ctx.font = `64px ${familiaDisplay}`;
   ctx.fillText("QUIZ DO CLAY", W / 2, 360);
 
-  // Mascote
   try {
     const m = await carregarImagem(POSES[pose]);
     const maxH = 540;
@@ -1201,7 +1565,6 @@ async function gerarStory(
     /* sem mascote */
   }
 
-  // Placar
   ctx.fillStyle = "#f2ede4";
   ctx.font = `bold 140px ${familiaCorpo}`;
   ctx.fillText(`${final.acertos}/10`, W / 2, 1120);
@@ -1210,7 +1573,6 @@ async function gerarStory(
   ctx.font = `bold 66px ${familiaCorpo}`;
   ctx.fillText(`${final.pontos} pontos`, W / 2, 1210);
 
-  // Chamada
   ctx.fillStyle = "#f2ede4";
   ctx.font = `46px ${familiaCorpo}`;
   const frase =
@@ -1221,7 +1583,6 @@ async function gerarStory(
         : "Será que você manja? 🤘";
   ctx.fillText(frase, W / 2, 1300);
 
-  // Chamada para jogar + QR Code
   ctx.fillStyle = "#e0892b";
   ctx.font = `bold 54px ${familiaDisplay}`;
   ctx.fillText("JOGUE TAMBÉM", W / 2, 1420);
@@ -1230,7 +1591,6 @@ async function gerarStory(
   ctx.font = `42px ${familiaCorpo}`;
   ctx.fillText(SITE_URL, W / 2, 1485);
 
-  // QR Code sobre um quadrado branco (escaneia bem no fundo escuro).
   try {
     const qr = await carregarImagem("/quiz-qr.png");
     const qs = 300;

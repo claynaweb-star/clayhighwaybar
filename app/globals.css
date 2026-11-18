@@ -141,6 +141,14 @@ body.quiz-jogando { overflow: hidden; }
 body.quiz-jogando > header,
 body.quiz-jogando > footer { display: none !important; }
 
+/* Página do Quiz (experiência imersiva): o cabeçalho fixo e o botão flutuante
+   de WhatsApp some, para a moldura 9:16 não ser coberta nem encavalada. A
+   rolagem continua liberada para alcançar o ranking e o regulamento abaixo. */
+body.quiz-aberto > header { display: none !important; }
+body.quiz-aberto a[aria-label="Falar com o Clay Highway no WhatsApp"] {
+  display: none !important;
+}
+
 /* Impede seleção/realce em perguntas e respostas (anti-cola). */
 .clay-nosel {
   -webkit-user-select: none;
@@ -148,4 +156,68 @@ body.quiz-jogando > footer { display: none !important; }
   user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================
+   Quiz do Clay — visual premium (game show)
+   Paleta: preto, marrom quase preto, laranja do Clay, âmbar,
+   vermelho quente; verde só no acerto.
+   ============================================================ */
+:root {
+  --quiz-preto: #0b0b0c;
+  --quiz-marrom: #17120e;
+  --quiz-ambar: #f2a93b;
+  --quiz-vermelho: #d9452b;
+  --quiz-verde: #2fb86a;
+}
+
+/* Cartões levemente inclinados do game show. */
+.clay-tilt-l { transform: rotate(-3deg); }
+.clay-tilt-r { transform: rotate(2deg); }
+
+/* Brilho/aura laranja em volta de um cartão. */
+.clay-glow {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent),
+    0 0 28px -4px color-mix(in srgb, var(--color-accent) 55%, transparent),
+    0 18px 50px -18px rgba(0, 0, 0, 0.8);
+}
+.clay-glow-ambar {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--quiz-ambar) 45%, transparent),
+    0 0 22px -6px color-mix(in srgb, var(--quiz-ambar) 50%, transparent);
+}
+
+/* Moldura 9:16: no desktop vira um "celular"; no celular encosta nas laterais. */
+.clay-moldura {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 30px 80px -24px rgba(0, 0, 0, 0.9);
+}
+
+/* Transição curta entre telas/perguntas (150–250 ms). */
+@keyframes clay-troca {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.clay-troca { animation: clay-troca 0.2s ease-out both; }
+
+/* Tremida vermelha da alternativa errada. */
+@keyframes clay-errou {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-4px); }
+}
+.clay-errou { animation: clay-errou 0.4s ease-in-out; }
+
+/* Pulso de brilho da alternativa certa. */
+@keyframes clay-certa {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--quiz-verde) 70%, transparent); }
+  100% { box-shadow: 0 0 22px 2px color-mix(in srgb, var(--quiz-verde) 0%, transparent); }
+}
+.clay-certa { animation: clay-certa 0.6s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .clay-troca, .clay-errou, .clay-certa { animation: none !important; }
 }

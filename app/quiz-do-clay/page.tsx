@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SITE } from "@/lib/site";
+import { SITE, ogImageForBanner } from "@/lib/site";
+import { events } from "@/lib/events";
 import { buscarRanking, hojeSaoPauloISO, mesDaData } from "@/lib/quiz";
+import { diasAbertos, formatDiaLabel } from "@/lib/nome-na-lista";
 import { QuizDoClay } from "./QuizDoClay";
+
+// Imagem das datas do Nome na Lista que não têm evento cadastrado.
+const IMAGEM_SEM_EVENTO = "/nome-na-lista-destaque.jpg";
 
 export const metadata: Metadata = {
   title: {
@@ -35,11 +40,24 @@ export default async function QuizDoClayPage() {
   const mes = mesDaData(hojeSaoPauloISO());
   const ranking = await buscarRanking(mes);
 
+  // Datas abertas do Nome na Lista (para o bloco de quem não ganha a entrada).
+  // Datas com evento usam a arte do evento; as sem evento, a imagem padrão.
+  const datasLista = diasAbertos().map((d) => {
+    const ev = events.find((e) => e.date === d.data);
+    return {
+      data: d.data,
+      preco: d.preco,
+      banner: ev?.banner ? ogImageForBanner(ev.banner) : IMAGEM_SEM_EVENTO,
+      titulo: ev?.title ?? d.titulo,
+      label: formatDiaLabel(d.data),
+    };
+  });
+
   return (
     <>
-      {/* O JOGO (ocupa a tela no celular). */}
-      <section className="bg-ink">
-        <QuizDoClay />
+      {/* O JOGO (moldura 9:16, estilo game show). */}
+      <section className="bg-[#0b0b0c]">
+        <QuizDoClay datas={datasLista} />
       </section>
 
       {/* RANKING DO MÊS */}
@@ -137,8 +155,9 @@ export default async function QuizDoClayPage() {
             </p>
             <p>
               <span className="font-semibold text-fog">Seus dados (LGPD).</span> Usamos seu nome e
-              WhatsApp apenas para registrar a partida, montar o ranking e contatar você sobre o
-              prêmio. Saiba mais na{" "}
+              WhatsApp para registrar a partida, montar o ranking e contatar você sobre o prêmio.
+              Só enviamos novidades e promoções pelo WhatsApp para quem marcar a caixinha opcional
+              no cadastro, e você pode pedir para sair quando quiser. Saiba mais na{" "}
               <Link href="/politica-de-privacidade" className="text-accent underline">
                 Política de Privacidade
               </Link>
