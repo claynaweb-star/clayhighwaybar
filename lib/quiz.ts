@@ -218,8 +218,8 @@ export function novaPartida(
 // o bundle do cliente). Para entrar no modo teste, o cadastro precisa bater com
 // AS DUAS: o nome e o "celular". Como não dá prêmio nem entra no ranking, não há
 // risco em alguém descobrir — no máximo joga partidas de teste sem valor.
-const TESTE_NOME = "CLAYXXX";
-const TESTE_TEL = "XXX";
+const TESTE_NOME = "CLAYX";
+const TESTE_TEL = "1938";
 
 /**
  * Diz se o cadastro corresponde às credenciais de TESTE (conferência só no
@@ -227,7 +227,8 @@ const TESTE_TEL = "XXX";
  */
 export function ehCredencialTeste(nome: string, whatsapp: string): boolean {
   const nomeIgual = nome.trim().toLowerCase() === TESTE_NOME.toLowerCase();
-  const telIgual = whatsapp.trim().toLowerCase() === TESTE_TEL.toLowerCase();
+  // O campo de celular aplica máscara ((19) 38); compara só os dígitos.
+  const telIgual = whatsapp.replace(/\D/g, "") === TESTE_TEL.replace(/\D/g, "");
   return nomeIgual && telIgual;
 }
 
