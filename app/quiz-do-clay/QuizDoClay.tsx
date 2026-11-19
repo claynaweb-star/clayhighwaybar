@@ -610,6 +610,36 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
     else somRef.current?.derrota();
   }, [tela, final]);
 
+  // ----- Música de fundo: toca durante o aviso e as perguntas; nas telas
+  // finais abaixa e para devagar; fora disso (intro/cadastro) fica em silêncio.
+  const telaComMusica = tela === "aviso" || tela === "pergunta";
+  useEffect(() => {
+    const m = somRef.current;
+    if (!m) return;
+    if (tela === "resultado") {
+      m.pararMusicaFade();
+      return;
+    }
+    if (somLigado && telaComMusica && !document.hidden) m.iniciarMusica();
+    else m.pausarMusica();
+  }, [somLigado, tela, telaComMusica]);
+
+  // Se a pessoa sai da tela/aba, a música pausa; ao voltar, retoma se for o caso.
+  useEffect(() => {
+    const aoTrocarVisibilidade = () => {
+      const m = somRef.current;
+      if (!m) return;
+      if (document.hidden) m.pausarMusica();
+      else if (somLigado && telaComMusica) m.iniciarMusica();
+    };
+    document.addEventListener("visibilitychange", aoTrocarVisibilidade);
+    return () =>
+      document.removeEventListener("visibilitychange", aoTrocarVisibilidade);
+  }, [somLigado, telaComMusica]);
+
+  // Ao fechar o Quiz, garante que a música pare.
+  useEffect(() => () => somRef.current?.pausarMusica(), []);
+
   // ----- Iniciar a partida (após o cadastro) -----
   const iniciar = useCallback(async () => {
     setErroForm("");
