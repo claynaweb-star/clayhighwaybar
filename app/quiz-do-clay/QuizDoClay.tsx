@@ -1656,10 +1656,19 @@ function TelaResultado({
     setCompartilhando(true);
     setDica("");
     setAbrirNoNavegador(false);
-    // O link vai SEMPRE para a área de transferência (serve em qualquer caminho).
+    // Texto de divulgação (com o link). No 10/10 marca @clayhighway, que é o que
+    // valida o prêmio na portaria.
+    const textoShare = ganhou
+      ? `Ganhei entrada free no Clay! 🏆 @clayhighway Jogue também: ${GAME_URL}`
+      : `Duvido você acertar 10 de 10! Jogue: ${GAME_URL}`;
+    // Aviso depois de copiar: no 10/10 pede para colar e marcar @clayhighway.
+    const avisoCopiado = ganhou
+      ? "Texto copiado! No Stories, cole e marque @clayhighway."
+      : "Link do jogo copiado! 🤘";
+    // O texto vai SEMPRE para a área de transferência (serve em qualquer caminho).
     let linkCopiado = false;
     try {
-      await navigator.clipboard?.writeText(GAME_URL);
+      await navigator.clipboard?.writeText(textoShare);
       linkCopiado = true;
     } catch {
       /* clipboard pode estar bloqueado */
@@ -1684,15 +1693,16 @@ function TelaResultado({
       }
       setAndroidInApp(android);
       setAbrirNoNavegador(true);
-      setDica(linkCopiado ? "Link do jogo copiado! 🤘" : "");
+      setDica(linkCopiado ? avisoCopiado : "");
       setCompartilhando(false);
       return;
     }
 
-    const dicaLink = linkCopiado
-      ? "Link copiado! No story, toque no ícone de figurinha, escolha LINK e cole."
-      : "No story, toque no ícone de figurinha, escolha LINK e cole clayhighwaybar.com.br/quiz.";
-    const textoShare = `Duvido você acertar 10 de 10! Jogue: ${GAME_URL}`;
+    const dicaLink = ganhou
+      ? avisoCopiado
+      : linkCopiado
+        ? "Link copiado! No story, toque no ícone de figurinha, escolha LINK e cole."
+        : "No story, toque no ícone de figurinha, escolha LINK e cole clayhighwaybar.com.br/quiz.";
     try {
       const blob = await gerarStory(final, pose, fonteDisplayRef.current);
       if (!blob) throw new Error("sem imagem");
@@ -1722,13 +1732,15 @@ function TelaResultado({
     } catch {
       setDica(
         linkCopiado
-          ? "Não rolou gerar a imagem agora, mas o link do jogo já está copiado — cole no seu story."
+          ? ganhou
+            ? "Não rolou gerar a imagem agora, mas o texto já está copiado — cole no seu Stories e marque @clayhighway."
+            : "Não rolou gerar a imagem agora, mas o link do jogo já está copiado — cole no seu story."
           : "Não rolou agora. Tenta de novo?",
       );
     } finally {
       setCompartilhando(false);
     }
-  }, [final, pose, retomarToken]);
+  }, [final, pose, retomarToken, ganhou]);
 
   // Link do Chrome (Android) carrega o token de retomada, para a tela final
   // reaparecer uma vez só ao abrir fora do app.
@@ -1741,32 +1753,44 @@ function TelaResultado({
       `Fiz ${final.pontos} pontos no Quiz do Clay! 🤘 Duvido você acertar 10 de 10 e ganhar entrada grátis: ${GAME_URL}`,
     );
 
+  // Botão "📸 Postar no Stories" (destaque laranja) — isolado para a vitória.
+  const botaoStories = (
+    <button
+      onClick={compartilhar}
+      disabled={compartilhando}
+      className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] text-[15px] font-extrabold transition-transform active:scale-95 disabled:opacity-60"
+      style={{
+        background: "linear-gradient(180deg,#f2a93b,#e8892b)",
+        color: "#140f0b",
+        boxShadow: "0 0 20px rgba(242,169,59,.4)",
+      }}
+    >
+      {compartilhando ? "Gerando…" : "📸 Postar no Stories"}
+    </button>
+  );
+
+  // Botão "💬 Desafiar amigo" (contorno).
+  const botaoDesafiar = (
+    <button
+      onClick={desafiar}
+      className="flex h-[50px] w-full items-center justify-center gap-2 rounded-[14px] text-sm font-extrabold text-[#F6EFE6] transition-transform active:scale-95"
+      style={{ background: "rgba(23,18,14,.9)", border: "1.5px solid #E8892B" }}
+    >
+      💬 Desafiar amigo
+    </button>
+  );
+
   const botoes = (
     // Lado a lado só quando cabe (>= 380px); abaixo disso, um embaixo do outro.
     <div className="flex w-full flex-col gap-2.5 min-[380px]:flex-row">
-      <button
-        onClick={compartilhar}
-        disabled={compartilhando}
-        className="flex h-[50px] w-full items-center justify-center gap-2 rounded-[14px] text-sm font-extrabold transition-transform active:scale-95 disabled:opacity-60 min-[380px]:flex-1"
-        style={{ background: "linear-gradient(180deg,#f2a93b,#e8892b)", color: "#140f0b" }}
-      >
-        {compartilhando ? "Gerando…" : "📸 Postar no Stories"}
-      </button>
-      <button
-        onClick={desafiar}
-        className="flex h-[50px] w-full items-center justify-center gap-2 rounded-[14px] text-sm font-extrabold text-[#F6EFE6] transition-transform active:scale-95 min-[380px]:flex-1"
-        style={{ background: "rgba(23,18,14,.9)", border: "1.5px solid #E8892B" }}
-      >
-        💬 Desafiar amigo
-      </button>
+      <span className="w-full min-[380px]:flex-1">{botaoStories}</span>
+      <span className="w-full min-[380px]:flex-1">{botaoDesafiar}</span>
     </div>
   );
 
-  // Botões de compartilhar + dica + painel "abrir no navegador" (mesmo bloco nas
-  // duas telas: vitória e "não foi dessa vez").
-  const compartilharUI = (
+  // Dica + painel "abrir no navegador" (mostrado depois de tocar em compartilhar).
+  const painelDica = (
     <>
-      {botoes}
       {dica && <p className="max-w-full text-sm text-accent">{dica}</p>}
       {/* Navegador interno (Instagram/Facebook/WhatsApp): passo a passo p/ Stories. */}
       {abrirNoNavegador && (
@@ -1774,7 +1798,7 @@ function TelaResultado({
           <p className="font-bold text-[#f2a93b]">Pra postar no Stories, abra no navegador</p>
           <p className="mt-1 text-[#A99C8C]">
             Toque nos <b className="text-fog">3 pontinhos (⋮)</b> lá em cima e em{" "}
-            <b className="text-fog">“Abrir no navegador”</b>. O link do jogo já está copiado.
+            <b className="text-fog">“Abrir no navegador”</b>. O texto do jogo já está copiado.
           </p>
           {androidInApp && (
             <a
@@ -1788,6 +1812,26 @@ function TelaResultado({
         </div>
       )}
     </>
+  );
+
+  // "Não foi dessa vez": os dois botões juntos + a dica.
+  const compartilharUI = (
+    <>
+      {botoes}
+      {painelDica}
+    </>
+  );
+
+  // Caixa laranja com a regra de validação do prêmio pelo Stories (só na vitória).
+  const caixaValidacao = (
+    <div className="w-full rounded-2xl border-2 border-[#e8892b] bg-[#17120e] p-3 text-left text-[13px] leading-snug text-[#F6EFE6]">
+      <p className="font-extrabold text-[#f2a93b]">📸 PARA VALIDAR SEU PRÊMIO:</p>
+      <p className="mt-1 text-[#D8CBBD]">
+        poste o resultado no seu Stories marcando <b className="text-fog">@clayhighway</b>. Na
+        portaria, mostre o Stories (ou ele no Arquivo do Instagram), documento com foto e o celular
+        cadastrado.
+      </p>
+    </div>
   );
 
   // Volta ao início: limpa o resultado guardado (no modo teste, joga de novo já).
@@ -1845,13 +1889,18 @@ function TelaResultado({
             : "Você já ganhou uma entrada grátis nos últimos 30 dias — ela volta a valer depois disso."}
         </p>
 
+        {/* Regra de validação pelo Stories: logo abaixo do destaque do prêmio. */}
+        {caixaValidacao}
+
+        {/* 4. BOTÕES: "Postar no Stories" em destaque, logo abaixo da caixa. */}
+        {botaoStories}
+        {botaoDesafiar}
+        {painelDica}
+
         <p className="text-[13px] text-[#A99C8C]">
           Você fez <b className="text-[#F2A93B]">{final.acertos}/10</b> ·{" "}
           <b className="text-[#F2A93B]">{final.pontos}</b> pontos
         </p>
-
-        {/* 4. BOTÕES: logo abaixo do destaque do prêmio. */}
-        {compartilharUI}
 
         {/* 2. NOITES EM QUE O PRÊMIO VALE. */}
         <div className="mt-1 w-full text-left">
@@ -2161,25 +2210,48 @@ async function gerarStory(
   if (venceu) {
     // Destaque do prêmio para quem gabaritou.
     ctx.fillStyle = "#2fb86a";
-    ctx.font = `58px ${familiaDisplay}`;
-    ctx.fillText("GANHEI ENTRADA FREE", W / 2, 1298);
+    ctx.font = `56px ${familiaDisplay}`;
+    ctx.fillText("GANHEI ENTRADA FREE", W / 2, 1280);
     ctx.fillStyle = "#f2ede4";
-    ctx.font = `58px ${familiaDisplay}`;
-    ctx.fillText("NO CLAY! 🏆", W / 2, 1360);
+    ctx.font = `56px ${familiaDisplay}`;
+    ctx.fillText("NO CLAY! 🏆", W / 2, 1338);
+
+    // @clayhighway em destaque (pílula âmbar) — é o que valida o prêmio.
+    const handle = "@clayhighway";
+    ctx.font = `52px ${familiaDisplay}`;
+    const tw = ctx.measureText(handle).width;
+    const pillW = tw + 64;
+    const pillH = 84;
+    const pillX = (W - pillW) / 2;
+    const pillY = 1378;
+    ctx.fillStyle = "#f2a93b";
+    const ctxR = ctx as CanvasRenderingContext2D & {
+      roundRect?: (x: number, y: number, w: number, h: number, r: number) => void;
+    };
+    if (typeof ctxR.roundRect === "function") {
+      ctx.beginPath();
+      ctxR.roundRect(pillX, pillY, pillW, pillH, 24);
+      ctx.fill();
+    } else {
+      ctx.fillRect(pillX, pillY, pillW, pillH);
+    }
+    ctx.fillStyle = "#140f0b";
+    ctx.textBaseline = "middle";
+    ctx.fillText(handle, W / 2, pillY + pillH / 2 + 2);
+    ctx.textBaseline = "alphabetic";
   } else {
     ctx.fillStyle = "#f2ede4";
     ctx.font = `46px ${familiaCorpo}`;
     const frase = final.faixa === "quase" ? "Quase lenda! 🤘" : "Será que você manja? 🤘";
     ctx.fillText(frase, W / 2, 1300);
+
+    ctx.fillStyle = "#e0892b";
+    ctx.font = `bold 54px ${familiaDisplay}`;
+    ctx.fillText("JOGUE TAMBÉM", W / 2, 1420);
   }
 
-  const yJogue = venceu ? 1448 : 1420;
-  const ySite = venceu ? 1508 : 1485;
-  const yQr = venceu ? 1556 : 1540;
-
-  ctx.fillStyle = "#e0892b";
-  ctx.font = `bold 54px ${familiaDisplay}`;
-  ctx.fillText("JOGUE TAMBÉM", W / 2, yJogue);
+  const ySite = venceu ? 1500 : 1485;
+  const yQr = venceu ? 1548 : 1540;
 
   ctx.fillStyle = "#f2ede4";
   ctx.font = `42px ${familiaCorpo}`;

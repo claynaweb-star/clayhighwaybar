@@ -153,6 +153,13 @@ export default async function QuizDoClayPage() {
               cada 30 dias por número de WhatsApp.
             </p>
             <p>
+              <span className="font-semibold text-fog">Validação pelo Stories.</span> Para validar o
+              prêmio, o vencedor deve publicar o resultado no Stories do Instagram marcando{" "}
+              <span className="font-semibold text-fog">@clayhighway</span> e apresentá-lo na portaria
+              (o Stories ou o registro no Arquivo do Instagram), junto com documento com foto e o
+              celular cadastrado.
+            </p>
+            <p>
               <span className="font-semibold text-fog">Conferência na portaria.</span> O prêmio só é
               liberado na portaria após conferência do nome com documento com foto e do número de
               telefone no celular do vencedor. Nome ou telefone diferentes do cadastro anulam o

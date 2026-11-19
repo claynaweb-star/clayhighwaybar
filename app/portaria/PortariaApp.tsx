@@ -502,7 +502,8 @@ export function PortariaApp() {
                       {vencedor && !item.entrou && !usadoEmOutra && confirmando && (
                         <div className="mt-3 rounded-xl border border-green-600 bg-green-950/70 p-3">
                           <p className="text-sm font-semibold text-green-200">
-                            Confira documento com foto e o telefone no celular da pessoa.
+                            Confira o Stories marcando @clayhighway (ou no Arquivo do Instagram),
+                            documento com foto e o telefone.
                           </p>
                           <div className="mt-3 flex gap-2">
                             <button
