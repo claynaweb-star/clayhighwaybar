@@ -103,6 +103,7 @@ export type ResultadoFinal = {
 /** Uma linha do ranking mensal (nome já reduzido para privacidade). */
 export type RankingItem = {
   nome: string;
+  acertos: number;
   pontos: number;
   tempoMs: number;
 };

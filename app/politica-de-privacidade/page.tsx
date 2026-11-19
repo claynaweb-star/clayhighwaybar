@@ -5,7 +5,7 @@ import { SITE, fullAddress } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Politica de Privacidade | Clay Highway Bar",
   description:
-    "Como o Clay Highway Bar coleta, usa e protege os dados pessoais informados no site, incluindo o cadastro da promocao Nome na Lista (nome, e-mail e telefone), conforme a LGPD.",
+    "Como o Clay Highway Bar coleta, usa e protege os dados pessoais informados no site, incluindo o cadastro da promocao Nome na Lista e o Quiz do Clay (nome, telefone e e-mail), conforme a LGPD.",
   alternates: { canonical: "/politica-de-privacidade" },
 };
 
@@ -50,6 +50,11 @@ export default function PoliticaDePrivacidadePage() {
           informa: <strong>nome, e-mail e telefone</strong>, e em qual dia voce
           quer entrar na lista. Nao pedimos CPF.
         </p>
+        <p>
+          No <strong>Quiz do Clay</strong> coletamos o <strong>nome e o WhatsApp</strong>{" "}
+          que voce informa para jogar, junto com os dados da partida (pontuacao,
+          acertos e tempo) e, quando voce gabarita, o codigo da entrada gratis.
+        </p>
       </Section>
 
       <Section title="Para que usamos">
@@ -57,11 +62,15 @@ export default function PoliticaDePrivacidadePage() {
         <ul className="list-disc space-y-1 pl-5">
           <li>conferir seu nome na portaria e aplicar o valor promocional;</li>
           <li>
+            registrar as partidas do Quiz do Clay, montar o ranking e entregar o
+            premio a quem gabarita;
+          </li>
+          <li>
             guardar seu cadastro de cliente, para facilitar proximas visitas;
           </li>
           <li>
-            enviar novidades e avisos de shows, somente se voce marcar essa
-            opcao no formulario.
+            enviar novidades e promocoes pelo WhatsApp, somente se voce marcar
+            essa opcao no formulario (no Nome na Lista ou no Quiz).
           </li>
         </ul>
         <p>

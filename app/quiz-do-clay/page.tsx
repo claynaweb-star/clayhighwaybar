@@ -81,7 +81,7 @@ export default async function QuizDoClayPage() {
           <p className="text-xs font-semibold tracking-[0.3em] text-accent">RANKING DO MÊS</p>
           <h2 className="font-display mt-2 text-3xl text-fog">Top 10 do rock</h2>
           <p className="mt-1 text-sm text-muted">
-            A maior pontuação do mês leva um{" "}
+            Mais acertos no mês leva um{" "}
             <span className="font-semibold text-fog">boné do Clay</span>. Empate? Vence quem
             fez em menos tempo.
           </p>
@@ -102,9 +102,13 @@ export default async function QuizDoClayPage() {
                   >
                     {i + 1}
                   </span>
-                  <span className="flex-1 font-semibold text-fog">{r.nome}</span>
-                  <span className="text-sm text-muted">{formataTempo(r.tempoMs)}</span>
-                  <span className="w-16 text-right font-bold text-accent">{r.pontos}</span>
+                  <span className="min-w-0 flex-1 truncate font-semibold text-fog">{r.nome}</span>
+                  <span className="flex shrink-0 flex-col items-end leading-tight">
+                    <span className="font-display text-base text-accent">{r.acertos}/10</span>
+                    <span className="text-[11px] text-muted">
+                      {formataTempo(r.tempoMs)} · {r.pontos} pts
+                    </span>
+                  </span>
                 </li>
               ))}
             </ol>
@@ -166,10 +170,9 @@ export default async function QuizDoClayPage() {
               prêmio.
             </p>
             <p>
-              <span className="font-semibold text-fog">Boné do Clay (ranking do mês).</span> A maior
-              pontuação de cada mês ganha 1 boné do Clay. Em caso de empate, vence quem fez em menos
-              tempo. O Top 10 do mês aparece nesta página apenas com o primeiro nome e a inicial do
-              sobrenome.
+              <span className="font-semibold text-fog">Boné do Clay (ranking do mês).</span> Ganha o
+              boné quem tiver mais acertos no mês; em caso de empate, quem fez em menos tempo. O Top
+              10 do mês aparece nesta página apenas com o primeiro nome e a inicial do sobrenome.
             </p>
             <p>
               <span className="font-semibold text-fog">Idade.</span> O quiz é para maiores de 18

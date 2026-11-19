@@ -31,8 +31,9 @@
  *  Checkin:  { token, action: "checkin", id, entrou, data }  (entrou = true/false)
  *  Ping:     { token, action: "ping" }
  *
- *  QUIZ DO CLAY (mesma planilha, aba "Quiz"):
- *  Inicio:   { token, action: "quiz_start",  wa, nome, dia, telefone }
+ *  QUIZ DO CLAY (aba "Quiz" OCULTA = base; abas "Quiz DD/MM a DD/MM" por semana
+ *  = leitura humana; todo jogador tambem entra em "Clientes"):
+ *  Inicio:   { token, action: "quiz_start",  wa, nome, dia, telefone, aceitaNovidades }
  *  Fim:      { token, action: "quiz_finish", wa, nome, dia, telefone, pontos, acertos, tempoMs, acertouTudo }
  *  Ranking:  { token, action: "quiz_ranking", mes }   (mes = "AAAA-MM")
  *  Resgate:  { token, action: "quiz_claim",  codigo, data }  (inclui o vencedor na lista da data)
@@ -58,8 +59,11 @@ var MAX_DATAS = 7;
 
 // As duas ultimas colunas (I, J) guardam o premio do Quiz quando a pessoa e vencedora.
 var COLS_DIA = ['ID', 'Cadastro em', 'Nome', 'E-mail', 'Telefone', 'Aceita novidades', 'Entrou', 'Hora da entrada', 'Prêmio Quiz', 'Código Quiz'];
-var COLS_CLIENTES = ['Telefone', 'Nome', 'E-mail', 'Aceita novidades', 'Primeiro cadastro', 'Último cadastro', 'Dias na lista'];
+// Clientes: colunas A-G sao do Nome na Lista; H-K sao do Quiz (origem e partidas).
+var COLS_CLIENTES = ['Telefone', 'Nome', 'E-mail', 'Aceita novidades', 'Primeiro cadastro', 'Último cadastro', 'Dias na lista', 'Origem', 'Primeira partida', 'Última partida', 'Total de partidas'];
 var COLS_QUIZ = ['Dia', 'WhatsApp', 'Nome', 'Telefone', 'Pontos', 'Acertos', 'TempoMs', 'Código', 'Validade', 'Data escolhida', 'Status', 'Criado em', 'Finalizado em', 'Resgatado em', 'Usado em', 'Usado dia'];
+// Aba legivel por SEMANA (segunda a domingo), uma por partida do Quiz.
+var COLS_SEMANA = ['Data e hora', 'Nome', 'WhatsApp', 'Aceita novidades', 'Pontos', 'Acertos', 'Tempo', 'Resultado', 'Código do prêmio'];
 
 var QUIZ_VALIDADE_DIAS = 30;
 var COR_VENCEDOR = '#D9EAD3'; // verde claro da linha do vencedor do Quiz
@@ -130,15 +134,24 @@ function sheetDoDia_(ss, data, criar) {
   return sh;
 }
 
-/** Aba "Clientes" (cria com cabecalho se nao existir). */
+/** Aba "Clientes" (cria com cabecalho se nao existir; migra colunas novas). */
 function sheetClientes_(ss) {
   var sh = ss.getSheetByName('Clientes');
   if (!sh) {
     sh = ss.insertSheet('Clientes');
     sh.appendRow(COLS_CLIENTES);
     sh.getRange('A:A').setNumberFormat('@'); // Telefone como texto
+  } else {
+    garantirColunasClientes_(sh);
   }
   return sh;
+}
+
+/** Garante que a aba "Clientes" tenha as colunas do Quiz (origem e partidas). */
+function garantirColunasClientes_(sh) {
+  if (sh.getLastColumn() < COLS_CLIENTES.length) {
+    sh.getRange(1, 1, 1, COLS_CLIENTES.length).setValues([COLS_CLIENTES]);
+  }
 }
 
 /** O telefone (so digitos) ja esta na aba do dia? */
@@ -276,7 +289,11 @@ function checkin_(d) {
 
 // ---- QUIZ DO CLAY (aba "Quiz", mesma planilha) -----------------------------
 
-/** Aba "Quiz" (cria com cabecalho e colunas de texto se nao existir). */
+/**
+ * Aba "Quiz" (base do sistema): cria com cabecalho e colunas de texto se nao
+ * existir e a mantem OCULTA (sem apagar) — a leitura humana e feita nas abas por
+ * semana.
+ */
 function sheetQuiz_(ss) {
   var sh = ss.getSheetByName('Quiz');
   if (!sh) {
@@ -289,6 +306,11 @@ function sheetQuiz_(ss) {
     sh.getRange('I:I').setNumberFormat('@'); // Validade (ISO)
     sh.getRange('J:J').setNumberFormat('@'); // Data escolhida
     sh.getRange('P:P').setNumberFormat('@'); // Usado dia (ISO)
+  }
+  try {
+    if (!sh.isSheetHidden()) sh.hideSheet();
+  } catch (e) {
+    Logger.log('nao foi possivel ocultar a aba Quiz: ' + e);
   }
   return sh;
 }
@@ -463,6 +485,13 @@ function quizStart_(d) {
     d.dia, wa, protegeFormula_(d.nome), protegeFormula_(d.telefone),
     '', '', '', '', '', '', 'jogando', new Date(), '', '', ''
   ]);
+  // Extras (nao travam o jogo se falharem): aba da semana + base de contatos.
+  try {
+    registrarSemanaInicio_(ss, d);
+    upsertClienteQuiz_(ss, d);
+  } catch (e) {
+    Logger.log('quizStart extras: ' + e);
+  }
   return 'ok';
 }
 
@@ -513,10 +542,19 @@ function quizFinish_(d) {
       resp.validade = formatBR_(validadeISO);
     }
   }
+  // Registra o resultado na aba da semana (nao trava o jogo se falhar).
+  try {
+    registrarSemanaFim_(ss, d, resp.codigo);
+  } catch (e) {
+    Logger.log('quizFinish extras: ' + e);
+  }
   return resp;
 }
 
-/** Ranking do mes: melhor pontuacao por WhatsApp (empate: menor tempo). Top 10. */
+/**
+ * Ranking do mes (Top 10). Ordem: 1) mais acertos; 2) menor tempo total;
+ * 3) mais pontos. Por WhatsApp, conta a MELHOR partida do mes por esse criterio.
+ */
 function quizRanking_(d) {
   var mes = String(d.mes || '');
   if (!/^\d{4}-\d{2}$/.test(mes)) return [];
@@ -529,20 +567,35 @@ function quizRanking_(d) {
     if (dia.slice(0, 7) !== mes) continue;
     if (String(rows[i][12] || '') === '') continue; // so partidas finalizadas
     var wa = digits_(rows[i][1]);
-    var pontos = Number(rows[i][4] || 0);
-    var tempoMs = Number(rows[i][6] || 0);
-    var nome = String(rows[i][2] || '');
+    var cand = {
+      nome: String(rows[i][2] || ''),
+      acertos: Number(rows[i][5] || 0),
+      pontos: Number(rows[i][4] || 0),
+      tempoMs: Number(rows[i][6] || 0)
+    };
     var atual = melhor[wa];
-    if (!atual || pontos > atual.pontos || (pontos === atual.pontos && tempoMs < atual.tempoMs)) {
-      melhor[wa] = { nome: nome, pontos: pontos, tempoMs: tempoMs };
+    if (!atual || melhorPartidaQuiz_(cand, atual)) {
+      melhor[wa] = cand;
     }
   }
   var arr = [];
   for (var k in melhor) {
     if (melhor.hasOwnProperty(k)) arr.push(melhor[k]);
   }
-  arr.sort(function (a, b) { return b.pontos - a.pontos || a.tempoMs - b.tempoMs; });
+  arr.sort(ordenaRankingQuiz_);
   return arr.slice(0, 10);
+}
+
+/** true se a partida `a` e melhor que `b`: mais acertos; empate = menor tempo; depois mais pontos. */
+function melhorPartidaQuiz_(a, b) {
+  if (a.acertos !== b.acertos) return a.acertos > b.acertos;
+  if (a.tempoMs !== b.tempoMs) return a.tempoMs < b.tempoMs;
+  return a.pontos > b.pontos;
+}
+
+/** Comparador do ranking: mais acertos, depois menor tempo, depois mais pontos. */
+function ordenaRankingQuiz_(a, b) {
+  return (b.acertos - a.acertos) || (a.tempoMs - b.tempoMs) || (b.pontos - a.pontos);
 }
 
 /** Resgate: inclui o vencedor na lista da data escolhida (mesma lista da portaria). */
@@ -615,6 +668,207 @@ function quizMarcarUso_(ss, codigo, usar, diaUso) {
       return;
     }
   }
+}
+
+// ---- QUIZ: abas por SEMANA (leitura humana) e base de CONTATOS -------------
+
+/** ISO AAAA-MM-DD a partir de um Date em UTC. */
+function isoUTC_(dt) {
+  var y = dt.getUTCFullYear();
+  var m = ('0' + (dt.getUTCMonth() + 1)).slice(-2);
+  var da = ('0' + dt.getUTCDate()).slice(-2);
+  return y + '-' + m + '-' + da;
+}
+
+/** Segunda e domingo (ISO) da semana que contem `diaISO`. */
+function semanaDe_(diaISO) {
+  var p = String(diaISO).split('-');
+  var dt = new Date(Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2])));
+  var dow = dt.getUTCDay(); // 0=domingo .. 6=sabado
+  var ateSegunda = (dow === 0) ? -6 : (1 - dow);
+  var seg = new Date(dt); seg.setUTCDate(dt.getUTCDate() + ateSegunda);
+  var dom = new Date(seg); dom.setUTCDate(seg.getUTCDate() + 6);
+  return { seg: isoUTC_(seg), dom: isoUTC_(dom) };
+}
+
+/** Nome da aba da semana, ex.: "Quiz 16/11 a 22/11". */
+function nomeAbaSemana_(diaISO) {
+  var s = semanaDe_(diaISO);
+  return 'Quiz ' + shortBR_(s.seg) + ' a ' + shortBR_(s.dom);
+}
+
+/** Data de inicio (DD/MM) da semana a partir do nome da aba, ou null. */
+function inicioSemanaDoNome_(nome) {
+  var m = String(nome).match(/^Quiz (\d{2})\/(\d{2}) a (\d{2})\/(\d{2})$/);
+  if (!m) return null;
+  return { dia: Number(m[1]), mes: Number(m[2]) };
+}
+
+/** Chave ordenavel (timestamp) da semana, resolvendo o ano perto da virada. */
+function chaveSemana_(nome, hoje) {
+  var ini = inicioSemanaDoNome_(nome);
+  if (!ini) return null;
+  var ano = hoje.getFullYear();
+  var cand = new Date(ano, ini.mes - 1, ini.dia);
+  // Se a semana cairia muito no futuro, e do ano anterior (virada de ano).
+  if (cand.getTime() - hoje.getTime() > 200 * 24 * 3600 * 1000) {
+    cand = new Date(ano - 1, ini.mes - 1, ini.dia);
+  }
+  return cand.getTime();
+}
+
+/** Tempo em ms -> "42s" ou "1m02s". */
+function formataTempoMs_(ms) {
+  var s = Math.round(Number(ms || 0) / 1000);
+  var m = Math.floor(s / 60);
+  var r = s % 60;
+  return m > 0 ? (m + 'm' + ('0' + r).slice(-2) + 's') : (r + 's');
+}
+
+/** Aba da semana (cria com cabecalho se `criar`; reordena as abas ao criar). */
+function sheetSemana_(ss, diaISO, criar) {
+  var nome = nomeAbaSemana_(diaISO);
+  var sh = ss.getSheetByName(nome);
+  if (!sh && criar) {
+    sh = ss.insertSheet(nome);
+    sh.appendRow(COLS_SEMANA);
+    sh.getRange('A:A').setNumberFormat('dd/MM/yyyy HH:mm'); // Data e hora
+    sh.getRange('C:C').setNumberFormat('@'); // WhatsApp como texto
+    sh.getRange('I:I').setNumberFormat('@'); // Código como texto
+    try { reordenarAbas_(ss); } catch (e) { Logger.log('reordenar: ' + e); }
+  }
+  return sh;
+}
+
+/**
+ * Ordena as abas: primeiro as "Lista AAAA-MM-DD" (na ordem atual), depois as
+ * "Quiz DD/MM a DD/MM" com a SEMANA MAIS RECENTE a esquerda, e por fim as demais
+ * (Clientes, Quiz oculta, etc.).
+ */
+function reordenarAbas_(ss) {
+  var sheets = ss.getSheets();
+  var hoje = new Date();
+  var listas = [], semanas = [], outras = [];
+  for (var i = 0; i < sheets.length; i++) {
+    var nm = sheets[i].getName();
+    if (/^Lista \d{4}-\d{2}-\d{2}$/.test(nm)) listas.push(sheets[i]);
+    else if (inicioSemanaDoNome_(nm)) semanas.push(sheets[i]);
+    else outras.push(sheets[i]);
+  }
+  semanas.sort(function (a, b) {
+    return (chaveSemana_(b.getName(), hoje) || 0) - (chaveSemana_(a.getName(), hoje) || 0);
+  });
+  var ordem = listas.concat(semanas).concat(outras);
+  for (var k = 0; k < ordem.length; k++) {
+    ss.setActiveSheet(ordem[k]);
+    ss.moveActiveSheet(k + 1);
+  }
+}
+
+/** Pinta de verde a linha de quem GANHOU na aba da semana. */
+function destaqueSemana_(sh, linha) {
+  sh.getRange(linha, 1, 1, COLS_SEMANA.length).setBackground(COR_VENCEDOR);
+}
+
+/** Registra o INICIO da partida na aba da semana (resultado "NÃO TERMINOU"). */
+function registrarSemanaInicio_(ss, d) {
+  var sh = sheetSemana_(ss, d.dia, true);
+  sh.appendRow([
+    new Date(),
+    protegeFormula_(d.nome),
+    protegeFormula_(d.telefone),
+    d.aceitaNovidades ? 'sim' : 'nao',
+    '', '', '',
+    'NÃO TERMINOU',
+    ''
+  ]);
+}
+
+/**
+ * Registra o FIM da partida na aba da semana: atualiza a linha "NÃO TERMINOU"
+ * daquele WhatsApp/dia (ou cria uma nova) com pontos, acertos, tempo, resultado
+ * (GANHOU se gabaritou, senao PERDEU) e o codigo do premio. GANHOU fica verde.
+ */
+function registrarSemanaFim_(ss, d, codigo) {
+  var sh = sheetSemana_(ss, d.dia, true);
+  var wa = digits_(d.wa || d.telefone);
+  var pontos = Number(d.pontos || 0);
+  var acertos = Number(d.acertos || 0);
+  var tempoMs = Number(d.tempoMs || 0);
+  var ganhou = acertos >= 10;
+  var resultado = ganhou ? 'GANHOU' : 'PERDEU';
+  var rows = sh.getDataRange().getValues();
+  var linha = -1;
+  for (var i = rows.length - 1; i >= 1; i--) {
+    if (String(rows[i][7]) !== 'NÃO TERMINOU') continue;
+    if (digits_(rows[i][2]) !== wa) continue;
+    if (diaISO_(rows[i][0]) !== String(d.dia)) continue;
+    linha = i + 1;
+    break;
+  }
+  if (linha === -1) {
+    sh.appendRow([
+      new Date(), protegeFormula_(d.nome), protegeFormula_(d.telefone),
+      d.aceitaNovidades ? 'sim' : 'nao', pontos, acertos,
+      formataTempoMs_(tempoMs), resultado, codigo || ''
+    ]);
+    linha = sh.getLastRow();
+  } else {
+    sh.getRange(linha, 5).setValue(pontos);
+    sh.getRange(linha, 6).setValue(acertos);
+    sh.getRange(linha, 7).setValue(formataTempoMs_(tempoMs));
+    sh.getRange(linha, 8).setValue(resultado);
+    if (codigo) sh.getRange(linha, 9).setValue(codigo);
+  }
+  if (ganhou) destaqueSemana_(sh, linha);
+}
+
+/** Junta origens numa lista "A, B" sem repetir (sem diferenciar maiuscula). */
+function mesclarOrigem_(atual, nova) {
+  var vistos = {};
+  var ordem = [];
+  function add(v) {
+    v = String(v == null ? '' : v).trim();
+    if (!v) return;
+    var k = v.toLowerCase();
+    if (!vistos[k]) { vistos[k] = true; ordem.push(v); }
+  }
+  String(atual || '').split(',').forEach(function (x) { add(x); });
+  add(nova);
+  return ordem.join(', ');
+}
+
+/**
+ * Upsert do jogador na aba "Clientes" (1 linha por WhatsApp). Acrescenta "Quiz"
+ * na origem (e "Nome na Lista" se a pessoa ja veio da lista), conta partidas e
+ * guarda primeira/ultima partida. Nao remove consentimento ja dado (upgrade-only).
+ */
+function upsertClienteQuiz_(ss, d) {
+  var sh = sheetClientes_(ss);
+  var tel = digits_(d.wa || d.telefone);
+  if (!tel) return;
+  var agora = new Date();
+  var optIn = d.aceitaNovidades === true;
+  var rows = sh.getDataRange().getValues();
+  for (var i = 1; i < rows.length; i++) {
+    if (digits_(rows[i][0]) !== tel) continue;
+    var linha = i + 1;
+    var origem = String(rows[i][7] || '');
+    // Se ja tinha cadastro de lista (col E) e ainda nao marcava a origem, assume Nome na Lista.
+    if (!origem && String(rows[i][4] || '') !== '') origem = 'Nome na Lista';
+    sh.getRange(linha, 8).setValue(mesclarOrigem_(origem, 'Quiz'));
+    if (optIn) sh.getRange(linha, 4).setValue('sim'); // upgrade-only
+    if (String(rows[i][1] || '') === '' && d.nome) sh.getRange(linha, 2).setValue(protegeFormula_(d.nome));
+    if (String(rows[i][8] || '') === '') sh.getRange(linha, 9).setValue(agora); // Primeira partida
+    sh.getRange(linha, 10).setValue(agora); // Última partida
+    sh.getRange(linha, 11).setValue(Number(rows[i][10] || 0) + 1); // Total de partidas
+    return;
+  }
+  sh.appendRow([
+    protegeFormula_(d.telefone), protegeFormula_(d.nome), '', optIn ? 'sim' : 'nao',
+    '', '', '',           // colunas da Lista (vazias para quem veio so do Quiz)
+    'Quiz', agora, agora, 1
+  ]);
 }
 
 // ---- Limpeza das listas antigas --------------------------------------------
@@ -782,13 +1036,33 @@ var QUIZ_DATA_TESTE_2 = '2000-01-04';
  */
 function testeQuizFluxo() {
   apagarTesteQuiz();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
   var hoje = todayISO_();
   var wa = digits_(TEL_TESTE);
 
-  var start1 = doPost(reqTeste_({ action: 'quiz_start', wa: wa, nome: 'Teste Quiz', telefone: TEL_TESTE, dia: hoje })).getContent();
-  var start2 = doPost(reqTeste_({ action: 'quiz_start', wa: wa, nome: 'Teste Quiz', telefone: TEL_TESTE, dia: hoje })).getContent();
+  var start1 = doPost(reqTeste_({ action: 'quiz_start', wa: wa, nome: 'Teste Quiz', telefone: TEL_TESTE, dia: hoje, aceitaNovidades: true })).getContent();
+  var start2 = doPost(reqTeste_({ action: 'quiz_start', wa: wa, nome: 'Teste Quiz', telefone: TEL_TESTE, dia: hoje, aceitaNovidades: true })).getContent();
   var fim = doPost(reqTeste_({ action: 'quiz_finish', wa: wa, nome: 'Teste Quiz', telefone: TEL_TESTE, dia: hoje, pontos: 150, acertos: 10, tempoMs: 42000, acertouTudo: true })).getContent();
   var j = JSON.parse(fim);
+
+  // Aba da semana: deve ter a partida com resultado GANHOU.
+  var shSem = ss.getSheetByName(nomeAbaSemana_(hoje));
+  var semResultado = 'NAO ACHOU';
+  if (shSem) {
+    var rsem = shSem.getDataRange().getValues();
+    for (var i = rsem.length - 1; i >= 1; i--) {
+      if (digits_(rsem[i][2]) === wa) { semResultado = String(rsem[i][7]); break; }
+    }
+  }
+  // Base de contatos: origem deve conter "Quiz" e total >= 1.
+  var shCli = ss.getSheetByName('Clientes');
+  var cliOrigem = 'NAO ACHOU', cliTotal = '';
+  if (shCli) {
+    var rcli = shCli.getDataRange().getValues();
+    for (var i = 1; i < rcli.length; i++) {
+      if (digits_(rcli[i][0]) === wa) { cliOrigem = String(rcli[i][7] || ''); cliTotal = String(rcli[i][10] || ''); break; }
+    }
+  }
 
   // O vencedor deve aparecer sozinho em QUALQUER lista aberta (via list_).
   var lista1 = JSON.parse(doPost(reqTeste_({ action: 'list', data: QUIZ_DATA_TESTE })).getContent());
@@ -802,7 +1076,9 @@ function testeQuizFluxo() {
     'start1: ' + start1 + ' (ok) | start2: ' + start2 + ' (duplicate) | finish: ' + fim +
     ' | vencedor na lista 1: ' + (v1 ? 'sim' : 'NAO') +
     ' | vencedor na lista 2: ' + (v2 ? 'sim' : 'NAO') +
-    ' | ranking contem teste: ' + (rank.indexOf('Teste Quiz') >= 0)
+    ' | ranking contem teste: ' + (rank.indexOf('Teste Quiz') >= 0) +
+    ' | aba semana resultado: ' + semResultado + ' (deve ser GANHOU)' +
+    ' | cliente origem: "' + cliOrigem + '" total: ' + cliTotal + ' (deve conter Quiz e total 1)'
   );
 
   if (v1) {
@@ -825,6 +1101,12 @@ function apagarTesteQuiz() {
   var removidas = 0;
   var quiz = ss.getSheetByName('Quiz');
   if (quiz) removidas += removeLinhasPorTelefone_(quiz, 2, tel); // col B = WhatsApp
+  // Aba da semana atual: remove so as linhas de teste (nunca apaga a aba).
+  var shSem = ss.getSheetByName(nomeAbaSemana_(todayISO_()));
+  if (shSem) removidas += removeLinhasPorTelefone_(shSem, 3, tel); // col C = WhatsApp
+  // Base de contatos: remove so as linhas de teste.
+  var shCli = ss.getSheetByName('Clientes');
+  if (shCli) removidas += removeLinhasPorTelefone_(shCli, 1, tel); // col A = Telefone
   var datas = [QUIZ_DATA_TESTE, QUIZ_DATA_TESTE_2];
   for (var k = 0; k < datas.length; k++) {
     var sh = ss.getSheetByName(nomeAbaDia_(datas[k]));

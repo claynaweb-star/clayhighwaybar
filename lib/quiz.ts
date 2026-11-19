@@ -494,16 +494,26 @@ export async function buscarRanking(mes: string): Promise<RankingItem[]> {
     return [];
   }
   try {
-    const bruto = JSON.parse(r.text) as Array<{ nome?: unknown; pontos?: unknown; tempoMs?: unknown }>;
+    const bruto = JSON.parse(r.text) as Array<{
+      nome?: unknown;
+      acertos?: unknown;
+      pontos?: unknown;
+      tempoMs?: unknown;
+    }>;
     if (!Array.isArray(bruto)) return [];
     return bruto
       .map((x) => ({
         nome: nomeParaRanking(String(x.nome ?? "")),
+        acertos: Number(x.acertos ?? 0),
         pontos: Number(x.pontos ?? 0),
         tempoMs: Number(x.tempoMs ?? 0),
       }))
       .filter((x) => Number.isFinite(x.pontos))
-      .sort((a, b) => b.pontos - a.pontos || a.tempoMs - b.tempoMs)
+      // 1) mais acertos; 2) menor tempo; 3) mais pontos.
+      .sort(
+        (a, b) =>
+          b.acertos - a.acertos || a.tempoMs - b.tempoMs || b.pontos - a.pontos,
+      )
       .slice(0, 10);
   } catch {
     logQuiz("ranking", "resposta nao-JSON");
