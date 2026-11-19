@@ -117,21 +117,26 @@ function salvarPartidaRecente(ids: number[]): void {
 }
 
 // Guarda o RESULTADO da última partida neste aparelho, para a tela final
-// reaparecer ao abrir /quiz no navegador (ex.: quem saiu do app do Instagram
-// para postar no Stories). Expira em 6 h para não "prender" o jogador.
+// reaparecer QUANDO a pessoa volta pelo botão "Abrir no navegador" (link com
+// ?retomar=<token>) ou toca em "Ver meu resultado" na tela inicial. Abrindo o
+// link normal, NUNCA restaura sozinho. Expira em 30 min e some ao ser usado 1×.
+// No modo teste nada é guardado.
 const RESULTADO_KEY = "quiz_ultimo_resultado";
-const RESULTADO_TTL_MS = 6 * 60 * 60 * 1000;
+const RESULTADO_TTL_MS = 30 * 60 * 1000;
 type ResultadoSalvo = {
   final: ResultadoFinal;
   nome: string;
   whatsapp: string;
   novidades: boolean;
   teste: boolean;
+  retomar: string; // token que precisa bater com ?retomar=<token> da URL
   em: number;
 };
 
 function salvarResultado(r: Omit<ResultadoSalvo, "em">): void {
   try {
+    // Nunca guarda no modo teste: lá sempre se começa do início.
+    if (r.teste) return;
     localStorage.setItem(RESULTADO_KEY, JSON.stringify({ ...r, em: Date.now() }));
   } catch {
     /* sem localStorage: segue sem restaurar a tela final */
@@ -143,8 +148,11 @@ function lerResultado(): ResultadoSalvo | null {
     const raw = localStorage.getItem(RESULTADO_KEY);
     if (!raw) return null;
     const r = JSON.parse(raw) as ResultadoSalvo;
-    if (!r || !r.final || typeof r.em !== "number") return null;
-    if (Date.now() - r.em > RESULTADO_TTL_MS) return null;
+    if (!r || !r.final || typeof r.em !== "number" || r.teste) return null;
+    if (Date.now() - r.em > RESULTADO_TTL_MS) {
+      limparResultado();
+      return null;
+    }
     return r;
   } catch {
     return null;
@@ -156,6 +164,26 @@ function limparResultado(): void {
     localStorage.removeItem(RESULTADO_KEY);
   } catch {
     /* ignora */
+  }
+}
+
+/** Token curto e aleatório para o link de retomada (?retomar=<token>). */
+function gerarTokenRetomada(): string {
+  try {
+    const a = new Uint32Array(2);
+    crypto.getRandomValues(a);
+    return a[0].toString(36) + a[1].toString(36);
+  } catch {
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+}
+
+/** Lê o parâmetro ?retomar=<token> da URL atual (vazio se não houver). */
+function tokenRetomadaDaUrl(): string {
+  try {
+    return new URLSearchParams(window.location.search).get("retomar") || "";
+  } catch {
+    return "";
   }
 }
 
@@ -370,6 +398,9 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
   const [carregando, setCarregando] = useState(false);
   const [erroRede, setErroRede] = useState(false);
   const [teste, setTeste] = useState(false); // MODO TESTE (liberado pelo servidor)
+  // Retomada da tela final: token do link ?retomar=<token> e aviso na intro.
+  const [retomarToken, setRetomarToken] = useState("");
+  const [temResultadoSalvo, setTemResultadoSalvo] = useState(false);
 
   // Formulário
   const [nome, setNome] = useState("");
@@ -415,21 +446,51 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
     identidadeRef.current = { nome, whatsapp, novidades, teste };
   }, [nome, whatsapp, novidades, teste]);
 
-  // Ao abrir /quiz (ex.: voltando do app do Instagram para postar no Stories),
-  // restaura a tela final da última partida — sem perder o prêmio/código.
-  useEffect(() => {
-    const r = lerResultado();
-    if (!r) return;
+  // Coloca a tela final de um resultado salvo (sem repetir o som do final).
+  const aplicarResultado = useCallback((r: ResultadoSalvo) => {
     setNome(r.nome);
     setWhatsapp(r.whatsapp);
     setNovidades(r.novidades);
-    setTeste(r.teste);
+    setTeste(false); // resultado salvo é sempre de partida normal
+    setRetomarToken(r.retomar);
     setFinal(r.final);
     finalRef.current = r.final;
     terminouRef.current = true;
     somFinalRef.current = true; // já ouviu o som; não repete ao restaurar
     setTela("resultado");
   }, []);
+
+  // Botão "Ver meu resultado" (tela inicial): mostra o resultado e o apaga.
+  const verResultado = useCallback(() => {
+    const r = lerResultado();
+    setTemResultadoSalvo(false);
+    if (!r) return;
+    aplicarResultado(r);
+    limparResultado(); // some depois de ser visto uma vez
+  }, [aplicarResultado]);
+
+  // Abertura de /quiz: SÓ restaura a tela final quando o link traz
+  // ?retomar=<token> (botão "Abrir no navegador") e o token bate com o salvo.
+  // Abrindo o link normal, começa sempre na intro — e, se já jogou hoje (modo
+  // normal), a intro oferece "Ver meu resultado".
+  useEffect(() => {
+    const r = lerResultado();
+    if (!r) return;
+    const token = tokenRetomadaDaUrl();
+    if (token && token === r.retomar) {
+      aplicarResultado(r);
+      limparResultado(); // restaura uma vez só
+      try {
+        window.history.replaceState(null, "", window.location.pathname);
+      } catch {
+        /* ignora */
+      }
+    } else {
+      // Link normal: não pula para o resultado; oferece ver na intro.
+      setTemResultadoSalvo(true);
+      setRetomarToken(r.retomar);
+    }
+  }, [aplicarResultado]);
 
   const pararTimer = useCallback(() => {
     if (rafRef.current !== null) {
@@ -591,8 +652,14 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
         salvarPartidaRecente(idsVistosRef.current);
         const fim = finalRef.current;
         setFinal(fim);
-        // Guarda o resultado para a tela final reaparecer ao abrir no navegador.
-        if (fim) salvarResultado({ final: fim, ...identidadeRef.current });
+        // Guarda o resultado (só partida normal) com um token de retomada, para
+        // a tela final poder reaparecer pelo link "Abrir no navegador".
+        const id = identidadeRef.current;
+        if (fim && !id.teste) {
+          const token = gerarTokenRetomada();
+          setRetomarToken(token);
+          salvarResultado({ final: fim, ...id, retomar: token });
+        }
         setTela("resultado");
       } else {
         // Busca a próxima pergunta só agora: o relógio do servidor começa aqui.
@@ -710,6 +777,7 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
 
   const reiniciar = useCallback(() => {
     limparResultado();
+    setTemResultadoSalvo(false);
     setTela("intro");
     setPergunta(null);
     setResultadoP(null);
@@ -782,7 +850,13 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
   // Conteúdo de cada tela.
   const conteudo = (
     <>
-      {tela === "intro" && <TelaIntro onComecar={comecar} />}
+      {tela === "intro" && (
+        <TelaIntro
+          onComecar={comecar}
+          jaJogou={temResultadoSalvo}
+          onVerResultado={verResultado}
+        />
+      )}
 
       {tela === "cadastro" && (
         <TelaCadastro
@@ -836,6 +910,8 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
           nome={nome}
           whatsapp={whatsapp}
           novidades={novidades}
+          retomarToken={retomarToken}
+          onInicio={reiniciar}
         />
       )}
 
@@ -857,12 +933,37 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
 
 // ======================= TELAS =======================
 
-function TelaIntro({ onComecar }: { onComecar: () => void }) {
+function TelaIntro({
+  onComecar,
+  jaJogou,
+  onVerResultado,
+}: {
+  onComecar: () => void;
+  jaJogou: boolean;
+  onVerResultado: () => void;
+}) {
   return (
     <div className="clay-troca flex w-full flex-1 flex-col items-center justify-center gap-5 py-2 text-center">
       <p className="text-[0.7rem] font-semibold tracking-[0.35em] text-accent">
         CLAY HIGHWAY BAR
       </p>
+
+      {/* Já jogou hoje (modo normal): oferece ver o resultado, sem pular pra ele. */}
+      {jaJogou && (
+        <div className="w-full max-w-xs rounded-2xl border border-[#f2a93b]/50 bg-[#17120e] p-3">
+          <p className="text-sm font-bold text-[#f2a93b]">Você já jogou hoje!</p>
+          <p className="mt-0.5 text-xs text-muted">
+            É 1 partida por dia. Dá uma olhada no seu resultado:
+          </p>
+          <button
+            onClick={onVerResultado}
+            className="mt-2.5 w-full rounded-[12px] px-4 py-2.5 text-sm font-extrabold text-[#140f0b] transition-transform active:scale-95"
+            style={{ background: "linear-gradient(180deg,#f2a93b,#e8892b)" }}
+          >
+            Ver meu resultado
+          </button>
+        </div>
+      )}
 
       {/* Cartão inclinado do título + mascote. */}
       <div className="relative flex flex-col items-center">
@@ -1507,12 +1608,16 @@ function TelaResultado({
   nome,
   whatsapp,
   novidades,
+  retomarToken,
+  onInicio,
 }: {
   final: ResultadoFinal;
   datas: DataLista[];
   nome: string;
   whatsapp: string;
   novidades: boolean;
+  retomarToken: string;
+  onInicio: () => void;
 }) {
   const [dica, setDica] = useState("");
   const [compartilhando, setCompartilhando] = useState(false);
@@ -1543,6 +1648,19 @@ function TelaResultado({
     // há como postar no Stories: orienta a abrir no navegador de verdade.
     const { interno, android } = navegadorInterno();
     if (interno) {
+      // Carimba ?retomar=<token> na URL atual: assim, ao "Abrir no navegador"
+      // (que abre a URL de agora), a tela final volta uma vez só lá fora.
+      if (retomarToken) {
+        try {
+          window.history.replaceState(
+            null,
+            "",
+            `${window.location.pathname}?retomar=${retomarToken}`,
+          );
+        } catch {
+          /* ignora */
+        }
+      }
       setAndroidInApp(android);
       setAbrirNoNavegador(true);
       setDica(linkCopiado ? "Link do jogo copiado! 🤘" : "");
@@ -1589,7 +1707,13 @@ function TelaResultado({
     } finally {
       setCompartilhando(false);
     }
-  }, [final, pose]);
+  }, [final, pose, retomarToken]);
+
+  // Link do Chrome (Android) carrega o token de retomada, para a tela final
+  // reaparecer uma vez só ao abrir fora do app.
+  const intentChrome = `intent://clayhighwaybar.com.br/quiz${
+    retomarToken ? `?retomar=${retomarToken}` : ""
+  }#Intent;scheme=https;package=com.android.chrome;end`;
 
   const desafiar = () =>
     desafiarAmigo(
@@ -1691,7 +1815,7 @@ function TelaResultado({
           </p>
           {androidInApp && (
             <a
-              href="intent://clayhighwaybar.com.br/quiz#Intent;scheme=https;package=com.android.chrome;end"
+              href={intentChrome}
               className="mt-2.5 flex w-full items-center justify-center rounded-[12px] px-4 py-2.5 font-extrabold text-[#140f0b] transition-transform active:scale-95"
               style={{ background: "linear-gradient(180deg,#f2a93b,#e8892b)" }}
             >
@@ -1711,6 +1835,14 @@ function TelaResultado({
           <BlocoNomeNaLista datas={datas} nome={nome} whatsapp={whatsapp} novidades={novidades} />
         </>
       )}
+
+      {/* Volta ao início: limpa o resultado guardado (no modo teste, joga de novo já). */}
+      <button
+        onClick={onInicio}
+        className="mt-1 flex items-center justify-center gap-1.5 rounded-full border border-white/15 px-5 py-2 text-xs font-bold text-[#A99C8C] transition-colors hover:text-fog"
+      >
+        🏠 Início
+      </button>
     </div>
   );
 }
