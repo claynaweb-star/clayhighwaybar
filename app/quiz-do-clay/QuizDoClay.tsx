@@ -1625,11 +1625,32 @@ function TelaResultado({
   // abrir no navegador; no Android, também o atalho "Abrir no Chrome".
   const [abrirNoNavegador, setAbrirNoNavegador] = useState(false);
   const [androidInApp, setAndroidInApp] = useState(false);
+  const [copiado, setCopiado] = useState(false);
   const fonteDisplayRef = useRef<HTMLSpanElement>(null);
 
   const ganhou = final.faixa === "lenda";
   const pose: Pose = ganhou ? "comemorando" : "nao_foi";
   const titulo = ganhou ? "Você é lenda!" : "Não foi dessa vez!";
+
+  // Copia o código do prêmio (ex.: QUIZ-7K3P) para apresentar na portaria.
+  const copiarCodigo = useCallback(async () => {
+    if (!final.codigo) return;
+    try {
+      await navigator.clipboard?.writeText(final.codigo);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2200);
+    } catch {
+      /* clipboard bloqueado: o código fica visível para digitar à mão */
+    }
+  }, [final.codigo]);
+
+  // Noites do Nome na Lista onde o prêmio vale (dentro dos 30 dias). Usa as datas
+  // do prêmio (servidor) e pega a arte na lista de datas abertas quando existe.
+  const noitesPremio = (final.datasPremio ?? []).map((p) => ({
+    data: p.data,
+    label: p.label,
+    banner: datas.find((d) => d.data === p.data)?.banner ?? "",
+  }));
 
   const compartilhar = useCallback(async () => {
     setCompartilhando(true);
@@ -1741,6 +1762,150 @@ function TelaResultado({
     </div>
   );
 
+  // Botões de compartilhar + dica + painel "abrir no navegador" (mesmo bloco nas
+  // duas telas: vitória e "não foi dessa vez").
+  const compartilharUI = (
+    <>
+      {botoes}
+      {dica && <p className="max-w-full text-sm text-accent">{dica}</p>}
+      {/* Navegador interno (Instagram/Facebook/WhatsApp): passo a passo p/ Stories. */}
+      {abrirNoNavegador && (
+        <div className="w-full max-w-sm rounded-2xl border border-[#f2a93b]/50 bg-[#17120e] p-3 text-left text-[13px] text-[#F6EFE6]">
+          <p className="font-bold text-[#f2a93b]">Pra postar no Stories, abra no navegador</p>
+          <p className="mt-1 text-[#A99C8C]">
+            Toque nos <b className="text-fog">3 pontinhos (⋮)</b> lá em cima e em{" "}
+            <b className="text-fog">“Abrir no navegador”</b>. O link do jogo já está copiado.
+          </p>
+          {androidInApp && (
+            <a
+              href={intentChrome}
+              className="mt-2.5 flex w-full items-center justify-center rounded-[12px] px-4 py-2.5 font-extrabold text-[#140f0b] transition-transform active:scale-95"
+              style={{ background: "linear-gradient(180deg,#f2a93b,#e8892b)" }}
+            >
+              Abrir no Chrome
+            </a>
+          )}
+        </div>
+      )}
+    </>
+  );
+
+  // Volta ao início: limpa o resultado guardado (no modo teste, joga de novo já).
+  const botaoInicio = (
+    <button
+      onClick={onInicio}
+      className="mt-1 flex items-center justify-center gap-1.5 rounded-full border border-white/15 px-5 py-2 text-xs font-bold text-[#A99C8C] transition-colors hover:text-fog"
+    >
+      🏠 Início
+    </button>
+  );
+
+  // ===================== TELA DE VITÓRIA (10 de 10) =====================
+  if (ganhou) {
+    return (
+      <div className="clay-troca relative flex w-full flex-1 flex-col items-center gap-3 py-1 text-center">
+        <Confete />
+        {/* Referência escondida p/ pegar a família da fonte display (Anton) no canvas. */}
+        <span ref={fonteDisplayRef} className="font-display sr-only" aria-hidden>
+          .
+        </span>
+
+        {/* 1. TOPO: mascote comemorando + título inclinado + destaque do prêmio. */}
+        <Claytinho pose="comemorando" anim="clay-jump" className="h-24 w-auto" />
+
+        <div
+          className="font-display max-w-full"
+          style={{
+            transform: "rotate(-3deg)",
+            padding: "10px 18px",
+            borderRadius: 18,
+            background: "#120d0a",
+            border: "2px solid #F2A93B",
+            boxShadow: "0 0 26px rgba(242,169,59,.45)",
+            fontSize: 21,
+            lineHeight: 1.05,
+            letterSpacing: "-.5px",
+            color: "#F6EFE6",
+          }}
+        >
+          🏆 PARABÉNS, LENDA DO ROCK!
+        </div>
+
+        <p
+          className="font-display text-[22px] leading-[1.1] text-[#F2A93B]"
+          style={{ textShadow: "0 0 18px rgba(242,169,59,.35)" }}
+        >
+          {final.codigo
+            ? "Você ganhou ENTRADA FREE no Clay!"
+            : "Você gabaritou de novo, lenda! 🤘"}
+        </p>
+        <p className="max-w-[20rem] text-[13px] leading-snug text-[#A99C8C]">
+          {final.codigo
+            ? "Seu nome já está na lista de todas as noites participantes. É só escolher uma e aparecer!"
+            : "Você já ganhou uma entrada grátis nos últimos 30 dias — ela volta a valer depois disso."}
+        </p>
+
+        <p className="text-[13px] text-[#A99C8C]">
+          Você fez <b className="text-[#F2A93B]">{final.acertos}/10</b> ·{" "}
+          <b className="text-[#F2A93B]">{final.pontos}</b> pontos
+        </p>
+
+        {/* 4. BOTÕES: logo abaixo do destaque do prêmio. */}
+        {compartilharUI}
+
+        {/* 2. NOITES EM QUE O PRÊMIO VALE. */}
+        <div className="mt-1 w-full text-left">
+          <h3 className="font-display text-[15px] uppercase leading-tight text-fog">
+            🎟️ Noites em que seu prêmio vale:
+          </h3>
+          {noitesPremio.length > 0 ? (
+            <div className="mt-2">
+              <CarrosselNoites noites={noitesPremio} />
+            </div>
+          ) : (
+            <p className="mt-1.5 text-[13px] leading-snug text-[#A99C8C]">
+              Seu nome entra automaticamente nas próximas noites com Nome na Lista. Fique de olho no
+              nosso Instagram!
+            </p>
+          )}
+        </div>
+
+        {/* 3. REGRAS EM DESTAQUE (borda âmbar) + código do prêmio. */}
+        <div className="w-full rounded-2xl border-2 border-accent bg-accent-soft/25 p-3 text-left">
+          <p className="text-[12px] leading-relaxed text-fog">• Válido por 30 dias, para 1 entrada.</p>
+          <p className="text-[12px] leading-relaxed text-fog">
+            • Na portaria, apresente documento com foto e o celular cadastrado.
+          </p>
+          {final.codigo ? (
+            <div className="mt-2.5 flex items-center justify-between gap-2 rounded-xl border border-accent/50 bg-[#120d0a] px-3 py-2">
+              <div className="min-w-0">
+                <span className="block text-[10px] font-semibold uppercase tracking-wide text-accent">
+                  Código do prêmio
+                </span>
+                <span className="font-display text-2xl leading-none tracking-widest text-fog">
+                  {final.codigo}
+                </span>
+              </div>
+              <button
+                onClick={copiarCodigo}
+                className="shrink-0 rounded-[10px] px-3 py-2 text-xs font-extrabold text-[#140f0b] transition-transform active:scale-95"
+                style={{ background: "linear-gradient(180deg,#f2a93b,#e8892b)" }}
+              >
+                {copiado ? "Copiado! ✓" : "Copiar código"}
+              </button>
+            </div>
+          ) : null}
+          {final.codigo && final.validadeCodigo ? (
+            <p className="mt-1.5 text-[11px] text-muted">Vale até {final.validadeCodigo}.</p>
+          ) : null}
+        </div>
+
+        {botaoInicio}
+      </div>
+    );
+  }
+
+  // ===================== "NÃO FOI DESSA VEZ" =====================
   return (
     <div className="clay-troca relative flex w-full flex-1 flex-col items-center gap-3 py-1 text-center">
       {ganhou && <Confete />}
@@ -1779,70 +1944,87 @@ function TelaResultado({
         <b className="text-[#F2A93B]">{final.pontos}</b> pontos
       </p>
 
-      {ganhou && final.codigo && (
-        <div className="w-full max-w-xs rounded-2xl border-2 border-accent bg-accent-soft/40 p-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-accent">
-            Entrada grátis
-          </p>
-          <p className="font-display text-3xl tracking-widest text-fog">{final.codigo}</p>
-          <p className="mt-1 text-xs font-semibold text-fog">
-            {(final.datasPremio?.length ?? 0) > 0
-              ? "Seu nome já está em todas as listas com Nome na Lista! Vale 1 entrada, numa noite à sua escolha."
-              : "Seu nome entra automaticamente nas próximas listas. Prêmio válido por 30 dias."}
-          </p>
-          {final.validadeCodigo ? (
-            <p className="mt-1 text-[0.7rem] text-muted">Vale até {final.validadeCodigo}.</p>
-          ) : null}
-        </div>
-      )}
-      {final.jaGanhouCodigo && (
-        <p className="max-w-xs text-sm text-muted">
-          Gabaritou de novo! 🤘 Mas você já ganhou uma entrada grátis nos últimos 30 dias — o
-          prêmio volta a valer depois disso.
-        </p>
-      )}
-
-      {botoes}
-      {dica && <p className="max-w-full text-sm text-accent">{dica}</p>}
-
-      {/* Navegador interno (Instagram/Facebook/WhatsApp): passo a passo p/ Stories. */}
-      {abrirNoNavegador && (
-        <div className="w-full max-w-sm rounded-2xl border border-[#f2a93b]/50 bg-[#17120e] p-3 text-left text-[13px] text-[#F6EFE6]">
-          <p className="font-bold text-[#f2a93b]">Pra postar no Stories, abra no navegador</p>
-          <p className="mt-1 text-[#A99C8C]">
-            Toque nos <b className="text-fog">3 pontinhos (⋮)</b> lá em cima e em{" "}
-            <b className="text-fog">“Abrir no navegador”</b>. O link do jogo já está copiado.
-          </p>
-          {androidInApp && (
-            <a
-              href={intentChrome}
-              className="mt-2.5 flex w-full items-center justify-center rounded-[12px] px-4 py-2.5 font-extrabold text-[#140f0b] transition-transform active:scale-95"
-              style={{ background: "linear-gradient(180deg,#f2a93b,#e8892b)" }}
-            >
-              Abrir no Chrome
-            </a>
-          )}
-        </div>
-      )}
+      {compartilharUI}
 
       {/* Quem NÃO ganhou: aviso piscando + bloco Nome na Lista. */}
-      {!ganhou && (
-        <>
-          <div className="clay-blink mt-1 flex flex-col items-center gap-0.5 text-[13px] font-extrabold uppercase leading-tight tracking-[0.06em] text-[#F2A93B]">
-            <span>Arraste para baixo e veja os dias com Nome na Lista</span>
-            <span aria-hidden className="clay-seta text-[22px] leading-none">⌄</span>
-          </div>
-          <BlocoNomeNaLista datas={datas} nome={nome} whatsapp={whatsapp} novidades={novidades} />
-        </>
-      )}
+      <div className="clay-blink mt-1 flex flex-col items-center gap-0.5 text-[13px] font-extrabold uppercase leading-tight tracking-[0.06em] text-[#F2A93B]">
+        <span>Arraste para baixo e veja os dias com Nome na Lista</span>
+        <span aria-hidden className="clay-seta text-[22px] leading-none">⌄</span>
+      </div>
+      <BlocoNomeNaLista datas={datas} nome={nome} whatsapp={whatsapp} novidades={novidades} />
 
-      {/* Volta ao início: limpa o resultado guardado (no modo teste, joga de novo já). */}
-      <button
-        onClick={onInicio}
-        className="mt-1 flex items-center justify-center gap-1.5 rounded-full border border-white/15 px-5 py-2 text-xs font-bold text-[#A99C8C] transition-colors hover:text-fog"
+      {botaoInicio}
+    </div>
+  );
+}
+
+/** Carrossel das noites onde o prêmio vale: arte + dia/data + selo "ENTRADA FREE". */
+function CarrosselNoites({
+  noites,
+}: {
+  noites: { data: string; label: string; banner: string }[];
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [idx, setIdx] = useState(0);
+
+  const aoRolar = () => {
+    const el = ref.current;
+    if (!el || noites.length === 0) return;
+    const passo = el.scrollWidth / noites.length;
+    setIdx(Math.min(noites.length - 1, Math.round(el.scrollLeft / passo)));
+  };
+
+  return (
+    <div className="w-full">
+      <div
+        ref={ref}
+        onScroll={aoRolar}
+        className="-mx-1 flex gap-2.5 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        🏠 Início
-      </button>
+        {noites.map((n) => (
+          <div
+            key={n.data}
+            className="flex w-[150px] shrink-0 flex-col overflow-hidden rounded-[14px] border border-white/10"
+            style={{ background: "#100c09" }}
+          >
+            <span className="relative block h-[62px] w-full bg-surface-2">
+              {n.banner ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={n.banner}
+                  alt={`Arte de ${n.label}`}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : null}
+              {/* Selo verde no lugar do preço. */}
+              <span className="absolute left-1.5 top-1.5 rounded-full bg-[#2fb86a] px-2 py-[3px] text-[9px] font-extrabold uppercase leading-none tracking-wide text-[#06130b] shadow">
+                Entrada Free
+              </span>
+            </span>
+            <span className="flex flex-col px-2.5 py-2">
+              <span className="font-display text-sm uppercase leading-tight text-white">
+                {n.label}
+              </span>
+              <span className="font-display text-sm uppercase text-[#2fb86a]">Entrada free</span>
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Bolinhas indicadoras + dica de arrastar para o lado. */}
+      {noites.length > 1 && (
+        <div className="mt-2 flex items-center justify-between text-xs font-bold text-[#A99C8C]">
+          <span className="flex gap-1" aria-hidden>
+            {noites.map((n, i) => (
+              <span key={n.data} className={i === idx ? "text-fog" : "text-[#A99C8C]/40"}>
+                ●
+              </span>
+            ))}
+          </span>
+          <span>arraste para o lado →</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -1975,29 +2157,39 @@ async function gerarStory(
   ctx.font = `bold 66px ${familiaCorpo}`;
   ctx.fillText(`${final.pontos} pontos`, W / 2, 1210);
 
-  ctx.fillStyle = "#f2ede4";
-  ctx.font = `46px ${familiaCorpo}`;
-  const frase =
-    final.faixa === "lenda"
-      ? "Lenda do rock! 🤘"
-      : final.faixa === "quase"
-        ? "Quase lenda! 🤘"
-        : "Será que você manja? 🤘";
-  ctx.fillText(frase, W / 2, 1300);
+  const venceu = final.faixa === "lenda";
+  if (venceu) {
+    // Destaque do prêmio para quem gabaritou.
+    ctx.fillStyle = "#2fb86a";
+    ctx.font = `58px ${familiaDisplay}`;
+    ctx.fillText("GANHEI ENTRADA FREE", W / 2, 1298);
+    ctx.fillStyle = "#f2ede4";
+    ctx.font = `58px ${familiaDisplay}`;
+    ctx.fillText("NO CLAY! 🏆", W / 2, 1360);
+  } else {
+    ctx.fillStyle = "#f2ede4";
+    ctx.font = `46px ${familiaCorpo}`;
+    const frase = final.faixa === "quase" ? "Quase lenda! 🤘" : "Será que você manja? 🤘";
+    ctx.fillText(frase, W / 2, 1300);
+  }
+
+  const yJogue = venceu ? 1448 : 1420;
+  const ySite = venceu ? 1508 : 1485;
+  const yQr = venceu ? 1556 : 1540;
 
   ctx.fillStyle = "#e0892b";
   ctx.font = `bold 54px ${familiaDisplay}`;
-  ctx.fillText("JOGUE TAMBÉM", W / 2, 1420);
+  ctx.fillText("JOGUE TAMBÉM", W / 2, yJogue);
 
   ctx.fillStyle = "#f2ede4";
   ctx.font = `42px ${familiaCorpo}`;
-  ctx.fillText(SITE_URL, W / 2, 1485);
+  ctx.fillText(SITE_URL, W / 2, ySite);
 
   try {
     const qr = await carregarImagem("/quiz-qr.png");
     const qs = 300;
     const qx = (W - qs) / 2;
-    const qy = 1540;
+    const qy = yQr;
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(qx - 16, qy - 16, qs + 32, qs + 32);
     ctx.drawImage(qr, qx, qy, qs, qs);
