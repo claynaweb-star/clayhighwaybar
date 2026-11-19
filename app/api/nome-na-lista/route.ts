@@ -142,8 +142,10 @@ export async function POST(request: NextRequest) {
 
   if (!r.ok) {
     logWebhookFailure("signup", `${r.cause} (${gasto}ms)`);
+    // `motivo` é só a causa TÉCNICA (sem nome/telefone/e-mail), para diagnóstico
+    // no navegador/Netlify. A mensagem amigável fica a cargo do cliente.
     return NextResponse.json(
-      { ok: false, error: "instavel" },
+      { ok: false, error: "instavel", motivo: r.cause },
       { status: 502 },
     );
   }

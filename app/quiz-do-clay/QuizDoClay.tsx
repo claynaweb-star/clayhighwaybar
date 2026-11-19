@@ -116,6 +116,75 @@ function salvarPartidaRecente(ids: number[]): void {
   }
 }
 
+// Guarda o RESULTADO da última partida neste aparelho, para a tela final
+// reaparecer ao abrir /quiz no navegador (ex.: quem saiu do app do Instagram
+// para postar no Stories). Expira em 6 h para não "prender" o jogador.
+const RESULTADO_KEY = "quiz_ultimo_resultado";
+const RESULTADO_TTL_MS = 6 * 60 * 60 * 1000;
+type ResultadoSalvo = {
+  final: ResultadoFinal;
+  nome: string;
+  whatsapp: string;
+  novidades: boolean;
+  teste: boolean;
+  em: number;
+};
+
+function salvarResultado(r: Omit<ResultadoSalvo, "em">): void {
+  try {
+    localStorage.setItem(RESULTADO_KEY, JSON.stringify({ ...r, em: Date.now() }));
+  } catch {
+    /* sem localStorage: segue sem restaurar a tela final */
+  }
+}
+
+function lerResultado(): ResultadoSalvo | null {
+  try {
+    const raw = localStorage.getItem(RESULTADO_KEY);
+    if (!raw) return null;
+    const r = JSON.parse(raw) as ResultadoSalvo;
+    if (!r || !r.final || typeof r.em !== "number") return null;
+    if (Date.now() - r.em > RESULTADO_TTL_MS) return null;
+    return r;
+  } catch {
+    return null;
+  }
+}
+
+function limparResultado(): void {
+  try {
+    localStorage.removeItem(RESULTADO_KEY);
+  } catch {
+    /* ignora */
+  }
+}
+
+/**
+ * Navegador interno (in-app) do Instagram/Facebook/WhatsApp: bloqueia o Web
+ * Share com arquivo e não abre os Stories. A saída é abrir no navegador de
+ * verdade (Safari/Chrome). `android` libera o atalho "Abrir no Chrome".
+ */
+function navegadorInterno(): { interno: boolean; android: boolean } {
+  if (typeof navigator === "undefined") return { interno: false, android: false };
+  const ua = navigator.userAgent || "";
+  const interno = /Instagram|FBAN|FBAV|FB_IAB|FBIOS|WhatsApp|Line\//i.test(ua);
+  const android = /Android/i.test(ua);
+  return { interno, android };
+}
+
+/** Ao focar um campo, rola a tela para ele ficar visível acima do teclado. */
+function rolarParaCampo(e: { currentTarget: HTMLElement }): void {
+  const el = e.currentTarget;
+  // Pequeno atraso: o teclado do celular sobe e muda a área visível antes do scroll.
+  setTimeout(() => {
+    try {
+      el.scrollIntoView({ block: "center", behavior: "smooth" });
+    } catch {
+      /* navegadores antigos: ignora */
+    }
+  }, 250);
+}
+
 /** Ícone de som ligado / desligado. */
 function IconeSom({ ligado, className = "" }: { ligado: boolean; className?: string }) {
   return (
@@ -317,6 +386,9 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
   const somFinalRef = useRef(false);
   // IDs das perguntas vistas NESTA partida (para guardar no anti-repetição no fim).
   const idsVistosRef = useRef<number[]>([]);
+  // Espelho dos dados do jogador, para salvar o resultado no fim sem depender do
+  // array de dependências do efeito de revelação.
+  const identidadeRef = useRef({ nome: "", whatsapp: "", novidades: false, teste: false });
 
   // Reloginho circular: o anel (arco) e o número dos segundos, atualizados por
   // ref a cada quadro (sem re-render), direto no rAF do timer.
@@ -336,6 +408,27 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
     const m = somRef.current;
     if (!m) return;
     setSomLigado(m.alternar());
+  }, []);
+
+  // Mantém o espelho dos dados do jogador para salvar o resultado no fim.
+  useEffect(() => {
+    identidadeRef.current = { nome, whatsapp, novidades, teste };
+  }, [nome, whatsapp, novidades, teste]);
+
+  // Ao abrir /quiz (ex.: voltando do app do Instagram para postar no Stories),
+  // restaura a tela final da última partida — sem perder o prêmio/código.
+  useEffect(() => {
+    const r = lerResultado();
+    if (!r) return;
+    setNome(r.nome);
+    setWhatsapp(r.whatsapp);
+    setNovidades(r.novidades);
+    setTeste(r.teste);
+    setFinal(r.final);
+    finalRef.current = r.final;
+    terminouRef.current = true;
+    somFinalRef.current = true; // já ouviu o som; não repete ao restaurar
+    setTela("resultado");
   }, []);
 
   const pararTimer = useCallback(() => {
@@ -496,7 +589,10 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
       if (terminouRef.current) {
         // Fim da partida: guarda os IDs vistos no anti-repetição do aparelho.
         salvarPartidaRecente(idsVistosRef.current);
-        setFinal(finalRef.current);
+        const fim = finalRef.current;
+        setFinal(fim);
+        // Guarda o resultado para a tela final reaparecer ao abrir no navegador.
+        if (fim) salvarResultado({ final: fim, ...identidadeRef.current });
         setTela("resultado");
       } else {
         // Busca a próxima pergunta só agora: o relógio do servidor começa aqui.
@@ -564,6 +660,7 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
         );
         return;
       }
+      limparResultado(); // nova partida: descarta o resultado guardado anterior
       setTeste(data.teste === true);
       gameTokenRef.current = data.gameToken;
       terminouRef.current = false;
@@ -582,6 +679,7 @@ export function QuizDoClay({ datas = [] }: { datas?: DataLista[] }) {
   }, [nome, whatsapp, aceite, novidades, empresa]);
 
   const reiniciar = useCallback(() => {
+    limparResultado();
     setTela("intro");
     setPergunta(null);
     setResultadoP(null);
@@ -814,6 +912,7 @@ function TelaCadastro({
           e.preventDefault();
           onEnviar();
         }}
+        autoComplete="off"
         className="flex flex-col gap-3"
       >
         <label className="flex flex-col gap-1 text-sm">
@@ -821,7 +920,8 @@ function TelaCadastro({
           <input
             value={nome}
             onChange={(e) => onNome(e.target.value)}
-            autoComplete="name"
+            onFocus={rolarParaCampo}
+            autoComplete="off"
             placeholder="Nome e sobrenome"
             className="rounded-xl border border-border bg-surface px-4 py-3 text-fog outline-none focus:border-accent"
           />
@@ -832,8 +932,9 @@ function TelaCadastro({
           <input
             value={whatsapp}
             onChange={(e) => onWhatsapp(e.target.value)}
+            onFocus={rolarParaCampo}
             inputMode="tel"
-            autoComplete="tel"
+            autoComplete="off"
             placeholder="(41) 99999-9999"
             className="rounded-xl border border-border bg-surface px-4 py-3 text-fog outline-none focus:border-accent"
           />
@@ -1258,14 +1359,22 @@ function BlocoNomeNaLista({
         setOkData(sel);
         return;
       }
+      // Mostra a causa real (o servidor loga a técnica e manda "motivo" aqui).
+      if (data?.motivo) console.warn("[nome-na-lista] falha:", data.motivo);
       setErro(
         res.status === 429
           ? "Muita gente agora. Tenta de novo em 1 minuto."
           : data?.error === "telefone"
             ? "Seu WhatsApp do jogo não passou na conferência. Faça pela página do Nome na Lista."
-            : data?.error === "email"
-              ? "Confere o e-mail."
-              : "Não rolou agora. Tenta de novo?",
+            : data?.error === "nome"
+              ? "Seu nome do jogo está sem sobrenome. Faça pela página do Nome na Lista."
+              : data?.error === "email"
+                ? "E-mail inválido. Confere e tenta de novo."
+                : data?.error === "dia"
+                  ? "Essa data fechou (o cadastro vai até as 21h). Escolhe outra."
+                  : data?.error === "instavel"
+                    ? "A lista está instável agora. Tenta de novo em instantes."
+                    : "Não rolou agora. Tenta de novo?",
       );
     } catch {
       setErro("Sem conexão. Tenta de novo?");
@@ -1341,6 +1450,7 @@ function BlocoNomeNaLista({
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onFocus={rolarParaCampo}
           placeholder="voce@email.com"
           className="rounded-xl border border-border bg-surface px-4 py-2.5 text-fog outline-none focus:border-accent"
         />
@@ -1376,6 +1486,10 @@ function TelaResultado({
 }) {
   const [dica, setDica] = useState("");
   const [compartilhando, setCompartilhando] = useState(false);
+  // Navegador interno (Instagram/Facebook/WhatsApp): mostra o passo a passo para
+  // abrir no navegador; no Android, também o atalho "Abrir no Chrome".
+  const [abrirNoNavegador, setAbrirNoNavegador] = useState(false);
+  const [androidInApp, setAndroidInApp] = useState(false);
   const fonteDisplayRef = useRef<HTMLSpanElement>(null);
 
   const ganhou = final.faixa === "lenda";
@@ -1385,6 +1499,8 @@ function TelaResultado({
   const compartilhar = useCallback(async () => {
     setCompartilhando(true);
     setDica("");
+    setAbrirNoNavegador(false);
+    // O link vai SEMPRE para a área de transferência (serve em qualquer caminho).
     let linkCopiado = false;
     try {
       await navigator.clipboard?.writeText(GAME_URL);
@@ -1392,6 +1508,18 @@ function TelaResultado({
     } catch {
       /* clipboard pode estar bloqueado */
     }
+
+    // Dentro do Instagram/Facebook/WhatsApp o compartilhamento é bloqueado e não
+    // há como postar no Stories: orienta a abrir no navegador de verdade.
+    const { interno, android } = navegadorInterno();
+    if (interno) {
+      setAndroidInApp(android);
+      setAbrirNoNavegador(true);
+      setDica(linkCopiado ? "Link do jogo copiado! 🤘" : "");
+      setCompartilhando(false);
+      return;
+    }
+
     const dicaLink = linkCopiado
       ? "Link copiado! No story, toque no ícone de figurinha, escolha LINK e cole."
       : "No story, toque no ícone de figurinha, escolha LINK e cole clayhighwaybar.com.br/quiz.";
@@ -1400,8 +1528,11 @@ function TelaResultado({
       const blob = await gerarStory(final, pose, fonteDisplayRef.current);
       if (!blob) throw new Error("sem imagem");
       const file = new File([blob], "quiz-do-clay.png", { type: "image/png" });
-      const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
-      if (nav.canShare && nav.canShare({ files: [file] })) {
+      const nav = navigator as Navigator & {
+        canShare?: (d: ShareData) => boolean;
+        share?: (d: ShareData) => Promise<void>;
+      };
+      if (nav.canShare && nav.canShare({ files: [file] }) && nav.share) {
         try {
           await nav.share({ files: [file], title: "Quiz do Clay", text: textoShare });
         } catch (e) {
@@ -1410,16 +1541,21 @@ function TelaResultado({
         }
         setDica(dicaLink);
       } else {
+        // Sem Web Share com arquivo: último recurso — salva a imagem e explica.
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = "quiz-do-clay.png";
         a.click();
         URL.revokeObjectURL(url);
-        setDica(`Imagem salva! ${dicaLink}`);
+        setDica(`Imagem salva na galeria! Abra os Stories e escolha ela. ${dicaLink}`);
       }
     } catch {
-      setDica("Não rolou gerar a imagem agora. Tenta de novo?");
+      setDica(
+        linkCopiado
+          ? "Não rolou gerar a imagem agora, mas o link do jogo já está copiado — cole no seu story."
+          : "Não rolou agora. Tenta de novo?",
+      );
     } finally {
       setCompartilhando(false);
     }
@@ -1514,6 +1650,26 @@ function TelaResultado({
 
       {botoes}
       {dica && <p className="max-w-full text-sm text-accent">{dica}</p>}
+
+      {/* Navegador interno (Instagram/Facebook/WhatsApp): passo a passo p/ Stories. */}
+      {abrirNoNavegador && (
+        <div className="w-full max-w-sm rounded-2xl border border-[#f2a93b]/50 bg-[#17120e] p-3 text-left text-[13px] text-[#F6EFE6]">
+          <p className="font-bold text-[#f2a93b]">Pra postar no Stories, abra no navegador</p>
+          <p className="mt-1 text-[#A99C8C]">
+            Toque nos <b className="text-fog">3 pontinhos (⋮)</b> lá em cima e em{" "}
+            <b className="text-fog">“Abrir no navegador”</b>. O link do jogo já está copiado.
+          </p>
+          {androidInApp && (
+            <a
+              href="intent://clayhighwaybar.com.br/quiz#Intent;scheme=https;package=com.android.chrome;end"
+              className="mt-2.5 flex w-full items-center justify-center rounded-[12px] px-4 py-2.5 font-extrabold text-[#140f0b] transition-transform active:scale-95"
+              style={{ background: "linear-gradient(180deg,#f2a93b,#e8892b)" }}
+            >
+              Abrir no Chrome
+            </a>
+          )}
+        </div>
+      )}
 
       {/* Quem NÃO ganhou: aviso piscando + bloco Nome na Lista. */}
       {!ganhou && (
