@@ -254,6 +254,27 @@ export const events: ClayEvent[] = [
       "Domingo de rock pesado e entrada free no Clay! A Youngs AC/DC Cover sobe ao palco com os maiores clássicos do AC/DC, de Highway to Hell a Back in Black e Thunderstruck. Garanta sua entrada gratuita pelo link e venha cantar junto. Não é só show. É Clay!",
   },
   {
+    id: "baile-80-27-11",
+    title: "Baile 80 em Curitiba",
+    tituloSeo: "Baile 80 em Curitiba, Festa Anos 80 | Clay Highway Bar",
+    seoDescription:
+      "Baile 80 no Clay Highway Bar, Curitiba, em 27/11/2026. Uma noite inteira com os maiores sucessos dos anos 80 ao vivo.",
+    date: "2026-11-27",
+    time: "20:00",
+    ocultarHorario: true,
+    genre: "Flashback anos 80",
+    nomeNaLista: { preco: 20 },
+    banner: "/baile-80-clay-highway-bar-27-11.png",
+    bannerAlt:
+      "Banner do Baile 80 no Clay Highway Bar em Curitiba, noite de flashbacks dos anos 80",
+    plataforma: "Articket",
+    linkIngresso: "https://articket.com.br/e/7324/baile-80-em-curitiba",
+    lineup: [],
+    venue: CLAY_HIGHWAY,
+    description:
+      "Prepare o figurino e a playlist da memória: o Baile 80 chega ao Clay! Uma noite inteira com os maiores sucessos dos anos 80, para cantar e dançar do começo ao fim. Não é só festa. É Clay!",
+  },
+  {
     id: "baile-do-hawaii",
     title: "Baile do Hawaii, Flashbacks Party",
     tituloSeo:

@@ -41,7 +41,7 @@ export const DATAS_NOME_NA_LISTA: DiaNomeNaLista[] = [
   { data: "2026-11-19", preco: 20 }, // Festival Cada Um Na Sua
   { data: "2026-11-20", preco: 20 }, // Festival Brasil Hits (Kid Abelha + Geração Coca-Cola)
   { data: "2026-11-21", preco: 25 }, // Sábado Revival (Mega Drive + Candyman + Queen)
-  { data: "2026-11-27", preco: 20, titulo: "Banda Baile 80" },
+  { data: "2026-11-27", preco: 20 }, // Baile 80 em Curitiba
   { data: "2026-11-28", preco: 25 }, // Baile do Hawaii (Gold Times + Delorean + Silvermoon)
   { data: "2026-12-04", preco: 20 }, // Festa American Pie
   { data: "2026-12-05", preco: 25 }, // DJ André Werneck
