@@ -1,3 +1,10 @@
+# Fidelidade — proxy reverso (rewrite 200) para o portal Fidelimax.
+# Mantém a URL clayhighwaybar.com.br/fidelidade e serve o conteúdo da Fidelimax.
+# O "!" força o rewrite ter prioridade sobre o roteamento do Next.js.
+# Se a Fidelimax informar outro endereço, troque o destino abaixo.
+/fidelidade        https://portal.fidelimax.com.br/         200!
+/fidelidade/*      https://portal.fidelimax.com.br/:splat   200!
+
 # Redirects 301 — migração Wix → Netlify (clayhighwaybar.com.br)
 # Formato Netlify: <origem>  <destino>  <status>
 
